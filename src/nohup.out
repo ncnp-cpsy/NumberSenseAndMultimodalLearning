@@ -1,0 +1,91 @@
+Experiments: ../experiments/loop-test
+Analysis: ./analysis/loop-test
+0
+Expt: ../experiments/../experiments/loop-test/cmnist/2023-10-26T13:57:23.739806jw8p8fo1
+RunID: 2023-10-26T13:57:23.739806
+====> Epoch: 001 Train loss: 1538.5780  took : 14.919108629226685
+====> Epoch: 002 Train loss: 1523.5565  took : 15.246675491333008
+====> Epoch: 003 Train loss: 1520.8265  took : 15.460279703140259
+====> Epoch: 004 Train loss: 1519.5484  took : 15.10986042022705
+====> Epoch: 005 Train loss: 1518.8084  took : 15.441403150558472
+====> Epoch: 006 Train loss: 1518.2777  took : 14.926482915878296
+====> Epoch: 007 Train loss: 1517.9023  took : 15.322352170944214
+====> Epoch: 008 Train loss: 1517.5934  took : 15.244383573532104
+====> Epoch: 009 Train loss: 1517.3577  took : 15.071369886398315
+====> Epoch: 010 Train loss: 1517.1390  took : 15.298415660858154
+====> Epoch: 011 Train loss: 1516.9575  took : 15.390930414199829
+====> Epoch: 012 Train loss: 1516.7990  took : 15.163269758224487
+====> Epoch: 013 Train loss: 1516.6523  took : 15.289060354232788
+====> Epoch: 014 Train loss: 1516.5452  took : 14.896127700805664
+====> Epoch: 015 Train loss: 1516.4223  took : 14.929681301116943
+====> Epoch: 016 Train loss: 1516.3109  took : 15.256693124771118
+====> Epoch: 017 Train loss: 1516.2205  took : 14.90297794342041
+====> Epoch: 018 Train loss: 1516.1293  took : 15.232495546340942
+====> Epoch: 019 Train loss: 1516.0555  took : 15.606245040893555
+====> Epoch: 020 Train loss: 1515.9876  took : 15.61484146118164
+====> Epoch: 021 Train loss: 1515.9179  took : 15.436412334442139
+====> Epoch: 022 Train loss: 1515.8514  took : 15.393903017044067
+====> Epoch: 023 Train loss: 1515.7940  took : 15.3396315574646
+====> Epoch: 024 Train loss: 1515.7189  took : 15.276461124420166
+====> Epoch: 025 Train loss: 1515.6582  took : 14.951181888580322
+====> Epoch: 026 Train loss: 1515.6238  took : 15.451578617095947
+====> Epoch: 027 Train loss: 1515.5834  took : 14.875510215759277
+====> Epoch: 028 Train loss: 1515.5247  took : 15.327510356903076
+====> Epoch: 029 Train loss: 1515.4720  took : 15.225276947021484
+====> Epoch: 030 Train loss: 1515.4381  took : 15.299809694290161
+====> [MM-VAE] Time: 484.417s or 00:08:04
+1
+Expt: ../experiments/../experiments/loop-test/cmnist/2023-10-26T14:05:36.800436gbbqi74j
+RunID: 2023-10-26T14:05:36.800436
+====> Epoch: 001 Train loss: 1538.6283  took : 14.911311388015747
+====> Epoch: 002 Train loss: 1523.4566  took : 15.087898254394531
+====> Epoch: 003 Train loss: 1520.7832  took : 14.855842113494873
+====> Epoch: 004 Train loss: 1519.5662  took : 14.996393203735352
+====> Epoch: 005 Train loss: 1518.8268  took : 15.108542442321777
+====> Epoch: 006 Train loss: 1518.3065  took : 15.10719108581543
+====> Epoch: 007 Train loss: 1517.9245  took : 15.081881284713745
+====> Epoch: 008 Train loss: 1517.6269  took : 14.994268417358398
+====> Epoch: 009 Train loss: 1517.4005  took : 14.84944462776184
+====> Epoch: 010 Train loss: 1517.2046  took : 14.930276155471802
+====> Epoch: 011 Train loss: 1517.0215  took : 14.83971118927002
+====> Epoch: 012 Train loss: 1516.8752  took : 14.85642671585083
+====> Epoch: 013 Train loss: 1516.7525  took : 14.867677450180054
+====> Epoch: 014 Train loss: 1516.6368  took : 14.910813093185425
+====> Epoch: 015 Train loss: 1516.5283  took : 15.058043956756592
+====> Epoch: 016 Train loss: 1516.4131  took : 14.800769329071045
+====> Epoch: 017 Train loss: 1516.3368  took : 14.940199851989746
+====> Epoch: 018 Train loss: 1516.2609  took : 15.000658512115479
+====> Epoch: 019 Train loss: 1516.1819  took : 14.727656841278076
+====> Epoch: 020 Train loss: 1516.0984  took : 14.822821855545044
+====> Epoch: 021 Train loss: 1516.0270  took : 14.888333320617676
+====> Epoch: 022 Train loss: 1515.9685  took : 14.872194766998291
+====> Epoch: 023 Train loss: 1515.9277  took : 14.862975835800171
+====> Epoch: 024 Train loss: 1515.8525  took : 14.894768238067627
+====> Epoch: 025 Train loss: 1515.8042  took : 14.910109758377075
+====> Epoch: 026 Train loss: 1515.7608  took : 14.830708265304565
+====> Epoch: 027 Train loss: 1515.7082  took : 14.960281610488892
+====> Epoch: 028 Train loss: 1515.6645  took : 14.846773624420166
+====> Epoch: 029 Train loss: 1515.6248  took : 14.874317407608032
+====> Epoch: 030 Train loss: 1515.5871  took : 14.985987901687622
+====> [MM-VAE] Time: 472.836s or 00:07:52
+Target runId: 2023-10-26T13:57:23.739806jw8p8fo1 2023-10-26T14:05:36.800436gbbqi74j
+Experiment ../experiments/loop-test/cmnist/2023-10-26T13:57:23.739806jw8p8fo1
+Output: ./analysis/loop-test/2023-10-26T13:57:23.739806jw8p8fo1/qualitative/
+mkdir: created directory './analysis/loop-test/2023-10-26T13:57:23.739806jw8p8fo1'
+mkdir: created directory './analysis/loop-test/2023-10-26T13:57:23.739806jw8p8fo1/qualitative/'
+mkdir: created directory './analysis/loop-test/2023-10-26T13:57:23.739806jw8p8fo1/quantitative/'
+Experiment ../experiments/loop-test/cmnist/2023-10-26T14:05:36.800436gbbqi74j
+Output: ./analysis/loop-test/2023-10-26T14:05:36.800436gbbqi74j/qualitative/
+mkdir: created directory './analysis/loop-test/2023-10-26T14:05:36.800436gbbqi74j'
+mkdir: created directory './analysis/loop-test/2023-10-26T14:05:36.800436gbbqi74j/qualitative/'
+mkdir: created directory './analysis/loop-test/2023-10-26T14:05:36.800436gbbqi74j/quantitative/'
+Target runId: 6 4
+Experiment ../experiments/loop-test/oscn/6
+Output: ./analysis/loop-test/6/qualitative/
+Experiment ../experiments/loop-test/oscn/4
+Output: ./analysis/loop-test/4/qualitative/
+Target runId: 2 3
+Experiment ../experiments/loop-test/cmnist-oscn/2
+Output folder: ./analysis/loop-test/cmnist-oscn/2/qualitative/ ./analysis/loop-test/cmnist-oscn/2/quantitative/
+Experiment ../experiments/loop-test/cmnist-oscn/3
+Output folder: ./analysis/loop-test/cmnist-oscn/3/qualitative/ ./analysis/loop-test/cmnist-oscn/3/quantitative/

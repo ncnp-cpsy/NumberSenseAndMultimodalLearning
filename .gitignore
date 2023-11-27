@@ -1,0 +1,34 @@
+<<<<<<< HEAD
+memo/*
+data/*
+data_prepare/*
+.git/*
+rslt/*
+=======
+>>>>>>> a4695a71e10fc5b92fe24210774e997483c513e7
+rslt/experiments/ignore/*
+rslt/experiments/loop-test/*
+rslt/rslt_latent_images/*
+rslt/analysis/*
+
+<<<<<<< HEAD
+# data/train_32x32.mat
+# data/cmnist_train_images.pt
+# data/oscn_train_images.pt 
+=======
+data/train_32x32.mat
+data/cmnist_train_images.pt
+data/oscn_train_images.pt 
+>>>>>>> a4695a71e10fc5b92fe24210774e997483c513e7
+
+memo/
+
+# remote: warning: File data/test_32x32.mat is 61.30 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB        
+# remote: error: Trace: b50c6c46a9bbc2865f61e5b2fd02fb5b72d5b4f8ebb2090999a8ba0838b06944        
+# remote: error: See https://gh.io/lfs for more information.        
+# remote: error: File data/train_32x32.mat is 173.61 MB; this exceeds GitHub's file size limit of 100.00 MB        
+# remote: error: File data/cmnist_train_images.pt is 1076.66 MB; this exceeds GitHub's file size limit of 100.00 MB        
+# remote: error: File data/oscn_train_images.pt is 1406.25 MB; this exceeds GitHub's file size limit of 100.00 MB        
+# git rm --cached data/cmnist_train_images.pt
+# git rm --cached data/cmnist_train_images.pt
+# git rm --cached data/oscn_train_images.pt 
