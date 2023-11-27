@@ -134,7 +134,7 @@ print('args after model loading:\n', args)
 
 
 # Functions
-def plot_reconstruct():
+def analyze_reconst():
     model.eval()
     with torch.no_grad():
         for i, dataT in enumerate(test_loader):
@@ -146,20 +146,29 @@ def plot_reconstruct():
                 print('Plot reconstruction of index:', i)
                 # exit()
                 break
-    return
+    return {
+        'reconst_avg': None,
+        'reconst_all': None,
+    }
 
+
+def analyze_cross():
+    return {
+        'cross_avg': None,
+        'cross_all': None,
+    }
 
 def analyze_cluster(latent_all,
-                       label_all,
-                       target_modality,
-                       target_property,
-                       ):
+                    label_all,
+                    target_modality,
+                    target_property,
+                    ):
     silhouette_vals = silhouette_samples(
         latent_all, label_all, metric='euclidean')
     cluster_labels = np.unique(label_all)
     n_clusters = len(cluster_labels)
 
-    y_ax_lower, y_ax_upper= 0, 0
+    y_ax_lower, y_ax_upper = 0, 0
     yticks = []
 
     for i, c in enumerate(cluster_labels):
@@ -194,12 +203,12 @@ def analyze_cluster(latent_all,
 
 
 def analyze_magnitude(label_all,
-                 latent_all,
-                 target_property,
-                 category_num,
-                 start_ind,
-                 end_ind,
-                 withzero):
+                      latent_all,
+                      target_property,
+                      category_num,
+                      start_ind,
+                      end_ind,
+                      withzero):
     mean_all = [None for i in range(category_num)]
     dist_all = [[0.0 for i in range(category_num)] for i in range(category_num)]
 
@@ -253,8 +262,8 @@ def analyze_magnitude(label_all,
     plt.clf()
 
     return {
-        'magnitude_avg:' correlation,
-        'magnitude_all:' correlation,
+        'magnitude_avg': correlation,
+        'magnitude_all': correlation,
     }
 
 
@@ -346,13 +355,13 @@ def analyze_tsne_3d(label_all,
     return
 
 
-def analyze_additive(latent_all,
-                     label_all,
-                     target_modality,
-                     category_num,
-                     start_ind,
-                     end_ind
-                     ):
+def analyze_mathematics(latent_all,
+                        label_all,
+                        target_modality,
+                        category_num,
+                        start_ind,
+                        end_ind
+                        ):
     mean_all = [None for i in range(category_num) ]
     dist_all = [[0.0 for i in range(category_num)] for i in range(category_num)]
 
@@ -428,7 +437,10 @@ def analyze_additive(latent_all,
         # check_additive(0, 3, 2, mean_all=mean_all) 0 is error
         check_additive(1, 8, 4, mean_all=mean_all)
 
-    return
+    return {
+        'mathematics_avg': None,
+        'mathematics_all': None,
+    }
 
 
 def check_additive(n1, n2 , n3, mean_all):
@@ -461,15 +473,15 @@ def get_latent_space(
     latent_all = []
 
     color_to_int = {
-        'r' : 3,
-        'g' : 2,
-        'b' : 1,
-        'w' : 0,
+        'r': 3,
+        'g': 2,
+        'b': 1,
+        'w': 0,
     }
     zukei_to_int = {
-        'j' : 0,
-        's' : 1,
-        't' : 2,
+        'j': 0,
+        's': 1,
+        't': 2,
     }
 
     # Settings for label and latent states
@@ -566,9 +578,9 @@ def get_latent_space(
         latent_dim  = latent_space.shape[-1]
         if args.model == 'mnist_clevr':
             label = label[0]
-        try :
+        try:
             label_all += list(np.array(label.cpu()))
-        except :
+        except:
             label_all += list(np.array(label))
         latent_all += list(latent_space)
         if i == 15:  # CHECK
@@ -611,17 +623,19 @@ def analyze(target_modality,
 
     # What analysis are performed?
     if args.model == 'cmnist_oscn':
-        require_reconstruct = True
+        require_reconst = True
+        require_cross = True
     else:
-        require_reconstruct = False
+        require_reconst = False
+        require_cross = False
     require_magnitude = True
     require_2d = True
     require_3d = False  # if true, error happened.
     require_cluster = True
     if target_property == 1:
-        require_additive = True
+        require_mathematics = True
     elif target_property == 0 or target_property == 2:
-        require_additive = False
+        require_mathematics = False
     else:
         raise Exception
     withzero = False
@@ -668,8 +682,10 @@ def analyze(target_modality,
     )
 
     # Main analysis
-    if require_reconstruct:
-        plot_reconstruct()
+    if require_reconst:
+        analyze_reconst()
+    if require_cross:
+        analyze_cross()
     if require_cluster:
         analyze_cluster(
             latent_all=latent_all,
@@ -705,8 +721,8 @@ def analyze(target_modality,
             target_modality=target_modality,
             target_property=target_property,
         )
-    if require_additive:
-        analyze_additive(
+    if require_mathematics:
+        analyze_mathematics(
             latent_all=latent_all,
             label_all=label_all,
             target_modality=target_modality,
@@ -723,6 +739,7 @@ def visualize_latent():
         Whether latent states are analyzed
         Only Single modal (OSCN or CMNIST) -> 0
         CMNIST_OSCN -> cmnist (0) or oscn(1)?
+
     target_property
         Whether information are analyzed, color(0), number(1), shape(2)?
     """
