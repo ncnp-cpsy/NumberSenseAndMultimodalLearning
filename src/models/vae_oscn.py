@@ -12,10 +12,10 @@ from torchvision import transforms, datasets
 from torchvision.utils import save_image, make_grid
 from torch.utils.data import Dataset
 
-from src.utils import Constants
-from src.vis import plot_embeddings, plot_kls_df
-from src.models.vae import VAE
-from src.datasets import DatasetOSCN
+from utils import Constants
+from vis import plot_embeddings, plot_kls_df
+from models.vae import VAE
+from datasets import DatasetOSCN
 
 
 # Constants
