@@ -1,5 +1,14 @@
+import argparse
+import datetime
+import sys
+import json
+
+from pathlib import Path
+from tempfile import mkdtemp
 import warnings
 from numba.core.errors import NumbaPerformanceWarning
+
+from src.utils import Logger, Timer, save_model, save_vars, unpack_data
 
 warnings.filterwarnings("ignore", category=NumbaPerformanceWarning)
 
@@ -56,34 +65,34 @@ torch.backends.cudnn.benchmark = True
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 
-# load args from disk if pretrained model path is given
-pretrained_path = ""
-if args.pre_trained:
-    pretrained_path = args.pre_trained
-    args = torch.load(args.pre_trained + '/args.rar')
-
-args.cuda = not args.no_cuda and torch.cuda.is_available()
-args.device = torch.device("cuda" if args.cuda else "cpu")
-
-if not args.experiment:
-    # args.experiment = model.modelName
-    args.experiment = args.model
-
-# set up run path
-runId = datetime.datetime.now().isoformat()
-experiment_dir = Path('../experiments/' + args.experiment)
-experiment_dir.mkdir(parents=True, exist_ok=True)
-runPath = mkdtemp(prefix=runId, dir=str(experiment_dir))
-sys.stdout = Logger('{}/run.log'.format(runPath))
-print('Expt:', runPath)
-print('RunID:', runId)
-
-# save args to run
-with open('{}/args.json'.format(runPath), 'w') as fp:
-    json.dump(args.__dict__, fp)
-torch.save(args, '{}/args.rar'.format(runPath))
-
 def main():
+    # load args from disk if pretrained model path is given
+    pretrained_path = ""
+    if args.pre_trained:
+        pretrained_path = args.pre_trained
+        args = torch.load(args.pre_trained + '/args.rar')
+
+    args.cuda = not args.no_cuda and torch.cuda.is_available()
+    args.device = torch.device("cuda" if args.cuda else "cpu")
+
+    if not args.experiment:
+        # args.experiment = model.modelName
+        args.experiment = args.model
+
+    # set up run path
+    runId = datetime.datetime.now().isoformat()
+    experiment_dir = Path('./experiments/' + args.experiment)
+    experiment_dir.mkdir(parents=True, exist_ok=True)
+    runPath = mkdtemp(prefix=runId, dir=str(experiment_dir))
+    sys.stdout = Logger('{}/run.log'.format(runPath))
+    print('Expt:', runPath)
+    print('RunID:', runId)
+
+    # save args to run
+    with open('{}/args.json'.format(runPath), 'w') as fp:
+        json.dump(args.__dict__, fp)
+    torch.save(args, '{}/args.rar'.format(runPath))
+
     if args.run_type == 'train':
         train()
     elif args.run_type == 'classify':
@@ -95,7 +104,6 @@ def main():
     else:
         Exception
     return
-
 
 if __name__ == '__main__':
     main()

@@ -2,7 +2,7 @@
 
 EXPR_DIR='./rslt/test/'
 
-python ./src/train.py  \
+python main.py  \
        --model "cmnist" \
        --experiment "${EXPR_DIR}/cmnist" \
        --obj "cross" \

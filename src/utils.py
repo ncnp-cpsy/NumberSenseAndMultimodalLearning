@@ -4,12 +4,12 @@ import shutil
 import sys
 import time
 
+import numpy as np
 import torch
 import torch.distributions as dist
 import torch.nn.functional as F
 
-from datasets import CUBImageFt
-import numpy as np
+from src.datasets import CUBImageFt
 
 # Classes
 class Constants(object):
