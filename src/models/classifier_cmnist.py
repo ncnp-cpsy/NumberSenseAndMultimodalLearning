@@ -4,7 +4,7 @@ from torch import nn
 from src.datasets import DatasetCMNIST, DatasetOSCN
 from src.models.classifier import Classifier
 
-class ClassifierCMNIST(Classifier):
+class Classifier_CMNIST(Classifier):
     """Classifier for CMNIST
     """
     @staticmethod

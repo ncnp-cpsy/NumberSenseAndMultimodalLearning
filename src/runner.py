@@ -9,20 +9,27 @@ from torch import optim
 from torchvision.utils import save_image, make_grid
 import torchsummary
 
-import src.models
-import src.objectives
+import src.models as models
+import src.objectives as objectives
 from src.utils import Logger, Timer, save_model, save_vars, unpack_data
 
+
 class Runner():
-    def __init__(args):
+    def __init__(self, args, run_path):
+        self.args = args
+        self.run_path = run_path
+
         # load model
         model_class = getattr(models, '{}'.format(args.model))
         model = model_class(args).to(args.device)
-        torchsummary.summary(model)
-        if pretrained_path:
-            # print('Loading model {} from {}'.format(model.modelName, pretrained_path))
-            print('Loading model {} from {}'.format(args.model, pretrained_path))
-            model.load_state_dict(torch.load(pretrained_path + '/model.rar'))
+        torchsummary.summary(
+            model, (model.data_size), device=args.device)
+
+        if args.pretrained_path:
+            print('Loading model {} from {}'.format(
+                model.__name__, args.pretrained_path))
+            model.load_state_dict(
+                torch.load(args.pretrained_path + '/model.rar'))
             model._pz_params = model._pz_params
         self.model = model
 
@@ -40,28 +47,30 @@ class Runner():
                 self.model.getDataLoaders(
                     args.batch_size, device=args.device)
 
-        self.objective = getattr(
-            objectives,
-            ('m_' if hasattr(self.model, 'vaes') else '')
-            + args.obj
-            + ('_looser' if (args.looser and args.obj != 'elbo') else ''))
-        self.t_objective = getattr(
-            objectives,
-            ('m_' if hasattr(self.model, 'vaes') else '') + 'iwae')
+        objective_name = ('m_' if hasattr(self.model, 'vaes') else '') \
+            + args.obj \
+            + ('_looser' if (args.looser and args.obj != 'elbo') else '')
+        t_objective_name = 'cross' if 'Classifier' in self.args.model else \
+            ('m_' if hasattr(self.model, 'vaes') else '') + 'iwae'
+        self.objective = getattr(objectives, objective_name)
+        self.t_objective = getattr(objectives, t_objective_name)
+        print(
+            'objectives: ', self.objective.__name__,
+            '\nt_objectives: ', self.t_objective.__name__,
+        )
 
-
-    def train(epoch, agg):
+    def train(self, epoch, agg):
         """Training models
         """
         self.model.train()
         b_loss = 0
         start_time = time.time()
 
-        for i, dataT in enumerate(train_loader):
+        for i, dataT in enumerate(self.train_loader):
             data, label = unpack_data(
-                dataT, device=args.device, require_label=True)
+                dataT, device=self.args.device, require_label=True)
 
-            #save_image(data[0:3], 'checks/clevr.png')
+            # save_image(data[0:3], 'checks/clevr.png')
             """
             for i in range(10,20):
                 # get_image(data[0][i], 'cmnist' + str(i) + '.jpg')
@@ -72,84 +81,92 @@ class Runner():
                     data[i].int().cpu().numpy().astype(np.uint8).T)
                 pil_image.save('checks/oscn' + str(i) + '.png')
             """
+
             self.optimizer.zero_grad()
             loss = self.objective(
                 self.model,
                 data,
-                K=args.K,
-                conditional=args.use_conditional,
+                K=self.args.K,
+                conditional=self.args.use_conditional,
                 labels=label,
-                device=args.device)
+                device=self.args.device)
             loss = -1 * loss
             """
-            with open(str(runPath) + '/ratio.log', 'a') as f:
+            with open(str(self.run_path) + '/ratio.log', 'a') as f:
                 print(ratio[0], ratio[1], file=f)
             """
             loss.backward()
             self.optimizer.step()
             b_loss += loss.item()
-            if args.print_freq > 0 and i % args.print_freq == 0:
+            if self.args.print_freq > 0 and i % self.args.print_freq == 0:
                 print("iteration {:04d}: loss: {:6.3f}".format(
-                    i, loss.item() / args.batch_size))
+                    i, loss.item() / self.args.batch_size))
 
         end_time = time.time()
-        agg['train_loss'].append(b_loss / len(train_loader.dataset))
+        agg['train_loss'].append(b_loss / len(self.train_loader.dataset))
         print('====> Epoch: {:03d} Train loss: {:.4f}'.format(
             epoch, agg['train_loss'][-1]), " took :", end_time - start_time)
 
-    def test(epoch, agg):
+    def test(self, epoch, agg):
         """Testing models
         """
-        model.eval()
+        self.model.eval()
         b_loss = 0
         with torch.no_grad():
-            for i, dataT in enumerate(test_loader):
+            for i, dataT in enumerate(self.test_loader):
                 data, label = unpack_data(
-                    dataT, device=args.device, require_label=True)
-                model.reconstruct(data, runPath, epoch)
-                if i == 0:
-                    break
+                    dataT, device=self.args.device, require_label=True)
 
-                loss = -t_objective(model, data, K=args.K)
+                self.model.reconstruct(data, self.run_path, epoch)
+                # if i == 0:
+                #     break
+                if 'Classifier' in self.args.model:
+                    loss = self.objective(
+                        self.model,
+                        data,
+                        labels=label,
+                        device=self.args.device)
+                else:
+                    loss = -self.t_objective(self.model, data, K=self.args.K)
                 b_loss += loss.item()
                 if i == 0:
-                    # model.reconstruct(data, runPath, epoch)
+                    # self.model.reconstruct(data, self.run_path, epoch)
                     print('done!')
                     break
-                    # if not args.no_analytics:
-                        # model.analyse(data, runPath, epoch)
-        # agg['test_loss'].append(b_loss / len(test_loader.dataset))
+                    # if not self.args.no_analytics:
+                        # self.model.analyse(data, self.run_path, epoch)
+        # agg['test_loss'].append(b_loss / len(self.test_loader.dataset))
         # print('====> Test loss: {:.4f}'.format(agg['test_loss'][-1]))
 
-    def get_image(data, name):
+    def get_image(self, data, name):
         data = (data * 255).int()
         data = data.cpu().numpy().astype(np.uint8).T
         pil_image = Image.fromarray(data)
         pil_image.save(name)
 
-    def estimate_log_marginal(K):
+    def estimate_log_marginal(self, K):
         """Compute an IWAE estimate of the log-marginal likelihood of test data."""
-        model.eval()
+        self.model.eval()
         marginal_loglik = 0
         with torch.no_grad():
-            for dataT in test_loader:
-                data = unpack_data(dataT, device=args.device)
-                marginal_loglik += -t_objective(model, data, K).item()
+            for dataT in self.test_loader:
+                data = unpack_data(dataT, device=self.args.device)
+                marginal_loglik += -self.t_objective(self.model, data, K).item()
 
-        marginal_loglik /= len(test_loader.dataset)
+        marginal_loglik /= len(self.test_loader.dataset)
         print('Marginal Log Likelihood (IWAE, K = {}): {:.4f}'.format(K, marginal_loglik))
 
 
-def main(args, runPath):
+def run_train(args, run_path):
     with Timer('MM-VAE') as t:
         agg = defaultdict(list)
-        runner = Runner(args=args)
+        runner = Runner(args=args, run_path=run_path)
 
         for epoch in range(1, args.epochs + 1):
             runner.train(epoch, agg)
-            save_model(runner.model, runPath + '/model.rar')
-            save_vars(agg, runPath + '/losses.rar')
-            runner.model.generate(runPath, epoch)
+            save_model(runner.model, run_path + '/model.rar')
+            save_vars(agg, run_path + '/losses.rar')
+            runner.model.generate(run_path, epoch)
             runner.test(epoch, agg)
 
         if args.logp:
@@ -160,5 +177,5 @@ if __name__ == '__main__':
     args = {
         'run_type': 'train',
     }
-    runPath = './rslt/test'
-    main(args=args, runPath=runPath)
+    run_path = './rslt/test'
+    run_train(args=args, run_path=run_path)

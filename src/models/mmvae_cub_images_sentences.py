@@ -1,19 +1,20 @@
 # cub multi-modal model specification
+
+from numpy import sqrt, prod
 import matplotlib.pyplot as plt
 import torch.distributions as dist
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data
-from numpy import sqrt, prod
 from torch.utils.data import DataLoader
 from torchnet.dataset import TensorDataset, ResampleDataset
 from torchvision.utils import save_image, make_grid
 
-from utils import Constants
-from vis import plot_embeddings, plot_kls_df
-from .mmvae import MMVAE
-from .vae_cub_image import CUB_Image
-from .vae_cub_sent import CUB_Sentence
+from src.utils import Constants
+from src.vis import plot_embeddings, plot_kls_df
+from src.models.mmvae import MMVAE
+from src.models.vae_cub_image import CUB_Image
+from src.models.vae_cub_sent import CUB_Sentence
 
 # Constants
 maxSentLen = 32

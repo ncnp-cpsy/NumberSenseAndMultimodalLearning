@@ -1,11 +1,12 @@
 # objectives of choice
-import torch
+import numpy as np
 from numpy import prod
 
-from utils import log_mean_exp, is_multidata, kl_divergence
-import numpy as np
+import torch
 import torch.nn.functional as F
 
+from src.utils import log_mean_exp, is_multidata, kl_divergence
+from src.datasets import convert_label_to_int
 
 # helper to vectorise computation
 def compute_microbatch_split(x, K):
@@ -297,5 +298,22 @@ def cross(model, x, K=1, conditional=False, labels=None, device=None):
     > labels = torch.argmax(labels, dim=1)
     > loss = F.nll_loss(F.log_softmax(x, dim=1), labels)
     """
-    loss = F.nll_loss(F.log_softmax(x, dim=1), labels)
+    pred = model(x)
+    labels = convert_label_to_int(
+        label=labels,
+        model_name=model.__class__.__name__,
+        target_property=1,
+    )
+    labels = torch.tensor(labels).to(device) - 1
+    # num_class = 9
+    # label = [l - 1 for l in label]
+    # label = np.identity(num_class)[label]
+    accuracy = sum(torch.argmax(pred, dim=1) == labels).item()
+    print(accuracy)
+    # print(
+    #     '\ninput:', x.shape,
+    #     '\nlabels in objectives:', labels,
+    #     '\npred:', pred,
+    # )
+    loss = F.nll_loss(F.log_softmax(pred, dim=1), labels)
     return - loss

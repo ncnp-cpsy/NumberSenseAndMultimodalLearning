@@ -4,7 +4,7 @@ import torch
 from torch import nn
 
 
-class Classifier(nn.module):
+class Classifier(nn.Module):
     """Base classifier class
     """
 

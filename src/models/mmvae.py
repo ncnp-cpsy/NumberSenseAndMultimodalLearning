@@ -7,8 +7,8 @@ import torch.nn as nn
 import torch.distributions as dist
 import torch.nn.functional as F
 
-from utils import get_mean, kl_divergence
-from vis import embed_umap, tensors_to_df
+from src.utils import get_mean, kl_divergence
+from src.vis import embed_umap, tensors_to_df
 
 
 class MMVAE(nn.Module):

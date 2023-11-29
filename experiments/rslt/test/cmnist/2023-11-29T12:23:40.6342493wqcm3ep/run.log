@@ -1,0 +1,4 @@
+Expt: experiments/rslt/test/cmnist/2023-11-29T12:23:40.6342493wqcm3ep
+RunID: 2023-11-29T12:23:40.634249
+Arguments: Namespace(K=20, batch_size=8, cuda=False, device='cpu', epochs=3, experiment='./rslt/test/cmnist', latent_dim=20, learn_prior=False, llik_scaling=0.0, logp=False, looser=False, model='Classifier_OSCN', no_analytics=False, no_cuda=True, num_hidden_layers=1, obj='cross', pre_trained='', pretrained_path='', print_freq=0, run_type='train', seed=4, use_conditional=False)
+====> [MM-VAE] Time:   2.617s or 00:00:02

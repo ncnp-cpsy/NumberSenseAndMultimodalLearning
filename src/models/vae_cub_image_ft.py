@@ -8,10 +8,10 @@ import torch.utils.data
 from numpy import sqrt
 from torchvision.utils import make_grid, save_image
 
-from datasets import CUBImageFt
-from utils import Constants, NN_lookup
-from vis import plot_embeddings, plot_kls_df
-from .vae import VAE
+from src.datasets import CUBImageFt
+from src.utils import Constants, NN_lookup
+from src.vis import plot_embeddings, plot_kls_df
+from src.models.vae import VAE
 
 # Constants
 imgChans = 3

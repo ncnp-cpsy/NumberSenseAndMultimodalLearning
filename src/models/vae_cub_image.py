@@ -9,9 +9,9 @@ from numpy import sqrt
 from torchvision import datasets, transforms
 from torchvision.utils import make_grid, save_image
 
-from utils import Constants
-from vis import plot_embeddings, plot_kls_df
-from .vae import VAE
+from src.utils import Constants
+from src.vis import plot_embeddings, plot_kls_df
+from src.models.vae import VAE
 
 # Constants
 imgChans = 3

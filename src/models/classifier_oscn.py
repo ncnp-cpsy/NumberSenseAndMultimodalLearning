@@ -4,7 +4,7 @@ from torch import nn
 from src.datasets import DatasetCMNIST, DatasetOSCN
 from src.models.classifier import Classifier
 
-class ClassifierOSCN(Classifier):
+class Classifier_OSCN(Classifier):
     """Classifier for OSCN
     """
     def __init__(self, params):
@@ -41,8 +41,18 @@ class ClassifierOSCN(Classifier):
 
     @staticmethod
     def getDataLoaders(batch_size, shuffle=True, device='cuda'):
-        oscn_train_dataset = DatasetOSCN(train=True)
-        oscn_test_dataset = DatasetOSCN(train=False)
+        oscn_train_dataset = DatasetOSCN(
+            train=True,
+            model_name='Classifier_OSCN',
+            device=device,
+            convert_label=True,
+        )
+        oscn_test_dataset = DatasetOSCN(
+            train=False,
+            model_name='Classifier_OSCN',
+            device=device,
+            convert_label=True,
+        )
         train = torch.utils.data.DataLoader(
             oscn_train_dataset,
             batch_size=batch_size,

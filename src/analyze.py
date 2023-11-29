@@ -471,13 +471,6 @@ def get_latent_space(
 
     label_all = []
     latent_all = []
-
-    color_to_int = {
-        'r': 3,
-        'g': 2,
-        'b': 1,
-        'w': 0,
-    }
     zukei_to_int = {
         'j': 0,
         's': 1,
@@ -506,78 +499,21 @@ def get_latent_space(
                 '\ndata[0].shape:', data[0].shape
             )
 
-        if args.model == 'cmnist_oscn':
-            if target_property == 1:
-                label = label[0]
-            else:
-                label = label[1]  # 全部の情報が必要
-
-        # Pattern of label -> [0,1,3,,,] (CMNIST and CLEVR)
-        if (args.model == 'cmnist') or (args.model == 'cmnist_oscn' and target_property == 1) or (args.model == 'clevr') or (args.model == 'mnist_clevr'):
-             if target_property == 0:
-                label = []
-
-                if args.model == 'cmnist_oscn' :
-                    for j in range(data[0].shape[0]):
-                        dataum = data[0][j]
-                        (sum0, sum1, sum2) = \
-                            (dataum[0].sum().item(),
-                             dataum[1].sum().item(),
-                             dataum[2].sum().item())
-                        if sum1 == 0.0 and sum2 == 0.0: # R
-                            label.append(0)
-                        elif sum1 == 0.0 and sum0 == 0.0: # B
-                            label.append(1)
-                        elif sum2 == 0.0 and sum0 == 0.0: # G
-                            label.append(2)
-                        else:
-                            label.append(3)
-                if args.model == 'cmnist':
-                    for j in range(data.shape[0]):
-                        dataum = data[j]
-                        (sum0, sum1, sum2) = \
-                            (dataum[0].sum().item(),
-                             dataum[1].sum().item(),
-                             dataum[2].sum().item())
-                        if sum1 == 0.0 and sum2 == 0.0: # B
-                            label.append(0)
-                        elif sum1 == 0.0 and sum0 == 0.0: # B
-                            label.append(1)
-                        elif sum2 == 0.0 and sum0 == 0.0: # B
-                            label.append(2)
-                        else:
-                            label.append(3)
-
-        # Pattern of label -> (g3j, w3t) (OSCN)
-        elif (args.model =='oscn') or (args.model == 'cmnist_oscn' and target_property != 1):
-            label = list(label)
-            if target_property == 0:
-                try :
-                    label = [color_to_int[s[0]] for s in label]
-                except:
-                    pass
-            elif target_property == 1:
-                try :
-                    label = [int(s[1]) for s in label]
-                except:
-                    pass
-            elif target_property == 2:
-                try:
-                    label = [zukei_to_int[s[2]] for s in label]
-                except:
-                    pass
-            else:
-                raise Exception
-        else:
-            raise Exception
+        label = convert_label_to_int(
+            label=label,
+            model_name=model,
+            target_property=target_property
+        )
 
         # Get latent space
         # model.reconstruct(data, '.', 3939, n =10)
         # pil_image.save(output_dir + '/check_' + str(label[indr])+ '.png')
         latent_space = model.latent(data)[target_modality].cpu().detach().numpy()
         latent_dim  = latent_space.shape[-1]
+
         if args.model == 'mnist_clevr':
             label = label[0]
+
         try:
             label_all += list(np.array(label.cpu()))
         except:

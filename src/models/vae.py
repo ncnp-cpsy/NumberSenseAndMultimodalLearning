@@ -2,11 +2,10 @@
 
 import torch
 import torch.nn as nn
-
-from utils import get_mean, kl_divergence
-from vis import embed_umap, tensors_to_df
 import torch.nn.functional as F
 
+from src.utils import get_mean, kl_divergence
+from src.vis import embed_umap, tensors_to_df
 
 
 class VAE(nn.Module):

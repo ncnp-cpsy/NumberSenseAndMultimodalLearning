@@ -10,9 +10,9 @@ import torch.nn.functional as F
 import torch.utils.data
 from torch.utils.data import DataLoader
 
-from datasets import CUBSentences
-from utils import Constants, FakeCategorical
-from .vae import VAE
+from src.datasets import CUBSentences
+from src.utils import Constants, FakeCategorical
+from src.models.vae import VAE
 
 # Constants
 maxSentLen = 32  # max length of any description for birds dataset

@@ -1,9 +1,9 @@
-from .mmvae_cmnist_oscn import CMNIST_OSCN as MMVAE_CMNIST_OSCN
-from .vae_mnist import MNIST as VAE_MNIST
-from .vae_cmnist import CMNIST as VAE_CMNIST
-from .vae_oscn import OSCN as VAE_OSCN
-from .classifier_oscn import ClassifierOSCN as Classifier_OSCN
-from .classifier_cmnist import ClassifierCMNIST as Classifier_CMNIST
+from src.models.mmvae_cmnist_oscn import MMVAE_CMNIST_OSCN
+from src.models.vae_mnist import VAE_MNIST
+from src.models.vae_cmnist import VAE_CMNIST
+from src.models.vae_oscn import VAE_OSCN
+from src.models.classifier_oscn import Classifier_OSCN as Classifier_OSCN
+from src.models.classifier_cmnist import Classifier_CMNIST as Classifier_CMNIST
 
 # from .mmvae_cub_images_sentences import CUB_Image_Sentence as VAE_cubIS
 # from .mmvae_cub_images_sentences_ft import CUB_Image_Sentence_ft as VAE_cubISft

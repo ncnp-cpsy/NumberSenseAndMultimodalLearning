@@ -9,9 +9,9 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from torchvision.utils import save_image, make_grid
 
-from utils import Constants
-from vis import plot_embeddings, plot_kls_df
-from .vae import VAE
+from src.utils import Constants
+from src.vis import plot_embeddings, plot_kls_df
+from src.models.vae import VAE
 
 # Constants
 dataSize = torch.Size([1, 28, 28])
@@ -61,11 +61,11 @@ class Dec(nn.Module):
         return d, torch.tensor(0.75).to(z.device)  # mean, length scale
 
 
-class MNIST(VAE):
+class VAE_MNIST(VAE):
     """ Derive a specific sub-class of a VAE for MNIST. """
 
     def __init__(self, params):
-        super(MNIST, self).__init__(
+        super(VAE_MNIST, self).__init__(
             dist.Normal, # prior
             dist.Normal,  # likelihood
             dist.Normal,  # posterior
@@ -98,7 +98,7 @@ class MNIST(VAE):
 
     def generate(self, runPath, epoch):
         N, K = 64, 9
-        samples = super(MNIST, self).generate(N, K).cpu()
+        samples = super(VAE_MNIST, self).generate(N, K).cpu()
         # wrangle things so they come out tiled
         samples = samples.view(K, N, *samples.size()[1:]).transpose(0, 1)  # N x K x 1 x 28 x 28
         s = [make_grid(t, nrow=int(sqrt(K)), padding=0) for t in samples]
@@ -107,16 +107,16 @@ class MNIST(VAE):
                    nrow=int(sqrt(N)))
 
     def latent(self, data):
-        zss= super(MNIST, self).get_latent(data)
+        zss= super(VAE_MNIST, self).get_latent(data)
         return zss                   
 
     def reconstruct(self, data, runPath, epoch, n = 8):
-        recon = super(MNIST, self).reconstruct(data[:n])
+        recon = super(VAE_MNIST, self).reconstruct(data[:n])
         comp = torch.cat([data[:n], recon]).data.cpu()
         save_image(comp, '{}/recon_{:03d}.png'.format(runPath, epoch))
 
     def analyse(self, data, runPath, epoch):
-        zemb, zsl, kls_df = super(MNIST, self).analyse(data, K=10)
+        zemb, zsl, kls_df = super(VAE_MNIST, self).analyse(data, K=10)
         labels = ['Prior', self.modelName.lower()]
         plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(runPath, epoch))
         plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(runPath, epoch))

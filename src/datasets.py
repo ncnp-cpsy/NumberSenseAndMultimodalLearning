@@ -14,14 +14,22 @@ from torchvision import transforms, models, datasets
 
 
 class DatasetOSCN(Dataset):
-    def __init__(self, train):
+    def __init__(self,
+                 train,
+                 device=None,
+                 model_name=None,
+                 convert_label=False):
+        # self.convert_label = convert_label
+        # self.device = device
+        # self.model_name = model_name
+
         if train:
-            self.images = torch.load('../data/oscn_train_images.pt')
-            self.labels = np.load('../data/oscn_train_labels.npy',
+            self.images = torch.load('./data/oscn_train_images.pt')
+            self.labels = np.load('./data/oscn_train_labels.npy',
                                   allow_pickle=True)
         else:
-            self.images = torch.load('../data/oscn_test_images.pt')
-            self.labels = np.load('../data/oscn_test_labels.npy',
+            self.images = torch.load('./data/oscn_test_images.pt')
+            self.labels = np.load('./data/oscn_test_labels.npy',
                                   allow_pickle=True)
 
     def __getitem__(self, index):
@@ -33,12 +41,16 @@ class DatasetOSCN(Dataset):
 
 class DatasetCMNIST(Dataset):
     def __init__(self, train):
+        # self.convert_label = convert_label
+        # self.device = device
+        # self.model_name = model_name
+
         if train:
-            self.images = torch.load('../data/cmnist_train_images.pt')
-            self.labels = torch.load('../data/cmnist_train_labels.pt')
+            self.images = torch.load('./data/cmnist_train_images.pt')
+            self.labels = torch.load('./data/cmnist_train_labels.pt')
         else:
-            self.images = torch.load('../data/cmnist_test_images.pt')
-            self.labels = torch.load('../data/cmnist_test_labels.pt')
+            self.images = torch.load('./data/cmnist_test_images.pt')
+            self.labels = torch.load('./data/cmnist_test_labels.pt')
 
     def __getitem__(self, index):
         return self.images[index], self.labels[index]
@@ -285,3 +297,107 @@ class CUBImageFt(Dataset):
         torch.save(data_mat, self.gen_data_file)
 
         self._load_ft_mat()
+
+
+def convert_label_to_int(label, model_name, target_property):
+    do_print = False
+    color_to_int = {
+        'r': 3,
+        'g': 2,
+        'b': 1,
+        'w': 0,
+    }
+
+    if do_print:
+        print(
+            '\n===\nlabel info before conversion...',
+            '\nmodel name:', model_name,
+            '\ntarget_property:', target_property,
+            '\ntype(label):', type(label),
+            '\nlabel:', label,
+            '\nlabel[0]:', label[0],
+            '\nlabel[1]:', label[1],
+        )
+
+    if model_name == 'MMVAE_CMNIST_OSCN':
+        if target_property == 1:
+            print('AAAAAAAAAAAAA')
+            label = label[0]
+        else:
+            label = label[1]  # 全部の情報が必要
+
+    # Pattern of label -> [0,1,3,,,] (CMNIST and CLEVR)
+    if (model_name == 'Classifier_CMNIST') or \
+       (model_name == 'VAE_CMNIST') or \
+       (model_name == 'VAE_CLEVR') or \
+       (model_name == 'MMVAE_CMNIST_OSCN' and target_property == 1) or \
+       (model_name == 'MMVAE_MNIST_CLEVR'):
+        if target_property == 0:
+            label = []
+            if model_name == 'MMVAE_CMNIST_OSCN' :
+                for j in range(data[0].shape[0]):
+                    dataum = data[0][j]
+                    (sum0, sum1, sum2) = \
+                        (dataum[0].sum().item(),
+                         dataum[1].sum().item(),
+                         dataum[2].sum().item())
+                    if sum1 == 0.0 and sum2 == 0.0: # R
+                        label.append(0)
+                    elif sum1 == 0.0 and sum0 == 0.0: # B
+                        label.append(1)
+                    elif sum2 == 0.0 and sum0 == 0.0: # G
+                        label.append(2)
+                    else:
+                        label.append(3)
+            if (model_name == 'Classifier_CMNIST') or \
+               (model_name == 'VAE_CMNIST'):
+                for j in range(data.shape[0]):
+                    dataum = data[j]
+                    (sum0, sum1, sum2) = \
+                        (dataum[0].sum().item(),
+                         dataum[1].sum().item(),
+                         dataum[2].sum().item())
+                    if sum1 == 0.0 and sum2 == 0.0: # B
+                        label.append(0)
+                    elif sum1 == 0.0 and sum0 == 0.0: # B
+                        label.append(1)
+                    elif sum2 == 0.0 and sum0 == 0.0: # B
+                        label.append(2)
+                    else:
+                        label.append(3)
+
+    # Pattern of label -> (g3j, w3t) (OSCN)
+    elif (model_name == 'Classifier_OSCN') or \
+         (model_name == 'VAE_OSCN') or \
+         (model_name == 'MMVAE_CMNIST_OSCN' and target_property != 1):
+        label = list(label)
+        if target_property == 0:
+            try :
+                label = [color_to_int[s[0]] for s in label]
+            except:
+                pass
+        elif target_property == 1:
+            try :
+                label = [int(s[1]) for s in label]
+            except:
+                pass
+        elif target_property == 2:
+            try:
+                label = [zukei_to_int[s[2]] for s in label]
+            except:
+                pass
+        else:
+            raise Exception
+    else:
+        raise Exception
+
+    if do_print:
+        print(
+            '\n===\nlabel info after conversion...',
+            '\ntype(label):', type(label),
+            '\nlabel:', label,
+            '\nlabel[0]:', label[0],
+            '\nlabel[1]:', label[1],
+        )
+
+    return label

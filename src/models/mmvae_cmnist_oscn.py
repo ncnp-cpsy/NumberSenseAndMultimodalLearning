@@ -1,24 +1,25 @@
 # CMNIST-OSCN multi-modal model specification
 import os
 
+from numpy import sqrt, prod
 import torch
 import torch.distributions as dist
 import torch.nn as nn
 import torch.nn.functional as F
-from numpy import sqrt, prod
 from torch.utils.data import DataLoader
 from torchnet.dataset import TensorDataset, ResampleDataset
 from torchvision.utils import save_image, make_grid
 
-from vis import plot_embeddings, plot_kls_df
-from .mmvae import MMVAE
-from .vae_cmnist import CMNIST
-from .vae_oscn import OSCN
+from src.vis import plot_embeddings, plot_kls_df
+from src.models.mmvae import MMVAE
+from src.models.vae_cmnist import VAE_CMNIST
+from src.models.vae_oscn import VAE_OSCN
 
 
-class CMNIST_OSCN(MMVAE):
+class MMVAE_CMNIST_OSCN(MMVAE):
     def __init__(self, params):
-        super(CMNIST_OSCN, self).__init__(dist.Laplace, params, CMNIST, OSCN)
+        super(MMVAE_CMNIST_OSCN, self).__init__(
+            dist.Laplace, params, CMNIST, OSCN)
         grad = {'requires_grad': params.learn_prior}
         self._pz_params = nn.ParameterList([
             nn.Parameter(torch.zeros(1, params.latent_dim), requires_grad=False),  # mu
@@ -33,7 +34,6 @@ class CMNIST_OSCN(MMVAE):
         return self._pz_params[0], F.softmax(self._pz_params[1], dim=1) * self._pz_params[1].size(-1)
 
     def getDataLoaders(self, batch_size, shuffle=True, device='cuda'):
-        
         # get transformed indices
         t_cmnist = torch.load('../data/train-ms-cmnist-idx.pt')
         t_oscn = torch.load('../data/train-ms-oscn-idx.pt')
@@ -65,7 +65,7 @@ class CMNIST_OSCN(MMVAE):
 
     def generate(self, runPath, epoch):
         N = 64
-        samples_list = super(CMNIST_OSCN, self).generate(N)
+        samples_list = super(MMVAE_CMNIST_OSCN, self).generate(N)
         for i, samples in enumerate(samples_list):
             samples = samples.data.cpu()
             # wrangle things so they come out tiled
@@ -76,7 +76,7 @@ class CMNIST_OSCN(MMVAE):
 
     def generate_special(self, mean, target_modality, label):
         N = 64
-        samples_list = super(CMNIST_OSCN, self).generate_special(N, mean)
+        samples_list = super(MMVAE_CMNIST_OSCN, self).generate_special(N, mean)
         for i, samples in enumerate(samples_list):
             samples = samples.data.cpu()
             # wrangle things so they come out tiled
@@ -87,7 +87,7 @@ class CMNIST_OSCN(MMVAE):
                         nrow=int(sqrt(N)))
 
     def reconstruct(self, data, runPath, epoch, n = 8):
-        recons_mat = super(CMNIST_OSCN, self).reconstruct([d[:n] for d in data])
+        recons_mat = super(MMVAE_CMNIST_OSCN, self).reconstruct([d[:n] for d in data])
         for r, recons_list in enumerate(recons_mat):
             for o, recon in enumerate(recons_list):
                 _data = data[r][:n].cpu()
@@ -99,14 +99,14 @@ class CMNIST_OSCN(MMVAE):
                 save_image(comp, '{}/recon_{}x{}_{:03d}.png'.format(runPath, r, o, epoch))
 
     def analyse(self, data, runPath, epoch):
-        #zemb, zsl, kls_df = super(CMNIST_OSCN, self).analyse(data, K=10)
+        #zemb, zsl, kls_df = super(MMVAE_CMNIST_OSCN, self).analyse(data, K=10)
         labels = ['Prior', *[vae.modelName.lower() for vae in self.vaes]]
         print(labels)
         #plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(runPath, epoch))
         #plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(runPath, epoch))
 
     def latent(self, data):
-        zss= super(CMNIST_OSCN, self).get_latent(data)
+        zss= super(MMVAE_CMNIST_OSCN, self).get_latent(data)
         return zss
 
 def resize_img(img, refsize):

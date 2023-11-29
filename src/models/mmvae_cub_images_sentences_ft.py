@@ -9,11 +9,11 @@ from torch.utils.data import DataLoader
 from torchnet.dataset import TensorDataset, ResampleDataset
 from torchvision.utils import save_image, make_grid
 
-from utils import Constants
-from vis import plot_embeddings, plot_kls_df
-from .mmvae import MMVAE
-from .vae_cub_image_ft import CUB_Image_ft
-from .vae_cub_sent_ft import CUB_Sentence_ft
+from src.utils import Constants
+from src.vis import plot_embeddings, plot_kls_df
+from src.models.mmvae import MMVAE
+from src.models.vae_cub_image_ft import CUB_Image_ft
+from src.models.vae_cub_sent_ft import CUB_Sentence_ft
 
 # Constants
 maxSentLen = 32

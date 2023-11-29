@@ -1,11 +1,11 @@
 #!/bin/bash
 
-EXPR_DIR='./rslt/test/'
+EXPR_DIR='./rslt/test'
 
 python main.py  \
-       --model "cmnist" \
+       --model "Classifier_OSCN" \
        --experiment "${EXPR_DIR}/cmnist" \
        --obj "cross" \
        --batch-size 128 \
-       --epochs 3 \
-       --seed $SEED_INDEX
+       --epochs 30 \
+       --seed 4 \

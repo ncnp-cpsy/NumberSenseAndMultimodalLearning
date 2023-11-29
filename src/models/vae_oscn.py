@@ -12,10 +12,10 @@ from torchvision import transforms, datasets
 from torchvision.utils import save_image, make_grid
 from torch.utils.data import Dataset
 
-from utils import Constants
-from vis import plot_embeddings, plot_kls_df
-from models.vae import VAE
-from datasets import DatasetOSCN
+from src.datasets import DatasetOSCN
+from src.utils import Constants
+from src.vis import plot_embeddings, plot_kls_df
+from src.models.vae import VAE
 
 
 # Constants
@@ -81,11 +81,11 @@ class Dec(nn.Module):
 
 
 
-class OSCN(VAE):
+class VAE_OSCN(VAE):
     """ Derive a specific sub-class of a VAE for OSCN """
 
     def __init__(self, params):
-        super(OSCN, self).__init__(
+        super(VAE_OSCN, self).__init__(
             dist.Laplace,  # prior
             dist.Laplace,  # likelihood
             dist.Laplace,  # posterior
@@ -132,7 +132,7 @@ class OSCN(VAE):
 
     def generate(self, runPath, epoch):
         N, K = 64, 9
-        samples = super(OSCN, self).generate(N, K).cpu()
+        samples = super(VAE_OSCN, self).generate(N, K).cpu()
         # wrangle things so they come out tiled
         samples = samples.view(K, N, *samples.size()[1:]).transpose(0, 1)
         s = [make_grid(t, nrow=int(sqrt(K)), padding=0) for t in samples]
@@ -142,7 +142,7 @@ class OSCN(VAE):
 
     def generate_special(self, mean, label):
         N = 64
-        samples_list = super(OSCN, self).generate_special(N, mean)
+        samples_list = super(VAE_OSCN, self).generate_special(N, mean)
         for i, samples in enumerate(samples_list):
             samples = samples.data.cpu()
             # wrangle things so they come out tiled
@@ -153,16 +153,16 @@ class OSCN(VAE):
                 nrow=int(sqrt(N)))
 
     def latent(self, data):
-        zss= super(OSCN, self).get_latent(data)
+        zss= super(VAE_OSCN, self).get_latent(data)
         return zss
 
     def reconstruct(self, data, runPath, epoch):
-        recon = super(OSCN, self).reconstruct(data[:24])
+        recon = super(VAE_OSCN, self).reconstruct(data[:24])
         comp = torch.cat([data[:24], recon]).data.cpu()
         save_image(comp, '{}/recon_{:03d}.png'.format(runPath, epoch))
 
     def analyse(self, data, runPath, epoch):
-        zemb, zsl, kls_df = super(OSCN, self).analyse(data, K=10)
+        zemb, zsl, kls_df = super(VAE_OSCN, self).analyse(data, K=10)
         labels = ['Prior', self.modelName.lower()]
         plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(runPath, epoch))
         plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(runPath, epoch))

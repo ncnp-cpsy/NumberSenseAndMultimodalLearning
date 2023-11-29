@@ -10,10 +10,10 @@ from torch.utils.data import DataLoader
 from torchnet.dataset import TensorDataset, ResampleDataset
 from torchvision.utils import save_image, make_grid
 
-from vis import plot_embeddings, plot_kls_df
-from .mmvae import MMVAE
-from .vae_mnist import MNIST
-from .vae_clevr import CLEVR
+from src.vis import plot_embeddings, plot_kls_df
+from src.models.mmvae import MMVAE
+from src.models.vae_mnist import MNIST
+from src.models.vae_clevr import CLEVR
 
 
 class MNIST_CLEVR(MMVAE):

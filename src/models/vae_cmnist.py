@@ -10,10 +10,11 @@ from torchvision import datasets, transforms
 from torchvision.utils import save_image, make_grid
 from torch.utils.data import Dataset
 
-from utils import Constants
-from vis import plot_embeddings, plot_kls_df
-from .vae import VAE
-from datasets import DatasetCMNIST
+from src.utils import Constants
+from src.vis import plot_embeddings, plot_kls_df
+from src.datasets import DatasetCMNIST
+from src.models.vae import VAE
+
 
 # Constants
 dataSize = torch.Size([3, 28, 28])
@@ -64,11 +65,11 @@ class Dec(nn.Module):
         return d, torch.tensor(0.75).to(z.device)  # mean, length scale
 
 
-class CMNIST(VAE):
+class VAE_CMNIST(VAE):
     """ Derive a specific sub-class of a VAE for CMNIST. """
 
     def __init__(self, params):
-        super(CMNIST, self).__init__(
+        super(VAE_CMNIST, self).__init__(
             dist.Normal,  # prior
             dist.Normal,  # likelihood
             dist.Normal,  # posterior
@@ -123,7 +124,7 @@ class CMNIST(VAE):
 
     def generate(self, runPath, epoch):
         N, K = 64, 9
-        samples = super(CMNIST, self).generate(N, K).cpu()
+        samples = super(VAE_CMNIST, self).generate(N, K).cpu()
         # wrangle things so they come out tiled
         samples = samples.view(K, N, *samples.size()[1:]).transpose(0, 1)  # N x K x 1 x 28 x 28
         s = [make_grid(t, nrow=int(sqrt(K)), padding=0) for t in samples]
@@ -133,7 +134,7 @@ class CMNIST(VAE):
 
     def generate_special(self, mean, label):
         N = 64
-        samples_list = super(CMNIST, self).generate_special(N, mean)
+        samples_list = super(VAE_CMNIST, self).generate_special(N, mean)
         for i, samples in enumerate(samples_list):
             samples = samples.data.cpu()
             # wrangle things so they come out tiled
@@ -143,16 +144,16 @@ class CMNIST(VAE):
                     nrow=int(sqrt(N)))
 
     def reconstruct(self, data, runPath, epoch, n = 8):
-        recon = super(CMNIST, self).reconstruct(data[:n])
+        recon = super(VAE_CMNIST, self).reconstruct(data[:n])
         comp = torch.cat([data[:8], recon]).data.cpu()
         save_image(comp, '{}/recon_{:03d}.png'.format(runPath, epoch))
 
     def latent(self, data):
-        zss= super(CMNIST, self).get_latent(data)
+        zss= super(VAE_CMNIST, self).get_latent(data)
         return zss
 
     def analyse(self, data, runPath, epoch):
-        zemb, zsl, kls_df = super(CMNIST, self).analyse(data, K=10)
+        zemb, zsl, kls_df = super(VAE_CMNIST, self).analyse(data, K=10)
         labels = ['Prior', self.modelName.lower()]
         plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(runPath, epoch))
         plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(runPath, epoch))

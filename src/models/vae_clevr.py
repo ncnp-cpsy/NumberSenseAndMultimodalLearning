@@ -11,9 +11,9 @@ from torchvision.utils import save_image, make_grid
 from torch.utils.data import Dataset
 import numpy as np
 
-from utils import Constants
-from vis import plot_embeddings, plot_kls_df
-from .vae import VAE
+from src.utils import Constants
+from src.vis import plot_embeddings, plot_kls_df
+from src.models.vae import VAE
 
 # Constants
 dataSize = torch.Size([1, 100, 160])
