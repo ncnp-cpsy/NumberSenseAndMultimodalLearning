@@ -33,15 +33,18 @@ class Enc(nn.Module):
 
     def __init__(self, latent_dim, num_hidden_layers=1):
         super(Enc, self).__init__()
+
         modules = []
-        modules.append(nn.Sequential(nn.Linear(data_dim, hidden_dim), nn.ReLU(True)))
-        modules.extend([extra_hidden_layer() for _ in range(num_hidden_layers - 1)])
+        modules.append(nn.Sequential(
+            nn.Linear(data_dim, hidden_dim),
+            nn.ReLU(True)))
+        modules.extend([
+            extra_hidden_layer() for _ in range(num_hidden_layers - 1)])
         self.enc = nn.Sequential(*modules)
         self.fc21 = nn.Linear(hidden_dim, latent_dim)
         self.fc22 = nn.Linear(hidden_dim, latent_dim)
 
     def forward(self, x):
-        
         e = self.enc(x.view(*x.size()[:-3], -1) )  # flatten data
         lv = self.fc22(e)
         return self.fc21(e), F.softmax(lv, dim=-1) * lv.size(-1) + Constants.eta

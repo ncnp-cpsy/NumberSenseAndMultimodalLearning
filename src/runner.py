@@ -107,11 +107,15 @@ class Runner():
         print('====> Epoch: {:03d} Train loss: {:.4f}'.format(
             epoch, agg['train_loss'][-1]), " took :", end_time - start_time)
 
+        return agg
+
     def test(self, epoch, agg):
         """Testing models
         """
-        self.model.eval()
         b_loss = 0
+        b_acc = 0
+        self.model.eval()
+
         with torch.no_grad():
             for i, dataT in enumerate(self.test_loader):
                 data, label = unpack_data(
@@ -121,22 +125,29 @@ class Runner():
                 # if i == 0:
                 #     break
                 if 'Classifier' in self.args.model:
-                    loss = self.objective(
+                    loss, acc = self.t_objective(
                         self.model,
                         data,
                         labels=label,
-                        device=self.args.device)
+                        device=self.args.device,
+                        return_accuracy=True,
+                    )
+                    b_acc += acc.item()
                 else:
                     loss = -self.t_objective(self.model, data, K=self.args.K)
                 b_loss += loss.item()
-                if i == 0:
-                    # self.model.reconstruct(data, self.run_path, epoch)
-                    print('done!')
-                    break
-                    # if not self.args.no_analytics:
-                        # self.model.analyse(data, self.run_path, epoch)
-        # agg['test_loss'].append(b_loss / len(self.test_loader.dataset))
-        # print('====> Test loss: {:.4f}'.format(agg['test_loss'][-1]))
+                # if i == 0:
+                #     self.model.reconstruct(data, self.run_path, epoch)
+                #     if not self.args.no_analytics:
+                #         self.model.analyse(data, self.run_path, epoch)
+                #     break
+
+        agg['test_loss'].append(b_loss / len(self.test_loader.dataset))
+        if 'Classifier' in self.args.model:
+            agg['test_acc'].append(b_acc / len(self.test_loader.dataset))
+        print('====> Test loss: {:.4f}, Test accuracy: {:.4f}'.format(
+            agg['test_loss'][-1], agg['test_acc'][-1]))
+        return agg
 
     def get_image(self, data, name):
         data = (data * 255).int()
@@ -163,11 +174,11 @@ def run_train(args, run_path):
         runner = Runner(args=args, run_path=run_path)
 
         for epoch in range(1, args.epochs + 1):
-            runner.train(epoch, agg)
+            _ = runner.train(epoch, agg)
             save_model(runner.model, run_path + '/model.rar')
             save_vars(agg, run_path + '/losses.rar')
             runner.model.generate(run_path, epoch)
-            runner.test(epoch, agg)
+            _ = runner.test(epoch, agg)
 
         if args.logp:
             # compute as tight a marginal likelihood as possible

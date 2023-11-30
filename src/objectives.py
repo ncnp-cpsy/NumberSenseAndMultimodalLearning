@@ -274,7 +274,7 @@ def m_dreg_looser(model, x, K=1, conditional = False, labels = None, device = No
         if zss.requires_grad:
             zss.register_hook(lambda grad: grad_wt.unsqueeze(-1) * grad)
     
-    if conditional : 
+    if conditional: 
         #print(conds.shape, labels.shape)
         classify_loss_number = F.nll_loss(conds_number, labels_number)
         classify_loss_color = F.nll_loss(conds_color, labels_color)
@@ -284,7 +284,13 @@ def m_dreg_looser(model, x, K=1, conditional = False, labels = None, device = No
         return (grad_wt * lw).mean(0).sum()
 
 
-def cross(model, x, K=1, conditional=False, labels=None, device=None):
+def cross(model,
+          x,
+          K=1,
+          conditional=False,
+          labels=None,
+          device=None,
+          return_accuracy=False):
     """Cross Entropy Loss for Classifier
 
     Note
@@ -298,22 +304,33 @@ def cross(model, x, K=1, conditional=False, labels=None, device=None):
     > labels = torch.argmax(labels, dim=1)
     > loss = F.nll_loss(F.log_softmax(x, dim=1), labels)
     """
+    do_print = False
+
     pred = model(x)
     labels = convert_label_to_int(
         label=labels,
         model_name=model.__class__.__name__,
         target_property=1,
     )
-    labels = torch.tensor(labels).to(device) - 1
+    labels = labels.to(device) - 1
     # num_class = 9
     # label = [l - 1 for l in label]
     # label = np.identity(num_class)[label]
-    accuracy = sum(torch.argmax(pred, dim=1) == labels).item()
-    print(accuracy)
-    # print(
-    #     '\ninput:', x.shape,
-    #     '\nlabels in objectives:', labels,
-    #     '\npred:', pred,
-    # )
+
     loss = F.nll_loss(F.log_softmax(pred, dim=1), labels)
-    return - loss
+    if return_accuracy:
+        accuracy = sum(torch.argmax(pred, dim=1) == labels)
+
+    if do_print:
+        print(
+            'accyracy:', accuracy,
+            '\loss:', loss,
+            '\ninput:', x.shape,
+            '\nlabels in objectives:', labels,
+            '\npred:', pred,
+        )
+
+    if return_accuracy:
+        return - loss, accuracy
+    else:
+        return - loss

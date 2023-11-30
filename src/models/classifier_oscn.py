@@ -43,15 +43,9 @@ class Classifier_OSCN(Classifier):
     def getDataLoaders(batch_size, shuffle=True, device='cuda'):
         oscn_train_dataset = DatasetOSCN(
             train=True,
-            model_name='Classifier_OSCN',
-            device=device,
-            convert_label=True,
         )
         oscn_test_dataset = DatasetOSCN(
             train=False,
-            model_name='Classifier_OSCN',
-            device=device,
-            convert_label=True,
         )
         train = torch.utils.data.DataLoader(
             oscn_train_dataset,

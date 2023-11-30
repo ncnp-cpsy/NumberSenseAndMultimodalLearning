@@ -1,0 +1,21 @@
+Expt: experiments/rslt/test/cmnist/2023-11-30T12:04:25.313383opjgjfyj
+RunID: 2023-11-30T12:04:25.313383
+Arguments: Namespace(K=20, batch_size=128, cuda=True, device='cuda', epochs=30, experiment='./rslt/test/cmnist', latent_dim=20, learn_prior=False, llik_scaling=0.0, logp=False, looser=False, model='Classifier_CMNIST', no_analytics=False, no_cuda=False, num_hidden_layers=1, obj='cross', pre_trained='', pretrained_path='', print_freq=0, run_type='train', seed=4, use_conditional=False)
+----------------------------------------------------------------
+        Layer (type)               Output Shape         Param #
+================================================================
+            Linear-1                  [-1, 400]         941,200
+              ReLU-2                  [-1, 400]               0
+            Linear-3                    [-1, 8]           3,208
+            Linear-4                    [-1, 9]              81
+================================================================
+Total params: 944,489
+Trainable params: 944,489
+Non-trainable params: 0
+----------------------------------------------------------------
+Input size (MB): 0.01
+Forward/backward pass size (MB): 0.01
+Params size (MB): 3.60
+Estimated Total Size (MB): 3.62
+----------------------------------------------------------------
+====> [MM-VAE] Time:   2.610s or 00:00:02

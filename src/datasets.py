@@ -15,14 +15,7 @@ from torchvision import transforms, models, datasets
 
 class DatasetOSCN(Dataset):
     def __init__(self,
-                 train,
-                 device=None,
-                 model_name=None,
-                 convert_label=False):
-        # self.convert_label = convert_label
-        # self.device = device
-        # self.model_name = model_name
-
+                 train):
         if train:
             self.images = torch.load('./data/oscn_train_images.pt')
             self.labels = np.load('./data/oscn_train_labels.npy',
@@ -41,10 +34,6 @@ class DatasetOSCN(Dataset):
 
 class DatasetCMNIST(Dataset):
     def __init__(self, train):
-        # self.convert_label = convert_label
-        # self.device = device
-        # self.model_name = model_name
-
         if train:
             self.images = torch.load('./data/cmnist_train_images.pt')
             self.labels = torch.load('./data/cmnist_train_labels.pt')
@@ -390,6 +379,10 @@ def convert_label_to_int(label, model_name, target_property):
             raise Exception
     else:
         raise Exception
+
+    if type(label) == list:
+        print('converting types')
+        label = torch.tensor(label)
 
     if do_print:
         print(

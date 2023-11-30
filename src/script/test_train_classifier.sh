@@ -3,7 +3,7 @@
 EXPR_DIR='./rslt/test'
 
 python main.py  \
-       --model "Classifier_OSCN" \
+       --model "Classifier_CMNIST" \
        --experiment "${EXPR_DIR}/cmnist" \
        --obj "cross" \
        --batch-size 128 \
