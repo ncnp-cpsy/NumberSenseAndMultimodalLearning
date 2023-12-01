@@ -154,7 +154,7 @@ class CUB_Sentence_ft(VAE):
 
         return train_loader, test_loader
 
-    def reconstruct(self, data, runPath, epoch):
+    def reconstruct(self, data, run_path, epoch):
         recon = super(CUB_Sentence_ft, self).reconstruct(data[:8]).argmax(dim=-1).squeeze()
         recon, data = self.fn_2i(recon), self.fn_2i(data[:8])
         recon, data = [self.fn_trun(r) for r in recon], [self.fn_trun(d) for d in data]
@@ -164,12 +164,12 @@ class CUB_Sentence_ft(VAE):
             print('[DATA]  ==> {}'.format(' '.join(i2w[str(i)] for i in d_sent)))
             print('[RECON] ==> {}\n'.format(' '.join(i2w[str(i)] for i in r_sent)))
 
-        with open('{}/recon_{:03d}.txt'.format(runPath, epoch), "w+") as txt_file:
+        with open('{}/recon_{:03d}.txt'.format(run_path, epoch), "w+") as txt_file:
             for r_sent, d_sent in zip(recon, data):
                 txt_file.write('[DATA]  ==> {}\n'.format(' '.join(i2w[str(i)] for i in d_sent)))
                 txt_file.write('[RECON] ==> {}\n\n'.format(' '.join(i2w[str(i)] for i in r_sent)))
 
-    def generate(self, runPath, epoch):
+    def generate(self, run_path, epoch):
         N, K = 5, 4
         i2w = self.load_vocab()
         samples = super(CUB_Sentence_ft, self).generate(N, K).argmax(dim=-1).squeeze()
@@ -180,13 +180,13 @@ class CUB_Sentence_ft(VAE):
         for s_sent in samples[0][:3]:
             print('[GEN]   ==> {}'.format(' '.join(i2w[str(i)] for i in s_sent if i != 0)))
 
-        with open('{}/gen_samples_{:03d}.txt'.format(runPath, epoch), "w+") as txt_file:
+        with open('{}/gen_samples_{:03d}.txt'.format(run_path, epoch), "w+") as txt_file:
             for s_sents in samples:
                 for s_sent in s_sents:
                     txt_file.write('{}\n'.format(' '.join(i2w[str(i)] for i in s_sent)))
                 txt_file.write('\n')
 
-    def analyse(self, data, runPath, epoch):
+    def analyse(self, data, run_path, epoch):
         pass
 
     def load_vocab(self):

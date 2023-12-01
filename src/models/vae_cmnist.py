@@ -17,11 +17,11 @@ from src.models.vae import VAE
 
 
 # Constants
-dataSize = torch.Size([3, 28, 28])
-imgChans = dataSize[0]
-fBase = 32
+data_size = torch.Size([3, 28, 28])
+img_chans = data_size[0]
+f_base = 32
 
-data_dim = int(prod(dataSize))
+data_dim = int(prod(data_size))
 hidden_dim = 400
 
 def extra_hidden_layer():
@@ -62,7 +62,7 @@ class Dec(nn.Module):
 
     def forward(self, z):
         p = self.fc3(self.dec(z))
-        d = torch.sigmoid(p.view(*z.size()[:-1], *dataSize))  # reshape data
+        d = torch.sigmoid(p.view(*z.size()[:-1], *data_size))  # reshape data
         d = d.clamp(Constants.eta, 1 - Constants.eta)
 
         return d, torch.tensor(0.75).to(z.device)  # mean, length scale
@@ -86,7 +86,7 @@ class VAE_CMNIST(VAE):
             nn.Parameter(torch.zeros(1, params.latent_dim), **grad)  # logvar
         ])
         self.modelName = 'cmnist'
-        self.dataSize = dataSize
+        self.data_size = data_size
         self.llik_scaling = 1.
 
     @property
@@ -125,14 +125,14 @@ class VAE_CMNIST(VAE):
 
         return train, test
 
-    def generate(self, runPath, epoch):
+    def generate(self, run_path, epoch):
         N, K = 64, 9
         samples = super(VAE_CMNIST, self).generate(N, K).cpu()
         # wrangle things so they come out tiled
         samples = samples.view(K, N, *samples.size()[1:]).transpose(0, 1)  # N x K x 1 x 28 x 28
         s = [make_grid(t, nrow=int(sqrt(K)), padding=0) for t in samples]
         save_image(torch.stack(s),
-                   '{}/gen_samples_{:03d}.png'.format(runPath, epoch),
+                   '{}/gen_samples_{:03d}.png'.format(run_path, epoch),
                    nrow=int(sqrt(N)))
 
     def generate_special(self, mean, label):
@@ -143,20 +143,21 @@ class VAE_CMNIST(VAE):
             # wrangle things so they come out tiled
             samples = samples.view(N, *samples.size()[1:])
             save_image(samples,
-                    'addition_images/gen_special_samples_cmnist_{}'.format(i) + "_" + label + '.png',
-                    nrow=int(sqrt(N)))
+                       # 'addition_images/gen_special_samples_cmnist_{}'.format(i) + "_" + label + '.png',
+                       'gen_special_samples_cmnist_{}'.format(i) + "_" + label + '.png',
+                       nrow=int(sqrt(N)))
 
-    def reconstruct(self, data, runPath, epoch, n = 8):
+    def reconstruct(self, data, run_path, epoch, n=8):
         recon = super(VAE_CMNIST, self).reconstruct(data[:n])
         comp = torch.cat([data[:8], recon]).data.cpu()
-        save_image(comp, '{}/recon_{:03d}.png'.format(runPath, epoch))
+        save_image(comp, '{}/recon_{:03d}.png'.format(run_path, epoch))
 
     def latent(self, data):
         zss= super(VAE_CMNIST, self).get_latent(data)
         return zss
 
-    def analyse(self, data, runPath, epoch):
+    def analyse(self, data, run_path, epoch):
         zemb, zsl, kls_df = super(VAE_CMNIST, self).analyse(data, K=10)
         labels = ['Prior', self.modelName.lower()]
-        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(runPath, epoch))
-        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(runPath, epoch))
+        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
+        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, epoch))

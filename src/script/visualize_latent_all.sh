@@ -6,10 +6,35 @@ OUTPUT_DIR_QUAN="${OUTPUT_DIR}quantitative/"
 mkdir -pv $OUTPUT_DIR_QUAL $OUTPUT_DIR_QUAN
 
 # CMNIST-OSCN
-python visualize_latent.py --model 'cmnist_oscn' --pre-trained '../experiments/cmnist-oscn/final' --target-modality 0 --target-property 0 --output-dir $OUTPUT_DIR_QUAL > "${OUTPUT_DIR_QUAN}cmnist_oscn_0_0.txt"
-python visualize_latent.py --model 'cmnist_oscn' --pre-trained '../experiments/cmnist-oscn/final' --target-modality 0 --target-property 1 --output-dir $OUTPUT_DIR_QUAL > "${OUTPUT_DIR_QUAN}cmnist_oscn_0_1.txt"
-python visualize_latent.py --model 'cmnist_oscn' --pre-trained '../experiments/cmnist-oscn/final' --target-modality 0 --target-property 2 --output-dir $OUTPUT_DIR_QUAL > "${OUTPUT_DIR_QUAN}cmnist_oscn_0_2.txt"
-python visualize_latent.py --model 'cmnist_oscn' --pre-trained '../experiments/cmnist-oscn/final' --target-modality 1 --target-property 0 --output-dir $OUTPUT_DIR_QUAL > "${OUTPUT_DIR_QUAN}cmnist_oscn_1_0.txt"
+python visualize_latent.py \
+       --model 'cmnist_oscn' \
+       --pre-trained '../experiments/cmnist-oscn/final' \
+       --target-modality 0 \
+       --target-property 0 \
+       --output-dir $OUTPUT_DIR_QUAL \
+       > "${OUTPUT_DIR_QUAN}cmnist_oscn_0_0.txt"
+python visualize_latent.py \
+       --model 'cmnist_oscn' \
+       --pre-trained '../experiments/cmnist-oscn/final' \
+       --target-modality 0 \
+       --target-property 1 \
+       --output-dir $OUTPUT_DIR_QUAL \
+       > "${OUTPUT_DIR_QUAN}cmnist_oscn_0_1.txt"
+python visualize_latent.py \
+       --model 'cmnist_oscn' \
+       --pre-trained '../experiments/cmnist-oscn/final' \
+       --target-modality 0 \
+       --target-property 2 \
+       --output-dir $OUTPUT_DIR_QUAL \
+       > "${OUTPUT_DIR_QUAN}cmnist_oscn_0_2.txt"
+python visualize_latent.py \
+       --model 'cmnist_oscn' \
+       --pre-trained '../experiments/cmnist-oscn/final' \
+       --target-modality 1 \
+       --target-property 0 \
+       --output-dir $OUTPUT_DIR_QUAL \
+       > "${OUTPUT_DIR_QUAN}cmnist_oscn_1_0.txt"
+
 python visualize_latent.py --model 'cmnist_oscn' --pre-trained '../experiments/cmnist-oscn/final' --target-modality 1 --target-property 1 --output-dir $OUTPUT_DIR_QUAL > "${OUTPUT_DIR_QUAN}cmnist_oscn_1_1.txt"
 python visualize_latent.py --model 'cmnist_oscn' --pre-trained '../experiments/cmnist-oscn/final' --target-modality 1 --target-property 2 --output-dir $OUTPUT_DIR_QUAL > "${OUTPUT_DIR_QUAN}cmnist_oscn_1_2.txt"
 

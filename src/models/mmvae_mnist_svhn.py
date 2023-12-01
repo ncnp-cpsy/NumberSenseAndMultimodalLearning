@@ -24,7 +24,7 @@ class MNIST_SVHN(MMVAE):
             nn.Parameter(torch.zeros(1, params.latent_dim), requires_grad=False),  # mu
             nn.Parameter(torch.zeros(1, params.latent_dim), **grad)  # logvar
         ])
-        self.vaes[0].llik_scaling = prod(self.vaes[1].dataSize) / prod(self.vaes[0].dataSize) \
+        self.vaes[0].llik_scaling = prod(self.vaes[1].data_size) / prod(self.vaes[0].data_size) \
             if params.llik_scaling == 0 else params.llik_scaling
         self.modelName = 'mnist-svhn'
 
@@ -62,7 +62,7 @@ class MNIST_SVHN(MMVAE):
         test = DataLoader(test_mnist_svhn, batch_size=batch_size, shuffle=shuffle, **kwargs)
         return train, test
 
-    def generate(self, runPath, epoch):
+    def generate(self, run_path, epoch):
         N = 64
         samples_list = super(MNIST_SVHN, self).generate(N)
         for i, samples in enumerate(samples_list):
@@ -70,26 +70,26 @@ class MNIST_SVHN(MMVAE):
             # wrangle things so they come out tiled
             samples = samples.view(N, *samples.size()[1:])
             save_image(samples,
-                       '{}/gen_samples_{}_{:03d}.png'.format(runPath, i, epoch),
+                       '{}/gen_samples_{}_{:03d}.png'.format(run_path, i, epoch),
                        nrow=int(sqrt(N)))
 
-    def reconstruct(self, data, runPath, epoch):
+    def reconstruct(self, data, run_path, epoch):
         recons_mat = super(MNIST_SVHN, self).reconstruct([d[:8] for d in data])
         for r, recons_list in enumerate(recons_mat):
             for o, recon in enumerate(recons_list):
                 _data = data[r][:8].cpu()
                 recon = recon.squeeze(0).cpu()
                 # resize mnist to 32 and colour. 0 => mnist, 1 => svhn
-                _data = _data if r == 1 else resize_img(_data, self.vaes[1].dataSize)
-                recon = recon if o == 1 else resize_img(recon, self.vaes[1].dataSize)
+                _data = _data if r == 1 else resize_img(_data, self.vaes[1].data_size)
+                recon = recon if o == 1 else resize_img(recon, self.vaes[1].data_size)
                 comp = torch.cat([_data, recon])
-                save_image(comp, '{}/recon_{}x{}_{:03d}.png'.format(runPath, r, o, epoch))
+                save_image(comp, '{}/recon_{}x{}_{:03d}.png'.format(run_path, r, o, epoch))
 
-    def analyse(self, data, runPath, epoch):
+    def analyse(self, data, run_path, epoch):
         zemb, zsl, kls_df = super(MNIST_SVHN, self).analyse(data, K=10)
         labels = ['Prior', *[vae.modelName.lower() for vae in self.vaes]]
-        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(runPath, epoch))
-        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(runPath, epoch))
+        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
+        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, epoch))
 
     def latent(self, data):
         zss= super(MNIST_SVHN, self).get_latent(data)

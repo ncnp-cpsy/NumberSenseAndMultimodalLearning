@@ -26,10 +26,10 @@ parser.add_argument('--iwae-samples', type=int, default=1000, metavar='I',
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='disables CUDA use')
 cmds = parser.parse_args()
-runPath = cmds.save_dir
+run_path = cmds.save_dir
 
-sys.stdout = Logger('{}/llik.log'.format(runPath))
-args = torch.load(runPath + '/args.rar')
+sys.stdout = Logger('{}/llik.log'.format(run_path))
+args = torch.load(run_path + '/args.rar')
 
 # cuda stuff
 needs_conversion = cmds.no_cuda and args.cuda
@@ -43,7 +43,7 @@ model = modelC(args)
 if args.cuda:
     model.cuda()
 
-model.load_state_dict(torch.load(runPath + '/model.rar', **conversion_kwargs), strict=False)
+model.load_state_dict(torch.load(run_path + '/model.rar', **conversion_kwargs), strict=False)
 B = 12000 // cmds.iwae_samples  # rough batch size heuristic
 train_loader, test_loader = model.getDataLoaders(B, device=device)
 N = len(test_loader.dataset)
@@ -168,7 +168,7 @@ def generate_sparse(D, steps, J):
             embs = torch.stack(embs).transpose(0, 1).contiguous()
             for r in range(2):
                 samples = model.vaes[r].px_z(*model.vaes[r].dec(embs.view(-1, D)[:((J) * steps * D)])).mean
-                save_image(samples.cpu(), os.path.join(runPath, 'latent-traversals-{}x{}.png'.format(i, r)), nrow=D)
+                save_image(samples.cpu(), os.path.join(run_path, 'latent-traversals-{}x{}.png'.format(i, r)), nrow=D)
         break
 
 

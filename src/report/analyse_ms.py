@@ -28,10 +28,10 @@ parser.add_argument('--save-dir', type=str, default="",
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='disables CUDA use')
 cmds = parser.parse_args()
-runPath = cmds.save_dir
+run_path = cmds.save_dir
 
-sys.stdout = Logger('{}/ms_acc.log'.format(runPath))
-args = torch.load(runPath + '/args.rar')
+sys.stdout = Logger('{}/ms_acc.log'.format(run_path))
+args = torch.load(run_path + '/args.rar')
 
 # cuda stuff
 needs_conversion = cmds.no_cuda and args.cuda
@@ -45,7 +45,7 @@ model = modelC(args)
 if args.cuda:
     model.cuda()
 
-model.load_state_dict(torch.load(runPath + '/model.rar', **conversion_kwargs), strict=False)
+model.load_state_dict(torch.load(run_path + '/model.rar', **conversion_kwargs), strict=False)
 B = 256  # rough batch size heuristic
 train_loader, test_loader = model.getDataLoaders(B, device=device)
 N = len(test_loader.dataset)

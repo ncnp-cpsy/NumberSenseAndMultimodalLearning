@@ -136,7 +136,7 @@ RunID: 2023-10-26T14:53:15.038269
 ====> Epoch: 030 Train loss: 1495.0449  took : 11.331539869308472
 ====> [MM-VAE] Time: 379.633s or 00:06:19
 ./run_replication_all.sh: line 38: --seed: command not found
-Target runId: 2023-10-26T14:30:03.74744154dzmdrm 2023-10-26T14:45:05.5739899v8xaqvx
+Target run_id: 2023-10-26T14:30:03.74744154dzmdrm 2023-10-26T14:45:05.5739899v8xaqvx
 Experiment ../experiments/loop-test/cmnist/2023-10-26T14:30:03.74744154dzmdrm
 Output: ./analysis/loop-test/cmnist/2023-10-26T14:30:03.74744154dzmdrm/qualitative/
 mkdir: created directory './analysis/loop-test'
@@ -149,7 +149,7 @@ Output: ./analysis/loop-test/cmnist/2023-10-26T14:45:05.5739899v8xaqvx/qualitati
 mkdir: created directory './analysis/loop-test/cmnist/2023-10-26T14:45:05.5739899v8xaqvx'
 mkdir: created directory './analysis/loop-test/cmnist/2023-10-26T14:45:05.5739899v8xaqvx/qualitative/'
 mkdir: created directory './analysis/loop-test/cmnist/2023-10-26T14:45:05.5739899v8xaqvx/quantitative/'
-Target runId: 2023-10-26T14:53:15.038269zmjzg5hl 2023-10-26T14:38:07.133530x7svwv3l
+Target run_id: 2023-10-26T14:53:15.038269zmjzg5hl 2023-10-26T14:38:07.133530x7svwv3l
 Experiment ../experiments/loop-test/oscn/2023-10-26T14:53:15.038269zmjzg5hl
 Output: ./analysis/loop-test/oscn/2023-10-26T14:53:15.038269zmjzg5hl/qualitative/
 mkdir: created directory './analysis/loop-test/oscn'
@@ -161,4 +161,4 @@ Output: ./analysis/loop-test/oscn/2023-10-26T14:38:07.133530x7svwv3l/qualitative
 mkdir: created directory './analysis/loop-test/oscn/2023-10-26T14:38:07.133530x7svwv3l'
 mkdir: created directory './analysis/loop-test/oscn/2023-10-26T14:38:07.133530x7svwv3l/qualitative/'
 mkdir: created directory './analysis/loop-test/oscn/2023-10-26T14:38:07.133530x7svwv3l/quantitative/'
-Target runId:
+Target run_id:

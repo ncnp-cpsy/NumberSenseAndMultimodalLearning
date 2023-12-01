@@ -59,7 +59,7 @@ done
 
 # Analysis of CMNIST
 dirs=`find "${EXPR_DIR}/cmnist/" -maxdepth 1 -mindepth 1 -type d | sed 's!^.*/!!'`
-echo "Target runId:" $dirs
+echo "Target run_id:" $dirs
 for dir in $dirs; do
     EXPR_DIR_TMP="${EXPR_DIR}/cmnist/${dir}"
     OUTPUT_DIR_QUAL="${OUTPUT_DIR}/cmnist/${dir}/qualitative/"
@@ -84,7 +84,7 @@ done
 
 # Analysis of OSCN
 dirs=`find "${EXPR_DIR}/oscn/" -maxdepth 1 -mindepth 1 -type d | sed 's!^.*/!!'`
-echo "Target runId:" $dirs
+echo "Target run_id:" $dirs
 for dir in $dirs; do
     EXPR_DIR_TMP="${EXPR_DIR}/oscn/${dir}"
     OUTPUT_DIR_QUAL="${OUTPUT_DIR}/oscn/${dir}/qualitative/"
@@ -115,7 +115,7 @@ done
 
 # Analysis of CMNIST-OSCN
 dirs=`find "${EXPR_DIR}/cmnist-oscn/" -maxdepth 1 -mindepth 1 -type d | sed 's!^.*/!!'`
-echo "Target runId:" $dirs
+echo "Target run_id:" $dirs
 for dir in $dirs; do
     EXPR_DIR_TMP="${EXPR_DIR}/cmnist-oscn/${dir}"
     OUTPUT_DIR_QUAL="${OUTPUT_DIR}/cmnist-oscn/${dir}/qualitative/"

@@ -288,8 +288,13 @@ class CUBImageFt(Dataset):
         self._load_ft_mat()
 
 
-def convert_label_to_int(label, model_name, target_property):
+def convert_label_to_int(label, model_name, target_property, data=None):
     do_print = False
+    zukei_to_int = {
+        'j': 0,
+        's': 1,
+        't': 2,
+    }
     color_to_int = {
         'r': 3,
         'g': 2,
@@ -319,8 +324,9 @@ def convert_label_to_int(label, model_name, target_property):
     if (model_name == 'Classifier_CMNIST') or \
        (model_name == 'VAE_CMNIST') or \
        (model_name == 'VAE_CLEVR') or \
-       (model_name == 'MMVAE_CMNIST_OSCN' and target_property == 1) or \
+       (model_name == 'MMVAE_CMNIST_OSCN' and target_modality == 0) or \
        (model_name == 'MMVAE_MNIST_CLEVR'):
+        # (model_name == 'MMVAE_CMNIST_OSCN' and target_property == 1) or \
         if target_property == 0:
             label = []
             if model_name == 'MMVAE_CMNIST_OSCN' :
@@ -358,31 +364,22 @@ def convert_label_to_int(label, model_name, target_property):
     # Pattern of label -> (g3j, w3t) (OSCN)
     elif (model_name == 'Classifier_OSCN') or \
          (model_name == 'VAE_OSCN') or \
-         (model_name == 'MMVAE_CMNIST_OSCN' and target_property != 1):
+         (model_name == 'MMVAE_CMNIST_OSCN' and target_modelity == 1):
+         # (model_name == 'MMVAE_CMNIST_OSCN' and target_property != 1):
         label = list(label)
         if target_property == 0:
-            try :
-                label = [color_to_int[s[0]] for s in label]
-            except:
-                pass
+            label = [color_to_int[s[0]] for s in label]
         elif target_property == 1:
-            try :
-                label = [int(s[1]) for s in label]
-            except:
-                pass
+            label = [int(s[1]) for s in label]
         elif target_property == 2:
-            try:
-                label = [zukei_to_int[s[2]] for s in label]
-            except:
-                pass
+            label = [zukei_to_int[s[2]] for s in label]
         else:
             raise Exception
     else:
         raise Exception
 
     if type(label) == list:
-        print('converting types')
-        label = torch.tensor(label)
+        label = torch.Tensor(label)
 
     if do_print:
         print(

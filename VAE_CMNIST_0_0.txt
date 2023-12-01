@@ -1,0 +1,270 @@
+Arguments (initial):
+ Namespace(K=20, batch_size=256, epochs=10, experiment='', latent_dim=20, learn_prior=False, llik_scaling=0.0, logp=False, looser=False, model='VAE_CMNIST', no_analytics=False, no_cuda=False, num_hidden_layers=1, obj='elbo', output_dir='./rslt/test/VAE_CMNIST/analyse/', pre_trained='./rslt/test/VAE_CMNIST/2023-12-01T14:50:24.203159x4mnj8f3', print_freq=0, run_type='analyse', seed=1, use_conditional=False)
+args are updated using pretrained_path:
+ Namespace(K=30, batch_size=128, cuda=True, device='cuda', epochs=10, experiment='test/VAE_CMNIST', latent_dim=20, learn_prior=True, llik_scaling=0.0, logp=False, looser=False, model='VAE_CMNIST', no_analytics=False, no_cuda=False, num_hidden_layers=1, obj='elbo', output_dir='final_latent_images_test/', pre_trained='', pretrained_path='', print_freq=0, run_type='train', seed=4, target_modality=0, target_property=1, use_conditional=False)
+Expt: rslt/test/VAE_CMNIST/2023-12-01T17:31:34.113105vml2b6l7
+RunID: 2023-12-01T17:31:34.113105
+Arguments (after settings):
+ Namespace(K=30, batch_size=128, cuda=True, device='cuda', epochs=10, experiment='test/VAE_CMNIST', latent_dim=20, learn_prior=True, llik_scaling=0.0, logp=False, looser=False, model='VAE_CMNIST', no_analytics=False, no_cuda=False, num_hidden_layers=1, obj='elbo', output_dir='final_latent_images_test/', pre_trained='', pretrained_path='', print_freq=0, run_type='train', seed=4, target_modality=0, target_property=1, use_conditional=False)
+Model runner was initialized.
+objectives:  elbo 
+t_objectives:  iwae
+Model runner was initialized.
+Loading model Classifier_CMNIST from ./rslt/test/Classifier_CMNIST/2023-12-01T15:43:23.118510rruaoa16/
+objectives:  cross 
+t_objectives:  cross
+
+
+ ==============
+ START ANALYSIS
+ ==============
+
+Namespace(K=30, batch_size=128, cuda=True, device='cuda', epochs=10, experiment='test/VAE_CMNIST', latent_dim=20, learn_prior=True, llik_scaling=0.0, logp=False, looser=False, model='VAE_CMNIST', no_analytics=False, no_cuda=False, num_hidden_layers=1, obj='elbo', output_dir='final_latent_images_test/', pre_trained='', pretrained_path='', print_freq=0, run_type='train', seed=4, target_modality=0, target_property=1, use_conditional=False)
+
+===
+Data and label info... 
+type(label): <class 'torch.Tensor'> 
+label: tensor([4, 2, 4, 1, 3, 7, 6, 9, 7, 2, 5, 3, 6, 1, 3, 4, 3, 6, 6, 5, 4, 6, 4, 6,
+        3, 4, 4, 5, 6, 4, 1, 9, 8, 8, 6, 4, 1, 8, 6, 9, 9, 9, 9, 5, 9, 8, 8, 1,
+        1, 6, 6, 3, 6, 2, 6, 6, 7, 8, 5, 3, 4, 5, 3, 1, 3, 7, 8, 4, 9, 4, 7, 1,
+        4, 1, 7, 2, 2, 9, 4, 1, 1, 8, 2, 1, 6, 4, 5, 1, 9, 7, 3, 6, 1, 3, 7, 9,
+        8, 4, 4, 5, 3, 8, 7, 3, 8, 7, 9, 6, 5, 7, 8, 6, 6, 3, 3, 9, 4, 9, 4, 1,
+        7, 7, 7, 8, 4, 5, 5, 9], device='cuda:0') 
+label[0]: tensor(4, device='cuda:0') 
+label[1]: tensor(2, device='cuda:0') 
+type(data): <class 'torch.Tensor'> 
+data[0]: tensor([[[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]],
+
+        [[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]],
+
+        [[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]]], device='cuda:0') 
+data[0].shape: torch.Size([3, 28, 28])
+
+===
+Setting info... 
+Target modality: 0 
+Target property: 0 
+Output directory: final_latent_images_test/ 
+Number of category 4 
+Shape of latent_all: (2048, 20) 
+Shape of label_all:  (2048,) 
+Set of label_all:  {0, 1, 2, 3} 
+Start index: 0 
+End index: 4 
+withzero: False
+Plot reconstruction of index: 0
+Silhouette values: [ 0.1291903  -0.06254352  0.08935066 ...  0.11324573  0.0972072
+  0.09882846]
+Average of silhouette coef: 0.056522418
+  0   1   2   3
+0 0.0 0.1 0.1 0.2 
+1 0.1 0.0 0.1 0.2 
+2 0.1 0.1 0.0 0.2 
+3 0.2 0.2 0.2 0.0 
+correlation [[1.        0.2810726]
+ [0.2810726 1.       ]]
+[[], [], [], []] [0 3 2 ... 2 0 2] [[-24.959753   18.752329 ]
+ [ 11.694994   45.6059   ]
+ [ 17.089869   -2.1195736]
+ ...
+ [  9.064989  -38.17294  ]
+ [-32.07555     8.211701 ]
+ [-18.215445  -16.061077 ]]
+saved final_latent_images_test//latent__0_0.svg
+{'reconst_avg': None, 'reconst_all': None, 'cluster_avg': 0.056522418, 'cluster_all': array([ 0.1291903 , -0.06254352,  0.08935066, ...,  0.11324573,
+        0.0972072 ,  0.09882846], dtype=float32), 'magnitude_avg': 1.0, 'magnitude_all': 1.0, 'tsne-2d_avg': None, 'tsne-2d_all': None}
+
+
+ ==============
+ START ANALYSIS
+ ==============
+
+Namespace(K=30, batch_size=128, cuda=True, device='cuda', epochs=10, experiment='test/VAE_CMNIST', latent_dim=20, learn_prior=True, llik_scaling=0.0, logp=False, looser=False, model='VAE_CMNIST', no_analytics=False, no_cuda=False, num_hidden_layers=1, obj='elbo', output_dir='final_latent_images_test/', pre_trained='', pretrained_path='', print_freq=0, run_type='train', seed=4, target_modality=0, target_property=1, use_conditional=False)
+
+===
+Data and label info... 
+type(label): <class 'torch.Tensor'> 
+label: tensor([1, 9, 6, 9, 6, 8, 3, 5, 8, 6, 8, 4, 2, 1, 3, 9, 2, 2, 6, 9, 4, 3, 3, 3,
+        7, 3, 6, 7, 8, 2, 9, 5, 3, 2, 9, 1, 2, 2, 4, 3, 5, 2, 5, 5, 7, 4, 7, 6,
+        1, 8, 6, 1, 1, 8, 6, 9, 8, 8, 6, 3, 6, 6, 9, 3, 3, 1, 7, 2, 3, 6, 8, 8,
+        2, 5, 8, 4, 4, 5, 2, 9, 2, 2, 7, 6, 5, 2, 3, 5, 7, 9, 3, 7, 1, 7, 8, 5,
+        6, 8, 5, 9, 5, 7, 2, 7, 3, 7, 4, 3, 2, 8, 3, 8, 9, 7, 1, 4, 8, 7, 1, 5,
+        7, 7, 7, 7, 2, 7, 4, 9], device='cuda:0') 
+label[0]: tensor(1, device='cuda:0') 
+label[1]: tensor(9, device='cuda:0') 
+type(data): <class 'torch.Tensor'> 
+data[0]: tensor([[[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]],
+
+        [[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]],
+
+        [[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]]], device='cuda:0') 
+data[0].shape: torch.Size([3, 28, 28])
+
+===
+Setting info... 
+Target modality: 0 
+Target property: 1 
+Output directory: final_latent_images_test/ 
+Number of category 10 
+Shape of latent_all: (2048, 20) 
+Shape of label_all:  (2048,) 
+Set of label_all:  {1, 2, 3, 4, 5, 6, 7, 8, 9} 
+Start index: 1 
+End index: 10 
+withzero: False
+Plot reconstruction of index: 0
+Silhouette values: [ 0.09910147  0.03447026 -0.08177616 ... -0.05036944 -0.22084089
+ -0.11399176]
+Average of silhouette coef: -0.07650822
+  1   2   3   4   5   6   7   8   9
+1 0.0 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 
+2 0.1 0.0 0.1 0.1 0.1 0.0 0.1 0.1 0.1 
+3 0.1 0.1 0.0 0.1 0.1 0.1 0.1 0.1 0.1 
+4 0.1 0.1 0.1 0.0 0.1 0.1 0.1 0.1 0.0 
+5 0.1 0.1 0.1 0.1 0.0 0.1 0.1 0.0 0.1 
+6 0.1 0.0 0.1 0.1 0.1 0.0 0.1 0.1 0.1 
+7 0.1 0.1 0.1 0.1 0.1 0.1 0.0 0.1 0.0 
+8 0.1 0.1 0.1 0.1 0.0 0.1 0.1 0.0 0.1 
+9 0.1 0.1 0.1 0.0 0.1 0.1 0.0 0.1 0.0 
+correlation [[1.         0.03523579]
+ [0.03523579 1.        ]]
+[[], [], [], [], [], [], [], [], [], []] [1 9 6 ... 8 4 7] [[-64.23644    8.845407]
+ [-78.86198    6.855075]
+ [ 73.90064  -33.98624 ]
+ ...
+ [-73.84246   18.029833]
+ [ 63.6057   -13.788264]
+ [ 39.964256 -20.969257]]
+saved final_latent_images_test//latent__0_1.svg
+shape (20,)
+shape (20,)
+shape (20,)
+shape (20,)
+shape (20,)
+shape (20,)
+shape (20,)
+shape (20,)
+shape (20,)
+ 0.0 -0.0 -0.0 -0.0 -0.1  0.0 -0.0  0.1  0.0 -0.0 -0.0  0.0 -0.0 -0.0 -0.0  0.1 -0.0  0.0  0.0  0.0 
+ 0.0 -0.0 -0.0 -0.0 -0.1  0.0 -0.1  0.1  0.1 -0.0 -0.1  0.0 -0.0 -0.0  0.0  0.1 -0.0  0.0  0.0  0.0 
+ 0.0 -0.0 -0.0 -0.0 -0.1  0.0 -0.1  0.1  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.1 -0.0  0.0  0.0  0.0 
+ 0.0 -0.0 -0.0 -0.0 -0.1  0.0 -0.0  0.1  0.0 -0.0 -0.1  0.0 -0.0 -0.0  0.0  0.1 -0.0  0.0  0.0  0.0 
+ 0.0 -0.0 -0.0 -0.0 -0.1  0.0 -0.0  0.1  0.0  0.0 -0.1  0.0 -0.0 -0.0  0.0  0.1 -0.0 -0.0  0.0  0.0 
+ 0.1 -0.0 -0.0 -0.0 -0.1  0.0 -0.0  0.1  0.1 -0.0 -0.1  0.0 -0.0 -0.0  0.0  0.1 -0.0  0.0  0.0  0.0 
+ 0.0 -0.0 -0.0 -0.0 -0.1 -0.0 -0.0  0.1  0.0  0.0 -0.0  0.1 -0.0 -0.0  0.0  0.1 -0.0  0.0  0.1  0.0 
+ 0.0 -0.0 -0.0 -0.0 -0.1  0.0 -0.1  0.1  0.0 -0.0 -0.1  0.0 -0.0 -0.0  0.0  0.1 -0.0  0.0  0.0  0.0 
+ 0.0 -0.0 -0.0 -0.0 -0.1 -0.0 -0.0  0.1  0.0 -0.0 -0.1  0.1 -0.0 -0.0  0.0  0.1 -0.0  0.0  0.0  0.0 
+<class 'numpy.ndarray'>
+1 0.054978468
+<class 'numpy.ndarray'>
+2 0.11076002
+<class 'numpy.ndarray'>
+3 0.10172782
+<class 'numpy.ndarray'>
+4 0.08689615
+<class 'numpy.ndarray'>
+5 0.09599838
+<class 'numpy.ndarray'>
+6 0.10071441
+<class 'numpy.ndarray'>
+7 0.053192805
+<class 'numpy.ndarray'>
+8 0.10820528
+<class 'numpy.ndarray'>
+9 0.07854125
+7 2
+<class 'numpy.ndarray'>
+1 0.12325109
+<class 'numpy.ndarray'>
+2 0.060440987
+<class 'numpy.ndarray'>
+3 0.092483945
+<class 'numpy.ndarray'>
+4 0.07320202
+<class 'numpy.ndarray'>
+5 0.08456685
+<class 'numpy.ndarray'>
+6 0.08179789
+<class 'numpy.ndarray'>
+7 0.08866463
+<class 'numpy.ndarray'>
+8 0.07678616
+<class 'numpy.ndarray'>
+9 0.062762946
+2 8
+<class 'numpy.ndarray'>
+1 0.101077065
+<class 'numpy.ndarray'>
+2 0.12887031
+<class 'numpy.ndarray'>
+3 0.06090523
+<class 'numpy.ndarray'>
+4 0.103100024
+<class 'numpy.ndarray'>
+5 0.07795161
+<class 'numpy.ndarray'>
+6 0.12792528
+<class 'numpy.ndarray'>
+7 0.09384074
+<class 'numpy.ndarray'>
+8 0.089006536
+<class 'numpy.ndarray'>
+9 0.096471116
+3 6
+<class 'numpy.ndarray'>
+1 0.053745154
+<class 'numpy.ndarray'>
+2 0.09963595
+<class 'numpy.ndarray'>
+3 0.08712385
+<class 'numpy.ndarray'>
+4 0.107365265
+<class 'numpy.ndarray'>
+5 0.07552159
+<class 'numpy.ndarray'>
+6 0.10185543
+<class 'numpy.ndarray'>
+7 0.087707534
+<class 'numpy.ndarray'>
+8 0.077197626
+<class 'numpy.ndarray'>
+9 0.102045424
+1 5
+{'reconst_avg': None, 'reconst_all': None, 'cluster_avg': -0.07650822, 'cluster_all': array([ 0.09910147,  0.03447026, -0.08177616, ..., -0.05036944,
+       -0.22084089, -0.11399176], dtype=float32), 'magnitude_avg': 1.0, 'magnitude_all': 1.0, 'tsne-2d_avg': None, 'tsne-2d_all': None, 'mathematics_avg': None, 'mathematics_all': None}

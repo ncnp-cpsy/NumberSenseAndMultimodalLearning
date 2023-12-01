@@ -15,22 +15,24 @@ from src.utils import Logger, Timer, save_model, save_vars, unpack_data
 
 
 class Runner():
-    def __init__(self, args, run_path):
+    def __init__(self, args, run_path='./'):
         self.args = args
         self.run_path = run_path
+        self.model_name = args.model
 
         # load model
-        model_class = getattr(models, '{}'.format(args.model))
+        print('Model runner was initialized.')
+        model_class = getattr(models, '{}'.format(self.model_name))
         model = model_class(args).to(args.device)
-        torchsummary.summary(
-            model, (model.data_size), device=args.device)
+        # torchsummary.summary(
+        #     model, (model.data_size), device=args.device)
 
         if args.pretrained_path:
             print('Loading model {} from {}'.format(
-                model.__name__, args.pretrained_path))
+                self.model_name, args.pretrained_path))
             model.load_state_dict(
                 torch.load(args.pretrained_path + '/model.rar'))
-            model._pz_params = model._pz_params
+            # model._pz_params = model._pz_params  # DEBUG
         self.model = model
 
         # preparation for training
@@ -38,7 +40,7 @@ class Runner():
             filter(lambda p: p.requires_grad, self.model.parameters()),
             lr=1e-3, amsgrad=True)
 
-        if args.model == 'smnist':
+        if self.model_name == 'smnist':
             self.train_loader, self.test_loader, self.abtest_loader = \
                 self.model.getDataLoaders(
                     args.batch_size, device=args.device)
@@ -50,7 +52,7 @@ class Runner():
         objective_name = ('m_' if hasattr(self.model, 'vaes') else '') \
             + args.obj \
             + ('_looser' if (args.looser and args.obj != 'elbo') else '')
-        t_objective_name = 'cross' if 'Classifier' in self.args.model else \
+        t_objective_name = 'cross' if 'Classifier' in self.model_name else \
             ('m_' if hasattr(self.model, 'vaes') else '') + 'iwae'
         self.objective = getattr(objectives, objective_name)
         self.t_objective = getattr(objectives, t_objective_name)
@@ -124,7 +126,7 @@ class Runner():
                 self.model.reconstruct(data, self.run_path, epoch)
                 # if i == 0:
                 #     break
-                if 'Classifier' in self.args.model:
+                if 'Classifier' in self.model_name:
                     loss, acc = self.t_objective(
                         self.model,
                         data,
@@ -143,10 +145,13 @@ class Runner():
                 #     break
 
         agg['test_loss'].append(b_loss / len(self.test_loader.dataset))
-        if 'Classifier' in self.args.model:
+        if 'Classifier' in self.model_name:
             agg['test_acc'].append(b_acc / len(self.test_loader.dataset))
-        print('====> Test loss: {:.4f}, Test accuracy: {:.4f}'.format(
-            agg['test_loss'][-1], agg['test_acc'][-1]))
+            print('====> Test loss: {:.4f}, Test accuracy: {:.4f}'.format(
+                agg['test_loss'][-1], agg['test_acc'][-1]))
+        else:
+            print('====> Test loss: {:.4f}'.format(
+                agg['test_loss'][-1]))
         return agg
 
     def get_image(self, data, name):
@@ -154,6 +159,10 @@ class Runner():
         data = data.cpu().numpy().astype(np.uint8).T
         pil_image = Image.fromarray(data)
         pil_image.save(name)
+
+    def predict(self, data):
+        pred = self.model.reconstruct(data)
+        return pred
 
     def estimate_log_marginal(self, K):
         """Compute an IWAE estimate of the log-marginal likelihood of test data."""

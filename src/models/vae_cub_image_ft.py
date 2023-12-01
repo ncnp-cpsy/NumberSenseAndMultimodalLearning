@@ -14,7 +14,7 @@ from src.vis import plot_embeddings, plot_kls_df
 from src.models.vae import VAE
 
 # Constants
-imgChans = 3
+img_chans = 3
 fBase = 64
 
 
@@ -110,25 +110,25 @@ class CUB_Image_ft(VAE):
 
         return train_loader, test_loader
 
-    def generate(self, runPath, epoch):
+    def generate(self, run_path, epoch):
         N, K = 64, 9
         samples = super(CUB_Image_ft, self).generate(N, K).data.cpu()
         samples = self.unproject(samples, search_split='train')
         samples = samples.view(K, N, *samples.size()[1:]).transpose(0, 1)
         s = [make_grid(t, nrow=int(sqrt(K)), padding=0) for t in samples.data.cpu()]
         save_image(torch.stack(s),
-                   '{}/gen_samples_{:03d}.png'.format(runPath, epoch),
+                   '{}/gen_samples_{:03d}.png'.format(run_path, epoch),
                    nrow=int(sqrt(N)))
 
-    def reconstruct(self, data, runPath, epoch):
+    def reconstruct(self, data, run_path, epoch):
         recon = super(CUB_Image_ft, self).reconstruct(data[:8])
         data_ = self.unproject(data[:8], search_split='test')
         recon_ = self.unproject(recon, search_split='train')
         comp = torch.cat([data_, recon_])
-        save_image(comp.data.cpu(), '{}/recon_{:03d}.png'.format(runPath, epoch))
+        save_image(comp.data.cpu(), '{}/recon_{:03d}.png'.format(run_path, epoch))
 
-    def analyse(self, data, runPath, epoch):
+    def analyse(self, data, run_path, epoch):
         zemb, zsl, kls_df = super(CUB_Image_ft, self).analyse(data, K=10)
         labels = ['Prior', self.modelName.lower()]
-        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(runPath, epoch))
-        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(runPath, epoch))
+        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
+        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, epoch))

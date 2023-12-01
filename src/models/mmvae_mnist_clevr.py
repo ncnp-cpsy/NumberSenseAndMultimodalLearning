@@ -24,7 +24,7 @@ class MNIST_CLEVR(MMVAE):
             nn.Parameter(torch.zeros(1, params.latent_dim), requires_grad=False),  # mu
             nn.Parameter(torch.zeros(1, params.latent_dim), **grad)  # logvar
         ])
-        self.vaes[0].llik_scaling = prod(self.vaes[1].dataSize) / prod(self.vaes[0].dataSize) \
+        self.vaes[0].llik_scaling = prod(self.vaes[1].data_size) / prod(self.vaes[0].data_size) \
             if params.llik_scaling == 0 else params.llik_scaling
         self.modelName = 'mnist-clevr'
 
@@ -63,7 +63,7 @@ class MNIST_CLEVR(MMVAE):
         test = DataLoader(test_mnist_clevr, batch_size=batch_size, shuffle=shuffle, **kwargs)
         return train, test
 
-    def generate(self, runPath, epoch):
+    def generate(self, run_path, epoch):
         N = 64
         samples_list = super(MNIST_CLEVR, self).generate(N)
         for i, samples in enumerate(samples_list):
@@ -71,7 +71,7 @@ class MNIST_CLEVR(MMVAE):
             # wrangle things so they come out tiled
             samples = samples.view(N, *samples.size()[1:])
             save_image(samples,
-                       '{}/gen_samples_{}_{:03d}.png'.format(runPath, i, epoch),
+                       '{}/gen_samples_{}_{:03d}.png'.format(run_path, i, epoch),
                        nrow=int(sqrt(N)))
 
     def generate_special(self, mean):
@@ -85,7 +85,7 @@ class MNIST_CLEVR(MMVAE):
                        './gen_special_samples_{}.png'.format(i),
                        nrow=int(sqrt(N)))
 
-    def reconstruct(self, data, runPath, epoch, n = 8):
+    def reconstruct(self, data, run_path, epoch, n = 8):
         recons_mat = super(MNIST_CLEVR, self).reconstruct([d[:n] for d in data])
         for r, recons_list in enumerate(recons_mat):
             for o, recon in enumerate(recons_list):
@@ -94,18 +94,18 @@ class MNIST_CLEVR(MMVAE):
                 # resize mnist to 32 and colour. 0 => mnist, 1 => clevr
 
                 #ここ買えたよ
-                #_data = _data if r == 1 else resize_img(_data, self.vaes[1].dataSize)
-                #recon = recon if o == 1 else resize_img(recon, self.vaes[1].dataSize)
+                #_data = _data if r == 1 else resize_img(_data, self.vaes[1].data_size)
+                #recon = recon if o == 1 else resize_img(recon, self.vaes[1].data_size)
                 #comp = torch.cat([_data, recon])
-                save_image(_data, '{}/recon_{}x{}_{:03d}_moto.png'.format(runPath, r, o, epoch))
-                save_image(recon, '{}/recon_{}x{}_{:03d}_saki.png'.format(runPath, r, o, epoch))
+                save_image(_data, '{}/recon_{}x{}_{:03d}_moto.png'.format(run_path, r, o, epoch))
+                save_image(recon, '{}/recon_{}x{}_{:03d}_saki.png'.format(run_path, r, o, epoch))
 
-    def analyse(self, data, runPath, epoch):
+    def analyse(self, data, run_path, epoch):
         #zemb, zsl, kls_df = super(MNIST_CLEVR, self).analyse(data, K=10)
         labels = ['Prior', *[vae.modelName.lower() for vae in self.vaes]]
         print(labels)
-        #plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(runPath, epoch))
-        #plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(runPath, epoch))
+        #plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
+        #plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, epoch))
 
     def latent(self, data):
         zss= super(MNIST_CLEVR, self).get_latent(data)

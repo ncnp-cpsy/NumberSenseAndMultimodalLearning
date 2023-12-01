@@ -17,7 +17,7 @@ from src.models.vae import VAE
 
 # Constants
 dataSize = torch.Size([1, 100, 160])
-imgChans = dataSize[0]
+img_chans = dataSize[0]
 fBase = 32  # base size of filter channels
 
 
@@ -29,7 +29,7 @@ class Enc(nn.Module):
         super(Enc, self).__init__()
         self.enc = nn.Sequential(
             # input size: 1 x 160 x 100
-            nn.Conv2d(imgChans, fBase, 4, 2, 1, bias=True),
+            nn.Conv2d(img_chans, fBase, 4, 2, 1, bias=True),
             nn.ReLU(True),
             # size: (fBase) x 80 x 50
             nn.Conv2d(fBase, fBase * 2, 4, 2, 1, bias=True),
@@ -76,7 +76,7 @@ class Dec(nn.Module):
             nn.ConvTranspose2d(fBase * 2, fBase, 4, 2, (1,0), bias=True),
             nn.ReLU(True),
             # size: (fBase) x 80 x 50
-            nn.ConvTranspose2d(fBase, imgChans, 4, 2, 1, bias=True),
+            nn.ConvTranspose2d(fBase, img_chans, 4, 2, 1, bias=True),
             nn.Sigmoid()
             # Output size: 3 x 160 x 100
         )
@@ -145,14 +145,14 @@ class CLEVR(VAE):
                           batch_size=batch_size, shuffle=shuffle, **kwargs) """
         return train, test
 
-    def generate(self, runPath, epoch):
+    def generate(self, run_path, epoch):
         N, K = 4, 4
         samples = super(CLEVR, self).generate(N, K).cpu()
         # wrangle things so they come out tiled
         samples = samples.view(K, N, *samples.size()[1:]).transpose(0, 1)
         s = [make_grid(t, nrow=int(sqrt(K)), padding=0) for t in samples]
         save_image(torch.stack(s),
-                   '{}/gen_samples_{:03d}.png'.format(runPath, epoch),
+                   '{}/gen_samples_{:03d}.png'.format(run_path, epoch),
                    nrow=int(sqrt(N)))
 
     def generate_special(self, mean):
@@ -170,13 +170,13 @@ class CLEVR(VAE):
         zss= super(CLEVR, self).get_latent(data)
         return zss
 
-    def reconstruct(self, data, runPath, epoch):
+    def reconstruct(self, data, run_path, epoch):
         recon = super(CLEVR, self).reconstruct(data[:24])
         comp = torch.cat([data[:24], recon]).data.cpu()
-        save_image(comp, '{}/recon_{:03d}.png'.format(runPath, epoch))
+        save_image(comp, '{}/recon_{:03d}.png'.format(run_path, epoch))
 
-    def analyse(self, data, runPath, epoch):
+    def analyse(self, data, run_path, epoch):
         zemb, zsl, kls_df = super(CLEVR, self).analyse(data, K=10)
         labels = ['Prior', self.modelName.lower()]
-        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(runPath, epoch))
-        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(runPath, epoch))
+        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
+        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, epoch))

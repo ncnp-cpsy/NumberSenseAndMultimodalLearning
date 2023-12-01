@@ -96,27 +96,27 @@ class VAE_MNIST(VAE):
                           batch_size=batch_size, shuffle=shuffle, **kwargs)
         return train, test
 
-    def generate(self, runPath, epoch):
+    def generate(self, run_path, epoch):
         N, K = 64, 9
         samples = super(VAE_MNIST, self).generate(N, K).cpu()
         # wrangle things so they come out tiled
         samples = samples.view(K, N, *samples.size()[1:]).transpose(0, 1)  # N x K x 1 x 28 x 28
         s = [make_grid(t, nrow=int(sqrt(K)), padding=0) for t in samples]
         save_image(torch.stack(s),
-                   '{}/gen_samples_{:03d}.png'.format(runPath, epoch),
+                   '{}/gen_samples_{:03d}.png'.format(run_path, epoch),
                    nrow=int(sqrt(N)))
 
     def latent(self, data):
         zss= super(VAE_MNIST, self).get_latent(data)
         return zss                   
 
-    def reconstruct(self, data, runPath, epoch, n = 8):
+    def reconstruct(self, data, run_path, epoch, n = 8):
         recon = super(VAE_MNIST, self).reconstruct(data[:n])
         comp = torch.cat([data[:n], recon]).data.cpu()
-        save_image(comp, '{}/recon_{:03d}.png'.format(runPath, epoch))
+        save_image(comp, '{}/recon_{:03d}.png'.format(run_path, epoch))
 
-    def analyse(self, data, runPath, epoch):
+    def analyse(self, data, run_path, epoch):
         zemb, zsl, kls_df = super(VAE_MNIST, self).analyse(data, K=10)
         labels = ['Prior', self.modelName.lower()]
-        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(runPath, epoch))
-        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(runPath, epoch))
+        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
+        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, epoch))

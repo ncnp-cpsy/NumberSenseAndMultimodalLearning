@@ -36,9 +36,9 @@ parser.add_argument('--save-dir', type=str, default=".",
 parser.add_argument('--no-cuda', action='store_true', default=True,
                     help='disables CUDA use')
 cmds = parser.parse_args()
-runPath = cmds.save_dir
-sys.stdout = Logger('{}/analyse.log'.format(runPath))
-args = torch.load(runPath + '/args.rar')
+run_path = cmds.save_dir
+sys.stdout = Logger('{}/analyse.log'.format(run_path))
+args = torch.load(run_path + '/args.rar')
 
 # cuda stuff
 needs_conversion = cmds.no_cuda and args.cuda
@@ -54,7 +54,7 @@ modelC = getattr(models, 'VAE_{}'.format(args.model))
 model = modelC(args)
 if args.cuda:
     model.cuda()
-model.load_state_dict(torch.load(runPath + '/model.rar', **conversion_kwargs), strict=False)
+model.load_state_dict(torch.load(run_path + '/model.rar', **conversion_kwargs), strict=False)
 train_loader, test_loader = model.getDataLoaders(batch_size, device=device)
 N = len(test_loader.dataset)
 
@@ -77,13 +77,13 @@ fn_to_emb = lambda data, emb=emb, weights=weights, u=u: \
 
 def calculate_corr(images, embeddings):
     global RESET
-    if not os.path.exists(runPath + '/images_mean.pt') or RESET:
+    if not os.path.exists(run_path + '/images_mean.pt') or RESET:
         generate_cca_projection()
         RESET = False
-    im_mean = torch.load(runPath + '/images_mean.pt')
-    emb_mean = torch.load(runPath + '/emb_mean.pt')
-    im_proj = torch.load(runPath + '/im_proj.pt')
-    emb_proj = torch.load(runPath + '/emb_proj.pt')
+    im_mean = torch.load(run_path + '/images_mean.pt')
+    emb_mean = torch.load(run_path + '/emb_mean.pt')
+    im_proj = torch.load(run_path + '/im_proj.pt')
+    emb_proj = torch.load(run_path + '/emb_proj.pt')
     with torch.no_grad():
         corr = F.cosine_similarity((images - im_mean) @ im_proj,
                                    (embeddings - emb_mean) @ emb_proj).mean()
@@ -95,10 +95,10 @@ def generate_cca_projection():
     emb = fn_to_emb(sentences.int())
     corr, (im_proj, emb_proj) = cca([images, emb], k=40)
     print("Largest eigen value from CCA: {:.3f}".format(corr[0]))
-    torch.save(images.mean(dim=0), runPath + '/images_mean.pt')
-    torch.save(emb.mean(dim=0), runPath + '/emb_mean.pt')
-    torch.save(im_proj, runPath + '/im_proj.pt')
-    torch.save(emb_proj, runPath + '/emb_proj.pt')
+    torch.save(images.mean(dim=0), run_path + '/images_mean.pt')
+    torch.save(emb.mean(dim=0), run_path + '/emb_mean.pt')
+    torch.save(im_proj, run_path + '/im_proj.pt')
+    torch.save(emb_proj, run_path + '/emb_proj.pt')
 
 
 def cross_coherence():

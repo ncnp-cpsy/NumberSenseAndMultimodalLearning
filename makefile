@@ -5,7 +5,7 @@ DATE := $(shell date +%Y%m%d-%H%M%S)
 all_loop:
 	make train_loop
 	make classify_loop
-	make analyze_loop
+	make analyse_loop
 	make synthesize
 
 .PHONY: train_loop
@@ -16,9 +16,9 @@ train_loop:
 classify_loop:
 	./src/runner/classify_loop.sh &> ./log/classify_loop_$(DATE).log
 
-.PHONY: analyze_loop
-analyze_loop:
-	./src/runner/analyze_loop.sh &> ./log/analyze_loop_$(DATE).log
+.PHONY: analyse_loop
+analyse_loop:
+	./src/runner/analyse_loop.sh &> ./log/analyse_loop_$(DATE).log
 
 .PHONY: synthesize
 synthesize:

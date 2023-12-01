@@ -85,7 +85,6 @@ def unpack_data(dataB, device='cuda', require_label = False, target = 0):
     # dataB :: (Tensor, Idx) | [(Tensor, Idx)]
     """ Unpacks the data batch object in an appropriate manner to extract data """
     if is_multidata(dataB):
-        
         if torch.is_tensor(dataB[0]):
             if torch.is_tensor(dataB[1]):
                 if require_label:

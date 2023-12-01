@@ -19,9 +19,9 @@ from src.models.vae import VAE
 
 
 # Constants
-dataSize = torch.Size([3, 32, 32])
-imgChans = dataSize[0]
-fBase = 32  # base size of filter channels
+data_size = torch.Size([3, 32, 32])
+img_chans = data_size[0]
+f_base = 32  # base size of filter channels
 
 
 # Classes
@@ -32,18 +32,18 @@ class Enc(nn.Module):
         super(Enc, self).__init__()
         self.enc = nn.Sequential(
             # input size: 3 x 32 x 32
-            nn.Conv2d(imgChans, fBase, 4, 2, 1, bias=True),
+            nn.Conv2d(img_chans, f_base, 4, 2, 1, bias=True),
             nn.ReLU(True),
-            # size: (fBase) x 16 x 16
-            nn.Conv2d(fBase, fBase * 2, 4, 2, 1, bias=True),
+            # size: (f_base) x 16 x 16
+            nn.Conv2d(f_base, f_base * 2, 4, 2, 1, bias=True),
             nn.ReLU(True),
-            # size: (fBase * 2) x 8 x 8
-            nn.Conv2d(fBase * 2, fBase * 4, 4, 2, 1, bias=True),
+            # size: (f_base * 2) x 8 x 8
+            nn.Conv2d(f_base * 2, f_base * 4, 4, 2, 1, bias=True),
             nn.ReLU(True),
-            # size: (fBase * 4) x 4 x 4
+            # size: (f_base * 4) x 4 x 4
         )
-        self.c1 = nn.Conv2d(fBase * 4, latent_dim, 4, 1, 0, bias=True)
-        self.c2 = nn.Conv2d(fBase * 4, latent_dim, 4, 1, 0, bias=True)
+        self.c1 = nn.Conv2d(f_base * 4, latent_dim, 4, 1, 0, bias=True)
+        self.c2 = nn.Conv2d(f_base * 4, latent_dim, 4, 1, 0, bias=True)
         # c1, c2 size: latent_dim x 1 x 1
 
     def forward(self, x):
@@ -58,16 +58,16 @@ class Dec(nn.Module):
     def __init__(self, latent_dim):
         super(Dec, self).__init__()
         self.dec = nn.Sequential(
-            nn.ConvTranspose2d(latent_dim, fBase * 4, 4, 1, 0, bias=True),
+            nn.ConvTranspose2d(latent_dim, f_base * 4, 4, 1, 0, bias=True),
             nn.ReLU(True),
-            # size: (fBase * 4) x 4 x 4
-            nn.ConvTranspose2d(fBase * 4, fBase * 2, 4, 2, 1, bias=True),
+            # size: (f_base * 4) x 4 x 4
+            nn.ConvTranspose2d(f_base * 4, f_base * 2, 4, 2, 1, bias=True),
             nn.ReLU(True),
-            # size: (fBase * 2) x 8 x 8
-            nn.ConvTranspose2d(fBase * 2, fBase, 4, 2, 1, bias=True),
+            # size: (f_base * 2) x 8 x 8
+            nn.ConvTranspose2d(f_base * 2, f_base, 4, 2, 1, bias=True),
             nn.ReLU(True),
-            # size: (fBase) x 16 x 16
-            nn.ConvTranspose2d(fBase, imgChans, 4, 2, 1, bias=True),
+            # size: (f_base) x 16 x 16
+            nn.ConvTranspose2d(f_base, img_chans, 4, 2, 1, bias=True),
             nn.Sigmoid()
             # Output size: 3 x 32 x 32
         )
@@ -99,7 +99,7 @@ class VAE_OSCN(VAE):
             nn.Parameter(torch.zeros(1, params.latent_dim), **grad)  # logvar
         ])
         self.modelName = 'oscn'
-        self.dataSize = dataSize
+        self.data_size = data_size
         self.llik_scaling = 1.
 
     @property
@@ -130,14 +130,14 @@ class VAE_OSCN(VAE):
                           batch_size=batch_size, shuffle=shuffle, **kwargs) """
         return train, test
 
-    def generate(self, runPath, epoch):
+    def generate(self, run_path, epoch):
         N, K = 64, 9
         samples = super(VAE_OSCN, self).generate(N, K).cpu()
         # wrangle things so they come out tiled
         samples = samples.view(K, N, *samples.size()[1:]).transpose(0, 1)
         s = [make_grid(t, nrow=int(sqrt(K)), padding=0) for t in samples]
         save_image(torch.stack(s),
-                   '{}/gen_samples_{:03d}.png'.format(runPath, epoch),
+                   '{}/gen_samples_{:03d}.png'.format(run_path, epoch),
                    nrow=int(sqrt(N)))
 
     def generate_special(self, mean, label):
@@ -149,20 +149,21 @@ class VAE_OSCN(VAE):
             samples = samples.view(N, *samples.size()[1:])
             save_image(
                 samples,
-                'addition_images/gen_special_samples_oscn_' + label + '.png',
+                # 'addition_images/gen_special_samples_oscn_' + label + '.png',
+                'gen_special_samples_oscn_' + label + '.png',
                 nrow=int(sqrt(N)))
 
     def latent(self, data):
         zss= super(VAE_OSCN, self).get_latent(data)
         return zss
 
-    def reconstruct(self, data, runPath, epoch):
+    def reconstruct(self, data, run_path, epoch, n=None):
         recon = super(VAE_OSCN, self).reconstruct(data[:24])
         comp = torch.cat([data[:24], recon]).data.cpu()
-        save_image(comp, '{}/recon_{:03d}.png'.format(runPath, epoch))
+        save_image(comp, '{}/recon_{:03d}.png'.format(run_path, epoch))
 
-    def analyse(self, data, runPath, epoch):
+    def analyse(self, data, run_path, epoch):
         zemb, zsl, kls_df = super(VAE_OSCN, self).analyse(data, K=10)
         labels = ['Prior', self.modelName.lower()]
-        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(runPath, epoch))
-        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(runPath, epoch))
+        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
+        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, epoch))

@@ -14,8 +14,8 @@ from src.vis import plot_embeddings, plot_kls_df
 from src.models.vae import VAE
 
 # Constants
-dataSize = torch.Size([3, 32, 32])
-imgChans = dataSize[0]
+data_size = torch.Size([3, 32, 32])
+img_chans = data_size[0]
 fBase = 32  # base size of filter channels
 
 
@@ -27,7 +27,7 @@ class Enc(nn.Module):
         super(Enc, self).__init__()
         self.enc = nn.Sequential(
             # input size: 3 x 32 x 32
-            nn.Conv2d(imgChans, fBase, 4, 2, 1, bias=True),
+            nn.Conv2d(img_chans, fBase, 4, 2, 1, bias=True),
             nn.ReLU(True),
             # size: (fBase) x 16 x 16
             nn.Conv2d(fBase, fBase * 2, 4, 2, 1, bias=True),
@@ -62,7 +62,7 @@ class Dec(nn.Module):
             nn.ConvTranspose2d(fBase * 2, fBase, 4, 2, 1, bias=True),
             nn.ReLU(True),
             # size: (fBase) x 16 x 16
-            nn.ConvTranspose2d(fBase, imgChans, 4, 2, 1, bias=True),
+            nn.ConvTranspose2d(fBase, img_chans, 4, 2, 1, bias=True),
             nn.Sigmoid()
             # Output size: 3 x 32 x 32
         )
@@ -93,7 +93,7 @@ class SVHN(VAE):
             nn.Parameter(torch.zeros(1, params.latent_dim), **grad)  # logvar
         ])
         self.modelName = 'svhn'
-        self.dataSize = dataSize
+        self.data_size = data_size
         self.llik_scaling = 1.
 
     @property
@@ -110,23 +110,23 @@ class SVHN(VAE):
                           batch_size=batch_size, shuffle=shuffle, **kwargs)
         return train, test
 
-    def generate(self, runPath, epoch):
+    def generate(self, run_path, epoch):
         N, K = 64, 9
         samples = super(SVHN, self).generate(N, K).cpu()
         # wrangle things so they come out tiled
         samples = samples.view(K, N, *samples.size()[1:]).transpose(0, 1)
         s = [make_grid(t, nrow=int(sqrt(K)), padding=0) for t in samples]
         save_image(torch.stack(s),
-                   '{}/gen_samples_{:03d}.png'.format(runPath, epoch),
+                   '{}/gen_samples_{:03d}.png'.format(run_path, epoch),
                    nrow=int(sqrt(N)))
 
-    def reconstruct(self, data, runPath, epoch):
+    def reconstruct(self, data, run_path, epoch):
         recon = super(SVHN, self).reconstruct(data[:8])
         comp = torch.cat([data[:8], recon]).data.cpu()
-        save_image(comp, '{}/recon_{:03d}.png'.format(runPath, epoch))
+        save_image(comp, '{}/recon_{:03d}.png'.format(run_path, epoch))
 
-    def analyse(self, data, runPath, epoch):
+    def analyse(self, data, run_path, epoch):
         zemb, zsl, kls_df = super(SVHN, self).analyse(data, K=10)
         labels = ['Prior', self.modelName.lower()]
-        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(runPath, epoch))
-        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(runPath, epoch))
+        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
+        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, epoch))

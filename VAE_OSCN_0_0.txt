@@ -1,0 +1,299 @@
+Arguments (initial):
+ Namespace(K=20, batch_size=256, epochs=10, experiment='', latent_dim=20, learn_prior=False, llik_scaling=0.0, logp=False, looser=False, model='VAE_OSCN', no_analytics=False, no_cuda=False, num_hidden_layers=1, obj='elbo', output_dir='./rslt/test/VAE_OSCN/analyse/', pre_trained='./rslt/test/VAE_OSCN/2023-12-01T14:52:04.918500cieaxeki', print_freq=0, run_type='analyse', seed=1, use_conditional=False)
+args are updated using pretrained_path:
+ Namespace(K=30, batch_size=128, cuda=True, device='cuda', epochs=10, experiment='test/VAE_OSCN', latent_dim=20, learn_prior=True, llik_scaling=0.0, logp=False, looser=False, model='VAE_OSCN', no_analytics=False, no_cuda=False, num_hidden_layers=1, obj='elbo', output_dir='final_latent_images_test/', pre_trained='', pretrained_path='', print_freq=0, run_type='train', seed=4, target_modality=0, target_property=1, use_conditional=False)
+Expt: rslt/test/VAE_OSCN/2023-12-01T17:31:14.945014iwx2l8yg
+RunID: 2023-12-01T17:31:14.945014
+Arguments (after settings):
+ Namespace(K=30, batch_size=128, cuda=True, device='cuda', epochs=10, experiment='test/VAE_OSCN', latent_dim=20, learn_prior=True, llik_scaling=0.0, logp=False, looser=False, model='VAE_OSCN', no_analytics=False, no_cuda=False, num_hidden_layers=1, obj='elbo', output_dir='final_latent_images_test/', pre_trained='', pretrained_path='', print_freq=0, run_type='train', seed=4, target_modality=0, target_property=1, use_conditional=False)
+Model runner was initialized.
+objectives:  elbo 
+t_objectives:  iwae
+Model runner was initialized.
+Loading model Classifier_OSCN from ./rslt/test/Classifier_OSCN/2023-12-01T15:42:21.987845yxi7qjfw
+objectives:  cross 
+t_objectives:  cross
+
+
+ ==============
+ START ANALYSIS
+ ==============
+
+Namespace(K=30, batch_size=128, cuda=True, device='cuda', epochs=10, experiment='test/VAE_OSCN', latent_dim=20, learn_prior=True, llik_scaling=0.0, logp=False, looser=False, model='VAE_OSCN', no_analytics=False, no_cuda=False, num_hidden_layers=1, obj='elbo', output_dir='final_latent_images_test/', pre_trained='', pretrained_path='', print_freq=0, run_type='train', seed=4, target_modality=0, target_property=1, use_conditional=False)
+
+===
+Data and label info... 
+type(label): <class 'tuple'> 
+label: ('g1s', 'g2s', 'g3t', 'r7s', 'g1j', 'r3t', 'w1s', 'r8t', 'r9s', 'r7t', 'r5s', 'b7t', 'w7j', 'r3j', 'g3s', 'r7t', 'w2s', 'w5t', 'r4s', 'g6j', 'w2s', 'w8t', 'g8s', 'b6t', 'w9s', 'b7s', 'w4t', 'b8t', 'g9s', 'b3t', 'b2s', 'b6s', 'r6t', 'r6t', 'w4j', 'w6j', 'r8t', 'g9j', 'r6s', 'w6s', 'r5s', 'g4t', 'g7j', 'w2t', 'r7j', 'b1j', 'b3t', 'g3t', 'g1t', 'b1t', 'b1t', 'r2s', 'r4j', 'g5t', 'w2t', 'b9t', 'w8j', 'g1s', 'g1j', 'w8s', 'r2j', 'b6j', 'g2s', 'w4t', 'g8s', 'b8j', 'b3t', 'g8s', 'g3j', 'g8s', 'r7t', 'r6j', 'g3s', 'r8s', 'g9t', 'w6t', 'g2t', 'b2t', 'w8j', 'g3t', 'r8j', 'r9j', 'r1j', 'w1s', 'b3s', 'r2t', 'w7t', 'r9s', 'r5j', 'g9t', 'b3t', 'r8t', 'w1j', 'b5j', 'r1j', 'b2t', 'g8t', 'b7t', 'w8t', 'b4t', 'b4t', 'g9s', 'w3t', 'b1s', 'g9j', 'b5j', 'b3t', 'w3s', 'b1t', 'r8j', 'b3j', 'b6t', 'b9j', 'g2s', 'w9s', 'w2s', 'b8j', 'r2j', 'b3t', 'b3t', 'b3t', 'r8t', 'w9t', 'r3s', 'r7s', 'w1t', 'g6j', 'w1j') 
+label[0]: g1s 
+label[1]: g2s 
+type(data): <class 'torch.Tensor'> 
+data[0]: tensor([[[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]],
+
+        [[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]],
+
+        [[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]]], device='cuda:0') 
+data[0].shape: torch.Size([3, 32, 32])
+
+===
+Setting info... 
+Target modality: 0 
+Target property: 0 
+Output directory: final_latent_images_test/ 
+Number of category 4 
+Shape of latent_all: (2048, 20) 
+Shape of label_all:  (2048,) 
+Set of label_all:  {0, 1, 2, 3} 
+Start index: 0 
+End index: 4 
+withzero: False
+Plot reconstruction of index: 0
+Silhouette values: [-0.06193445 -0.0720141  -0.01559873 ... -0.01212451  0.06870168
+ -0.0355163 ]
+Average of silhouette coef: -0.0071893698
+  0   1   2   3
+0 0.0 0.0 0.0 0.0 
+1 0.0 0.0 0.0 0.0 
+2 0.0 0.0 0.0 0.0 
+3 0.0 0.0 0.0 0.0 
+correlation [[1.        0.1353958]
+ [0.1353958 1.       ]]
+[[], [], [], []] [2 2 2 ... 3 1 0] [[  9.0954485  -8.099722 ]
+ [  8.08024   -14.375005 ]
+ [ 61.386158   -6.4737606]
+ ...
+ [ 17.765232    8.725694 ]
+ [ 11.41447    -4.408151 ]
+ [ 12.871979   76.864525 ]]
+saved final_latent_images_test//latent__0_0.svg
+{'reconst_avg': None, 'reconst_all': None, 'cluster_avg': -0.0071893698, 'cluster_all': array([-0.06193445, -0.0720141 , -0.01559873, ..., -0.01212451,
+        0.06870168, -0.0355163 ], dtype=float32), 'magnitude_avg': 1.0, 'magnitude_all': 1.0, 'tsne-2d_avg': None, 'tsne-2d_all': None}
+
+
+ ==============
+ START ANALYSIS
+ ==============
+
+Namespace(K=30, batch_size=128, cuda=True, device='cuda', epochs=10, experiment='test/VAE_OSCN', latent_dim=20, learn_prior=True, llik_scaling=0.0, logp=False, looser=False, model='VAE_OSCN', no_analytics=False, no_cuda=False, num_hidden_layers=1, obj='elbo', output_dir='final_latent_images_test/', pre_trained='', pretrained_path='', print_freq=0, run_type='train', seed=4, target_modality=0, target_property=1, use_conditional=False)
+
+===
+Data and label info... 
+type(label): <class 'tuple'> 
+label: ('w1s', 'g1s', 'r8t', 'w8s', 'b4s', 'b7t', 'r9s', 'w7s', 'w6s', 'r7j', 'w8s', 'r4t', 'b6j', 'w2s', 'w6t', 'r9t', 'g3t', 'r9t', 'r1s', 'g5t', 'g7j', 'r3t', 'w3j', 'w3j', 'r9s', 'w6j', 'w6s', 'w3s', 'g2j', 'g7j', 'w2s', 'g2s', 'r3s', 'w1t', 'g1s', 'w3j', 'r9t', 'r1t', 'b6s', 'b6t', 'w9s', 'g7s', 'b4t', 'g3s', 'w6t', 'w2j', 'w6t', 'r9s', 'w1j', 'w7s', 'w3s', 'b4j', 'w2s', 'g1s', 'r4s', 'b7t', 'r7t', 'b4t', 'r6s', 'w7j', 'g4j', 'r3t', 'g6s', 'r5s', 'b1j', 'b6j', 'r7t', 'w3s', 'b7j', 'r2s', 'b9s', 'w8j', 'g1t', 'r1s', 'g5s', 'g3t', 'b7t', 'r8s', 'g2t', 'r1j', 'g7s', 'w9j', 'g2j', 'b9j', 'r4s', 'r4j', 'r5j', 'b7t', 'r7s', 'g1t', 'b1j', 'w9j', 'r9j', 'r3s', 'g9s', 'w4s', 'b2t', 'r6t', 'g6t', 'w2t', 'b7j', 'w8s', 'r4t', 'r3j', 'r7t', 'g7s', 'r2j', 'g7s', 'b2j', 'b4j', 'b1s', 'g3j', 'g8t', 'g3j', 'g4t', 'r2t', 'g1j', 'w4t', 'r8s', 'w5t', 'g6t', 'w5s', 'g8s', 'r4s', 'b8t', 'r6t', 'r8j', 'b8j') 
+label[0]: w1s 
+label[1]: g1s 
+type(data): <class 'torch.Tensor'> 
+data[0]: tensor([[[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 1.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]],
+
+        [[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 1.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]],
+
+        [[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 1.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]]], device='cuda:0') 
+data[0].shape: torch.Size([3, 32, 32])
+
+===
+Setting info... 
+Target modality: 0 
+Target property: 1 
+Output directory: final_latent_images_test/ 
+Number of category 10 
+Shape of latent_all: (2048, 20) 
+Shape of label_all:  (2048,) 
+Set of label_all:  {1, 2, 3, 4, 5, 6, 7, 8, 9} 
+Start index: 1 
+End index: 10 
+withzero: False
+Plot reconstruction of index: 0
+Silhouette values: [ 0.09349869  0.14602815 -0.09506038 ... -0.06475257 -0.07248849
+ -0.12218653]
+Average of silhouette coef: -0.111399405
+  1   2   3   4   5   6   7   8   9
+1 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+2 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+3 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+4 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+6 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+7 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+8 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+9 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
+correlation [[1.        0.9863217]
+ [0.9863217 1.       ]]
+[[], [], [], [], [], [], [], [], [], []] [1 1 8 ... 2 9 2] [[-21.137539  -4.471644]
+ [-13.655679  20.809467]
+ [  9.971873 -58.32975 ]
+ ...
+ [  8.681413  26.283834]
+ [ 15.451473 -61.42274 ]
+ [ 29.19197  -34.63943 ]]
+saved final_latent_images_test//latent__0_1.svg
+shape (20,)
+shape (20,)
+shape (20,)
+shape (20,)
+shape (20,)
+shape (20,)
+shape (20,)
+shape (20,)
+shape (20,)
+-0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0  0.0 
+-0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0  0.0 
+-0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0  0.0 
+-0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0  0.0 
+-0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0  0.0 -0.0  0.0  0.0 
+-0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0  0.0 -0.0  0.0  0.0 
+ 0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0 
+ 0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0  0.0  0.0  0.0  0.0 
+ 0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0  0.0  0.0  0.0  0.0 
+<class 'numpy.ndarray'>
+1 0.0074505056
+<class 'numpy.ndarray'>
+2 0.005638339
+<class 'numpy.ndarray'>
+3 0.00509023
+<class 'numpy.ndarray'>
+4 0.0075719613
+<class 'numpy.ndarray'>
+5 0.010984439
+<class 'numpy.ndarray'>
+6 0.014203797
+<class 'numpy.ndarray'>
+7 0.01745956
+<class 'numpy.ndarray'>
+8 0.01942943
+<class 'numpy.ndarray'>
+9 0.025249705
+3 2
+<class 'numpy.ndarray'>
+1 0.02687721
+<class 'numpy.ndarray'>
+2 0.023235386
+<class 'numpy.ndarray'>
+3 0.019005626
+<class 'numpy.ndarray'>
+4 0.015497094
+<class 'numpy.ndarray'>
+5 0.010568064
+<class 'numpy.ndarray'>
+6 0.007484468
+<class 'numpy.ndarray'>
+7 0.0038397557
+<class 'numpy.ndarray'>
+8 0.0029914018
+<class 'numpy.ndarray'>
+9 0.0071409703
+8 8
+<class 'numpy.ndarray'>
+1 0.021094646
+<class 'numpy.ndarray'>
+2 0.01762516
+<class 'numpy.ndarray'>
+3 0.0131239295
+<class 'numpy.ndarray'>
+4 0.010162968
+<class 'numpy.ndarray'>
+5 0.004746874
+<class 'numpy.ndarray'>
+6 0.0037916098
+<class 'numpy.ndarray'>
+7 0.00393332
+<class 'numpy.ndarray'>
+8 0.0056246067
+<class 'numpy.ndarray'>
+9 0.011526506
+6 6
+<class 'numpy.ndarray'>
+1 0.013978291
+<class 'numpy.ndarray'>
+2 0.010677749
+<class 'numpy.ndarray'>
+3 0.006954478
+<class 'numpy.ndarray'>
+4 0.004958211
+<class 'numpy.ndarray'>
+5 0.004077518
+<class 'numpy.ndarray'>
+6 0.00658038
+<class 'numpy.ndarray'>
+7 0.009915239
+<class 'numpy.ndarray'>
+8 0.011647879
+<class 'numpy.ndarray'>
+9 0.018028634
+5 5
+{'reconst_avg': None, 'reconst_all': None, 'cluster_avg': -0.111399405, 'cluster_all': array([ 0.09349869,  0.14602815, -0.09506038, ..., -0.06475257,
+       -0.07248849, -0.12218653], dtype=float32), 'magnitude_avg': 1.0, 'magnitude_all': 1.0, 'tsne-2d_avg': None, 'tsne-2d_all': None, 'mathematics_avg': None, 'mathematics_all': None}
+
+
+ ==============
+ START ANALYSIS
+ ==============
+
+Namespace(K=30, batch_size=128, cuda=True, device='cuda', epochs=10, experiment='test/VAE_OSCN', latent_dim=20, learn_prior=True, llik_scaling=0.0, logp=False, looser=False, model='VAE_OSCN', no_analytics=False, no_cuda=False, num_hidden_layers=1, obj='elbo', output_dir='final_latent_images_test/', pre_trained='', pretrained_path='', print_freq=0, run_type='train', seed=4, target_modality=0, target_property=1, use_conditional=False)
+
+===
+Data and label info... 
+type(label): <class 'tuple'> 
+label: ('w8j', 'w8j', 'g2s', 'w1j', 'b5t', 'b7s', 'b7j', 'r9s', 'b5t', 'b1s', 'g4s', 'g8j', 'w1s', 'b3t', 'r5t', 'g3s', 'w5t', 'r5s', 'b4s', 'r1t', 'w2t', 'g4j', 'b4s', 'w6t', 'b4s', 'b8j', 'w2s', 'b2t', 'w2s', 'w1s', 'b1j', 'r5s', 'w1s', 'g3t', 'r1j', 'b1t', 'b1j', 'b2j', 'g9j', 'g9j', 'r5s', 'r4t', 'b2j', 'w8t', 'r8s', 'g1j', 'r4j', 'b5t', 'r3t', 'r6s', 'b5t', 'g9t', 'w2t', 'b8t', 'g4t', 'r7s', 'w2t', 'b1t', 'g7s', 'w3t', 'r5s', 'b6t', 'w5s', 'w3s', 'g1s', 'b7s', 'r2t', 'g4j', 'w3t', 'g7s', 'b5t', 'g3j', 'w2t', 'b8j', 'r4t', 'g9t', 'r7t', 'b3s', 'b1t', 'b2s', 'w4t', 'r9s', 'b3s', 'r6j', 'g6t', 'b8t', 'w6s', 'r9j', 'g3s', 'g3s', 'b5s', 'w9s', 'w6s', 'b2s', 'g8j', 'w4j', 'w3s', 'r3j', 'w1t', 'r4t', 'w3j', 'r1s', 'b6j', 'w8j', 'r7j', 'w5t', 'r6j', 'g8j', 'r5t', 'g5j', 'g6j', 'w7j', 'r6t', 'w2j', 'b3t', 'w8s', 'r5j', 'w9j', 'w1j', 'r9s', 'g8j', 'w6j', 'w1t', 'b2t', 'g5t', 'g8t', 'g6t', 'w8t') 
+label[0]: w8j 
+label[1]: w8j 
+type(data): <class 'torch.Tensor'> 
+data[0]: tensor([[[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]],
+
+        [[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]],
+
+        [[0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         ...,
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.],
+         [0., 0., 0.,  ..., 0., 0., 0.]]], device='cuda:0') 
+data[0].shape: torch.Size([3, 32, 32])

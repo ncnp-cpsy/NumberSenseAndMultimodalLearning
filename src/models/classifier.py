@@ -11,10 +11,19 @@ class Classifier(nn.Module):
     def __init__(self, params):
         super().__init__()
 
+    @staticmethod
+    def getDataLoaders():
+        raise NotImplementedError()
+
     def forward(self):
         raise NotImplementedError()
 
-    def reconstruct(self, data, runPath, epoch):
+    def generate(self, run_path, epoch):
+        """Predictions of class labels
+        """
+        pass
+
+    def reconstruct(self, data, run_path, epoch):
         """Predictions of class labels
         """
         self.eval()
@@ -22,14 +31,5 @@ class Classifier(nn.Module):
             pred = self(data)
         return pred
 
-    def generate(self, runPath, epoch):
-        """Predictions of class labels
-        """
+    def analyse(self, data, run_path, epoch):
         pass
-
-    def analyze(self, data, runPath, epoch):
-        pass
-
-    @staticmethod
-    def getDataLoaders():
-        raise NotImplementedError()

@@ -36,7 +36,7 @@ class CUB_Image_Sentence(MMVAE):
             nn.Parameter(torch.zeros(1, params.latent_dim), requires_grad=False),  # mu
             nn.Parameter(torch.zeros(1, params.latent_dim), **grad)  # logvar
         ])
-        self.vaes[0].llik_scaling = self.vaes[1].maxSentLen / prod(self.vaes[0].dataSize) \
+        self.vaes[0].llik_scaling = self.vaes[1].maxSentLen / prod(self.vaes[0].data_size) \
             if params.llik_scaling == 0 else params.llik_scaling
 
         for vae in self.vaes:
@@ -64,7 +64,7 @@ class CUB_Image_Sentence(MMVAE):
             s2.dataset]), batch_size=batch_size, shuffle=shuffle, **kwargs)
         return train_loader, test_loader
 
-    def generate(self, runPath, epoch):
+    def generate(self, run_path, epoch):
         N = 8
         samples = super(CUB_Image_Sentence, self).generate(N)
         images, captions = [sample.data.cpu() for sample in samples]
@@ -73,10 +73,10 @@ class CUB_Image_Sentence(MMVAE):
         for i, (image, caption) in enumerate(zip(images, captions)):
             fig = self._imshow(image, caption, i, fig, N)
 
-        plt.savefig('{}/gen_samples_{:03d}.png'.format(runPath, epoch))
+        plt.savefig('{}/gen_samples_{:03d}.png'.format(run_path, epoch))
         plt.close()
 
-    def reconstruct(self, raw_data, runPath, epoch):
+    def reconstruct(self, raw_data, run_path, epoch):
         N = 8
         recons_mat = super(CUB_Image_Sentence, self).reconstruct([d[:N] for d in raw_data])
         fns = [lambda images: images.data.cpu(), lambda sentences: self._sent_preprocess(sentences)]
@@ -89,23 +89,23 @@ class CUB_Image_Sentence(MMVAE):
                     for i, (_data, _recon) in enumerate(zip(data, recon)):
                         image, caption = (_data, _recon) if r == 0 else (_recon, _data)
                         fig = self._imshow(image, caption, i, fig, N)
-                    plt.savefig('{}/recon_{}x{}_{:03d}.png'.format(runPath, r, o, epoch))
+                    plt.savefig('{}/recon_{}x{}_{:03d}.png'.format(run_path, r, o, epoch))
                     plt.close()
                 else:
                     if r == 0:
                         comp = torch.cat([data, recon])
-                        save_image(comp, '{}/recon_{}x{}_{:03d}.png'.format(runPath, r, o, epoch))
+                        save_image(comp, '{}/recon_{}x{}_{:03d}.png'.format(run_path, r, o, epoch))
                     else:
-                        with open('{}/recon_{}x{}_{:03d}.txt'.format(runPath, r, o, epoch), "w+") as txt_file:
+                        with open('{}/recon_{}x{}_{:03d}.txt'.format(run_path, r, o, epoch), "w+") as txt_file:
                             for r_sent, d_sent in zip(recon, data):
                                 txt_file.write('[DATA]  ==> {}\n'.format(' '.join(self.i2w[str(i)] for i in d_sent)))
                                 txt_file.write('[RECON] ==> {}\n\n'.format(' '.join(self.i2w[str(i)] for i in r_sent)))
 
-    def analyse(self, data, runPath, epoch):
+    def analyse(self, data, run_path, epoch):
         zemb, zsl, kls_df = super(CUB_Image_Sentence, self).analyse(data, K=10)
         labels = ['Prior', *[vae.modelName.lower() for vae in self.vaes]]
-        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(runPath, epoch))
-        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(runPath, epoch))
+        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
+        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, epoch))
 
     def _sent_preprocess(self, sentences):
         """make sure raw data is always passed as dim=2 to avoid argmax.
