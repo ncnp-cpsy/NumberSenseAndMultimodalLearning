@@ -119,11 +119,13 @@ class SVHN(VAE):
         save_image(torch.stack(s),
                    '{}/gen_samples_{:03d}.png'.format(run_path, epoch),
                    nrow=int(sqrt(N)))
+        return samples
 
     def reconstruct(self, data, run_path, epoch):
         recon = super(SVHN, self).reconstruct(data[:8])
         comp = torch.cat([data[:8], recon]).data.cpu()
         save_image(comp, '{}/recon_{:03d}.png'.format(run_path, epoch))
+        return recon
 
     def analyse(self, data, run_path, epoch):
         zemb, zsl, kls_df = super(SVHN, self).analyse(data, K=10)

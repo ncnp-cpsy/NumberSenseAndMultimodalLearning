@@ -74,7 +74,7 @@ class MMVAE_CMNIST_OSCN(MMVAE):
                        '{}/gen_samples_{}_{:03d}.png'.format(run_path, i, epoch),
                        nrow=int(sqrt(N)))
 
-    def generate_special(self, mean, target_modality, label):
+    def generate_special(self, mean, target_modality, label, run_path):
         N = 64
         samples_list = super(MMVAE_CMNIST_OSCN, self).generate_special(N, mean)
         for i, samples in enumerate(samples_list):
@@ -82,8 +82,9 @@ class MMVAE_CMNIST_OSCN(MMVAE):
             # wrangle things so they come out tiled
             samples = samples.view(N, *samples.size()[1:])
             if i == target_modality:
-                save_image(samples,
-                        'addition_images/gen_special_samples_cmnist-oscn_{}'.format(i) + "_" + label + '.png',
+                save_image(
+                    samples,
+                    '{}/gen_special_samples_cmnist-oscn_{}'.format(run_path, i) + "_" + label + '.png',
                         nrow=int(sqrt(N)))
 
     def reconstruct(self, data, run_path, epoch, n = 8):

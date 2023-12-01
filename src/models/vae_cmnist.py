@@ -134,23 +134,28 @@ class VAE_CMNIST(VAE):
         save_image(torch.stack(s),
                    '{}/gen_samples_{:03d}.png'.format(run_path, epoch),
                    nrow=int(sqrt(N)))
+        return samples
 
-    def generate_special(self, mean, label):
-        N = 64
+    def generate_special(self, mean, run_path, label='', N=64):
         samples_list = super(VAE_CMNIST, self).generate_special(N, mean)
         for i, samples in enumerate(samples_list):
             samples = samples.data.cpu()
             # wrangle things so they come out tiled
             samples = samples.view(N, *samples.size()[1:])
-            save_image(samples,
-                       # 'addition_images/gen_special_samples_cmnist_{}'.format(i) + "_" + label + '.png',
-                       'gen_special_samples_cmnist_{}'.format(i) + "_" + label + '.png',
-                       nrow=int(sqrt(N)))
+            save_image(
+                samples,
+                # 'addition_images/gen_special_samples_cmnist_{}'.format(i) + "_" + label + '.png',
+                '{}/gen_special_samples_cmnist_{}'.format(run_path, i) + "_" + label + '.png',
+                nrow=int(sqrt(N)))
+        return samples
 
-    def reconstruct(self, data, run_path, epoch, n=8):
-        recon = super(VAE_CMNIST, self).reconstruct(data[:n])
-        comp = torch.cat([data[:8], recon]).data.cpu()
+    def reconstruct(self, data, run_path, epoch, N=None):
+        if N is not None:
+            data = data[:N]
+        recon = super(VAE_CMNIST, self).reconstruct(data)
+        comp = torch.cat([data, recon]).data.cpu()
         save_image(comp, '{}/recon_{:03d}.png'.format(run_path, epoch))
+        return recon
 
     def latent(self, data):
         zss= super(VAE_CMNIST, self).get_latent(data)

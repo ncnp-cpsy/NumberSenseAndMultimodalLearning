@@ -94,34 +94,36 @@ def main(run_type, args):
     # load args from disk if pretrained model path is given
     args.pretrained_path = ""
     if args.pre_trained:
+        # temporary
+        args_tmp_output_dir = args.output_dir
         args.pretrained_path = args.pre_trained
+        # load
         args = torch.load(args.pre_trained + '/args.rar')
+        args.output_dir = args_tmp_output_dir
         print("args are updated using pretrained_path:\n", args)
 
     args.cuda = not args.no_cuda and torch.cuda.is_available()
     # args.device = torch.device("cuda" if args.cuda else "cpu")
     args.device = "cuda" if args.cuda else "cpu"
 
-    if not args.experiment:
-        # args.experiment = model.modelName
-        args.experiment = args.model
-
-    # set up run path
+    # set up directories
     run_id = datetime.datetime.now().isoformat()
+    run_path = None
+    if not args.experiment:
+        args.experiment = args.model
     experiment_dir = Path('./rslt/' + args.experiment)
-    experiment_dir.mkdir(parents=True, exist_ok=True)
-    run_path = mkdtemp(prefix=run_id, dir=str(experiment_dir))
-    sys.stdout = Logger('{}/run.log'.format(run_path))
+    if args.pre_trained:
+        experiment_dir.mkdir(parents=True, exist_ok=True)
+        run_path = mkdtemp(prefix=run_id, dir=str(experiment_dir))
+        sys.stdout = Logger('{}/run.log'.format(run_path))
+        with open('{}/args.json'.format(run_path), 'w') as fp:
+            json.dump(args.__dict__, fp)
+        torch.save(args, '{}/args.rar'.format(run_path))
 
     # log
     print('Expt:', run_path)
     print('RunID:', run_id)
     print('Arguments (after settings):\n', args)
-
-    # save args to run
-    with open('{}/args.json'.format(run_path), 'w') as fp:
-        json.dump(args.__dict__, fp)
-    torch.save(args, '{}/args.rar'.format(run_path))
 
     # main
     if run_type == 'train':
@@ -139,11 +141,11 @@ def main(run_type, args):
         run_train(args=args_classifier, run_path=run_path)
 
     elif run_type == 'analyse':
-        analyse(args=args,
-                args_classifier_cmnist=config_classifier_cmnist,
-                args_classifier_oscn=config_classifier_oscn,
-                run_path='./',
-                )
+        analyse(
+            args=args,
+            args_classifier_cmnist=config_classifier_cmnist,
+            args_classifier_oscn=config_classifier_oscn,
+        )
     elif run_type == 'synthesize':
         synthesize()
     else:

@@ -23,7 +23,7 @@ class Classifier(nn.Module):
         """
         pass
 
-    def reconstruct(self, data, run_path, epoch):
+    def reconstruct(self, data, run_path=None, epoch=None):
         """Predictions of class labels
         """
         self.eval()

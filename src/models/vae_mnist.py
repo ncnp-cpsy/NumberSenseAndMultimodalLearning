@@ -105,6 +105,7 @@ class VAE_MNIST(VAE):
         save_image(torch.stack(s),
                    '{}/gen_samples_{:03d}.png'.format(run_path, epoch),
                    nrow=int(sqrt(N)))
+        return samples
 
     def latent(self, data):
         zss= super(VAE_MNIST, self).get_latent(data)
@@ -114,6 +115,7 @@ class VAE_MNIST(VAE):
         recon = super(VAE_MNIST, self).reconstruct(data[:n])
         comp = torch.cat([data[:n], recon]).data.cpu()
         save_image(comp, '{}/recon_{:03d}.png'.format(run_path, epoch))
+        return recon
 
     def analyse(self, data, run_path, epoch):
         zemb, zsl, kls_df = super(VAE_MNIST, self).analyse(data, K=10)

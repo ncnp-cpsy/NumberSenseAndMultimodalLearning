@@ -139,9 +139,9 @@ class VAE_OSCN(VAE):
         save_image(torch.stack(s),
                    '{}/gen_samples_{:03d}.png'.format(run_path, epoch),
                    nrow=int(sqrt(N)))
+        return samples
 
-    def generate_special(self, mean, label):
-        N = 64
+    def generate_special(self, mean, label, run_path, N=64):
         samples_list = super(VAE_OSCN, self).generate_special(N, mean)
         for i, samples in enumerate(samples_list):
             samples = samples.data.cpu()
@@ -150,20 +150,26 @@ class VAE_OSCN(VAE):
             save_image(
                 samples,
                 # 'addition_images/gen_special_samples_oscn_' + label + '.png',
-                'gen_special_samples_oscn_' + label + '.png',
+                '{}/gen_special_samples_oscn_'.format(run_path) + label + '.png',
                 nrow=int(sqrt(N)))
+        return samples
 
     def latent(self, data):
         zss= super(VAE_OSCN, self).get_latent(data)
         return zss
 
-    def reconstruct(self, data, run_path, epoch, n=None):
-        recon = super(VAE_OSCN, self).reconstruct(data[:24])
-        comp = torch.cat([data[:24], recon]).data.cpu()
+    def reconstruct(self, data, run_path, epoch, N=None):
+        if N is not None:
+            data = data[:N]
+        recon = super(VAE_OSCN, self).reconstruct(data)
+        comp = torch.cat([data, recon]).data.cpu()
         save_image(comp, '{}/recon_{:03d}.png'.format(run_path, epoch))
+        return recon
 
     def analyse(self, data, run_path, epoch):
         zemb, zsl, kls_df = super(VAE_OSCN, self).analyse(data, K=10)
         labels = ['Prior', self.modelName.lower()]
-        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
+        plot_embeddings(
+            zemb, zsl, labels,
+            '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
         plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, epoch))

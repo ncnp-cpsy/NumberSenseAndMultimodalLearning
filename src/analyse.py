@@ -1,9 +1,15 @@
+from pathlib import Path
+
 import numpy as np
 import torch
 from torch import optim
-from mpl_toolkits.mplot3d import Axes3D
 from sklearn.manifold import TSNE
-from sklearn.metrics import silhouette_samples
+from sklearn.metrics import (
+    confusion_matrix,
+    ConfusionMatrixDisplay,
+    silhouette_samples,
+)
+from mpl_toolkits.mplot3d import Axes3D
 from PIL import Image
 import matplotlib
 import matplotlib.pyplot as plt
@@ -37,25 +43,81 @@ def analyse_reconst(runner,
     runner.model.eval()
     with torch.no_grad():
         for i, dataT in enumerate(runner.test_loader):
-            data = unpack_data(dataT, device=runner.args.device)
+            data, label = unpack_data(
+                dataT,
+                device=runner.args.device,
+                require_label=True,
+            )
+            print(data.shape, len(label))
             loss = - runner.t_objective(runner.model, data, K=runner.args.K)
             if i == 0:
-                runner.model.reconstruct(
+                recon = runner.model.reconstruct(
                     data=data,
                     run_path=output_dir,
                     epoch=999,
-                    n=64,
                 )
-                runner.model.generate(
+                generation = runner.model.generate(
                     run_path=output_dir,
                     epoch=999,
                 )
+                r = count_reconst(
+                    recon=recon,
+                    true_label=convert_label_to_int(
+                        label=label,
+                        model_name=runner.model_name,
+                        target_property=1,
+                        data=data,
+                    ),
+                    classifier=classifier,
+                    output_dir=output_dir
+                )
                 print('Plot reconstruction of index:', i)
                 break
+
     return {
         'reconst_avg': None,
         'reconst_all': None,
     }
+
+def count_reconst(recon,
+                  true_label,
+                  classifier,
+                  output_dir,
+                  ):
+    def accuracy(pred, tar):
+        print('pred:', pred, '\t\ttar:', tar)
+        return torch.sum(pred == tar)
+    set_label = list(set(true_label.cpu().numpy()))
+
+    print(recon.shape, 'set_label', set_label)
+    pred_label = classifier.predict(recon)
+    pred_label = torch.argmax(pred_label, dim=1).cpu()
+    true_label = true_label.cpu()
+
+    # all category
+    acc_all = accuracy(
+        pred=pred_label,
+        tar=true_label,
+    )
+    print('Accuracy:', acc_all)
+
+    # each cateogry
+    conf_mat = confusion_matrix(
+        y_true=true_label,
+        y_pred=pred_label,
+        labels=set_label,
+    )
+    print('Accuracy:', conf_mat)
+
+    # Plot matrix
+    disp = ConfusionMatrixDisplay(
+        confusion_matrix=conf_mat,
+        display_labels=set_label,
+    )
+    # disp.plot()
+    # plt.show()
+
+    return acc_all, conf_mat
 
 def analyse_cross(runner,
                   classifier,
@@ -166,7 +228,7 @@ def analyse_magnitude(runner,
     dist_flat = np.array(dist_flat)
 
     coef = np.corrcoef([dist_cor1, dist_cor2])
-    correlation = coef[0, 0]
+    correlation = coef[0, 1]
     print('correlation', coef)
 
     plt.scatter(dist_cor1, dist_cor2)
@@ -299,38 +361,42 @@ def analyse_mathematics(runner,
     # base[8] = (mean_all[0] + mean_all[7] - mean_all[4])[8]
     # model.generate_special( base  )
 
-    # if False :
     if True:
-        # TODO: fix try to if
-        try:
+        if 'MMVAE' in runner.model_name:
             runner.model.generate_special(
-                mean_all[1] + mean_all[9] - mean_all[8],
+                mean=mean_all[1] + mean_all[9] - mean_all[8],
+                target_modality=target_modality,
+                run_path=output_dir,
+                label="1+9-8",
+            )
+            runner.model.generate_special(
+                mean=mean_all[2] + mean_all[7] - mean_all[1],
                 target_modality = target_modality,
-                label = "1+9-8")
-        except:
+                run_path=output_dir,
+                label="2+7-1",
+            )
             runner.model.generate_special(
-                mean = mean_all[1] + mean_all[9] - mean_all[8],
-                label = "1+9-8" )
-        try:
-            runner.model.generate_special(
-                mean_all[2] + mean_all[7] - mean_all[1],
+                mean=mean_all[3] + mean_all[5] - mean_all[2],
                 target_modality = target_modality,
-                label = "2+7-1")
-        except:
+                run_path=output_dir,
+                label="3+5-2",
+            )
+        else:
             runner.model.generate_special(
-                mean = mean_all[2] + mean_all[7] - mean_all[1],
-                label = "2+7-1" )
-
-        try:
+                mean=mean_all[1] + mean_all[9] - mean_all[8],
+                run_path=output_dir,
+                label="1+9-8",
+            )
             runner.model.generate_special(
-                mean_all[3] + mean_all[5] - mean_all[2],
-                target_modality = target_modality,
-                label = "3+5-2")
-        except:
+                mean=mean_all[2] + mean_all[7] - mean_all[1],
+                run_path=output_dir,
+                label="2+7-1",
+            )
             runner.model.generate_special(
-                mean = mean_all[3] + mean_all[5] - mean_all[2],
-                label = "3+5-2" )
-
+                mean=mean_all[3] + mean_all[5] - mean_all[2],
+                run_path=output_dir,
+                label="3+5-2",
+            )
         """
         points = TSNE(n_components=3, random_state=0).fit_transform(mean_all)
         fig = plt.figure()
@@ -514,7 +580,8 @@ def analyse_model(runner,
         target_modality=target_modality,
         target_property=target_property,
         runner=runner,
-        withzero=withzero)
+        withzero=withzero,
+    )
 
     # Get latent space
     latent_all, label_all = get_latent_space(
@@ -613,7 +680,6 @@ def analyse_model(runner,
 def analyse(args,
             args_classifier_cmnist,
             args_classifier_oscn,
-            run_path,
             ):
     """Main function for model analysis
     target_modality
@@ -624,8 +690,9 @@ def analyse(args,
     target_property
         Whether information are analysed, color(0), number(1), shape(2)?
     """
+    print('Args:', args)
     # model setting
-    runner = Runner(args=args, run_path=run_path)
+    runner = Runner(args=args)
 
     if runner.model_name == 'MMVAE_CMNIST_OSCN':
         modality_list = [0, 1]
@@ -657,8 +724,10 @@ def analyse(args,
                   '==============\n',
                   'START ANALYSIS\n',
                   '==============\n')
-            output_dir = args.output_dir
-            print(args)
+            output_dir = args.output_dir + '_' + \
+                str(target_modality) + '_' + str(target_property)
+            print('AAA:', args, output_dir, args.output_dir)
+            Path(output_dir).mkdir(parents=True, exist_ok=True)
             rslt = analyse_model(
                 runner=runner,
                 classifier=classifier,

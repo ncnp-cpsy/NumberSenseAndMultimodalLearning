@@ -161,7 +161,7 @@ class Runner():
         pil_image.save(name)
 
     def predict(self, data):
-        pred = self.model.reconstruct(data)
+        pred = self.model.reconstruct(data, run_path=None, epoch=None)
         return pred
 
     def estimate_log_marginal(self, K):
@@ -174,7 +174,8 @@ class Runner():
                 marginal_loglik += -self.t_objective(self.model, data, K).item()
 
         marginal_loglik /= len(self.test_loader.dataset)
-        print('Marginal Log Likelihood (IWAE, K = {}): {:.4f}'.format(K, marginal_loglik))
+        print('Marginal Log Likelihood (IWAE, K = {}): {:.4f}'.format(
+            K, marginal_loglik))
 
 
 def run_train(args, run_path):

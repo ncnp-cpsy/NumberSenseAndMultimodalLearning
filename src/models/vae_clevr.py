@@ -154,6 +154,7 @@ class CLEVR(VAE):
         save_image(torch.stack(s),
                    '{}/gen_samples_{:03d}.png'.format(run_path, epoch),
                    nrow=int(sqrt(N)))
+        return samples
 
     def generate_special(self, mean):
         N = 64
@@ -165,6 +166,7 @@ class CLEVR(VAE):
             save_image(samples,
                        './gen_special_samples_{}.png'.format(i),
                        nrow=int(sqrt(N)))
+        return samples
 
     def latent(self, data):
         zss= super(CLEVR, self).get_latent(data)
@@ -174,6 +176,7 @@ class CLEVR(VAE):
         recon = super(CLEVR, self).reconstruct(data[:24])
         comp = torch.cat([data[:24], recon]).data.cpu()
         save_image(comp, '{}/recon_{:03d}.png'.format(run_path, epoch))
+        return recon
 
     def analyse(self, data, run_path, epoch):
         zemb, zsl, kls_df = super(CLEVR, self).analyse(data, K=10)
