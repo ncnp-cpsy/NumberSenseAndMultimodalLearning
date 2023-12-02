@@ -1,6 +1,5 @@
 from collections import defaultdict
 import time
-
 from PIL import Image
 
 import numpy as np
@@ -21,13 +20,13 @@ class Runner():
         self.model_name = args.model
 
         # load model
-        print('Model runner was initialized.')
+        print('\n\nModel runner was initialized.')
         model_class = getattr(models, '{}'.format(self.model_name))
         model = model_class(args).to(args.device)
         # torchsummary.summary(
         #     model, (model.data_size), device=args.device)
 
-        if args.pretrained_path:
+        if args.pretrained_path != '':
             print('Loading model {} from {}'.format(
                 self.model_name, args.pretrained_path))
             model.load_state_dict(

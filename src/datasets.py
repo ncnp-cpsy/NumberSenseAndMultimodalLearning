@@ -378,8 +378,10 @@ def convert_label_to_int(label, model_name, target_property, data=None):
     else:
         raise Exception
 
+    # Type
     if type(label) == list:
         label = torch.Tensor(label)
+    label = label.to(torch.int64)
 
     if do_print:
         print(

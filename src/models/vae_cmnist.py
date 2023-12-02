@@ -1,10 +1,10 @@
 # CMNIST model specification
 
+from numpy import prod, sqrt
 import torch
 import torch.distributions as dist
 import torch.nn as nn
 import torch.nn.functional as F
-from numpy import prod, sqrt
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from torchvision.utils import save_image, make_grid
@@ -125,18 +125,24 @@ class VAE_CMNIST(VAE):
 
         return train, test
 
-    def generate(self, run_path, epoch):
+    def generate(self,
+                 run_path,
+                 suffix):
         N, K = 64, 9
         samples = super(VAE_CMNIST, self).generate(N, K).cpu()
         # wrangle things so they come out tiled
         samples = samples.view(K, N, *samples.size()[1:]).transpose(0, 1)  # N x K x 1 x 28 x 28
         s = [make_grid(t, nrow=int(sqrt(K)), padding=0) for t in samples]
         save_image(torch.stack(s),
-                   '{}/gen_samples_{:03d}.png'.format(run_path, epoch),
+                   '{}/gen_samples_{:03d}.png'.format(run_path, suffix),
                    nrow=int(sqrt(N)))
         return samples
 
-    def generate_special(self, mean, run_path, label='', N=64):
+    def generate_special(self,
+                         mean,
+                         run_path,
+                         label='',
+                         N=64):
         samples_list = super(VAE_CMNIST, self).generate_special(N, mean)
         for i, samples in enumerate(samples_list):
             samples = samples.data.cpu()
@@ -149,20 +155,29 @@ class VAE_CMNIST(VAE):
                 nrow=int(sqrt(N)))
         return samples
 
-    def reconstruct(self, data, run_path, epoch, N=None):
-        if N is not None:
-            data = data[:N]
-        recon = super(VAE_CMNIST, self).reconstruct(data)
-        comp = torch.cat([data, recon]).data.cpu()
-        save_image(comp, '{}/recon_{:03d}.png'.format(run_path, epoch))
-        return recon
-
     def latent(self, data):
         zss= super(VAE_CMNIST, self).get_latent(data)
         return zss
 
-    def analyse(self, data, run_path, epoch):
+    def reconstruct(self,
+                    data,
+                    run_path=None,
+                    suffix=None,
+                    num_data=None
+                    ):
+        if num_data is not None:
+            data = data[:num_data]
+        recon = super(VAE_CMNIST, self).reconstruct(data)
+        comp = torch.cat([data, recon]).data.cpu()
+        save_image(comp, '{}/recon_{:03d}.png'.format(run_path, suffix))
+        return recon
+
+    def analyse(self,
+                data,
+                run_path=None,
+                suffix=None
+                ):
         zemb, zsl, kls_df = super(VAE_CMNIST, self).analyse(data, K=10)
         labels = ['Prior', self.modelName.lower()]
-        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
-        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, epoch))
+        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, suffix))
+        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, suffix))

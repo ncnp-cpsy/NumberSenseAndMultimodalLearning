@@ -49,16 +49,16 @@ def analyse_reconst(runner,
                 require_label=True,
             )
             print(data.shape, len(label))
-            loss = - runner.t_objective(runner.model, data, K=runner.args.K)
+            # loss = - runner.t_objective(runner.model, data, K=runner.args.K)
             if i == 0:
                 recon = runner.model.reconstruct(
                     data=data,
                     run_path=output_dir,
-                    epoch=999,
+                    suffix=999,
                 )
                 generation = runner.model.generate(
                     run_path=output_dir,
-                    epoch=999,
+                    suffix=999,
                 )
                 r = count_reconst(
                     recon=recon,
@@ -611,18 +611,21 @@ def analyse_model(runner,
     # Main analysis
     rslt = {}
     if require_reconst:
+        print('---')
         rslt.update(analyse_reconst(
             runner=runner,
             classifier=classifier,
             output_dir=output_dir,
         ))
     if require_cross:
+        print('---')
         rslt.update(analyse_cross(
             runner=runner,
             classifier=classifier,
             output_dir=output_dir,
         ))
     if require_cluster:
+        print('---')
         rslt.update(analyse_cluster(
             latent_all=latent_all,
             label_all=label_all,
@@ -631,6 +634,7 @@ def analyse_model(runner,
             output_dir=output_dir,
         ))
     if require_magnitude:
+        print('---')
         rslt.update(analyse_magnitude(
             runner=runner,
             label_all=label_all,
@@ -643,6 +647,7 @@ def analyse_model(runner,
             output_dir=output_dir,
         ))
     if require_2d:
+        print('---')
         rslt.update(analyse_tsne_2d(
             label_all=label_all,
             latent_all=latent_all,
@@ -654,6 +659,7 @@ def analyse_model(runner,
             output_dir=output_dir,
         ))
     if require_3d:
+        print('---')
         rslt.update(analyse_tsne_3d(
             label_all=label_all,
             latent_all=latent_all,
@@ -663,6 +669,7 @@ def analyse_model(runner,
             output_dir=output_dir,
         ))
     if require_mathematics:
+        print('---')
         rslt.update(analyse_mathematics(
             runner=runner,
             latent_all=latent_all,

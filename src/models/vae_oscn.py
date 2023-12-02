@@ -130,46 +130,63 @@ class VAE_OSCN(VAE):
                           batch_size=batch_size, shuffle=shuffle, **kwargs) """
         return train, test
 
-    def generate(self, run_path, epoch):
+    def generate(self,
+                 run_path=None,
+                 suffix=None
+                 ):
         N, K = 64, 9
         samples = super(VAE_OSCN, self).generate(N, K).cpu()
         # wrangle things so they come out tiled
         samples = samples.view(K, N, *samples.size()[1:]).transpose(0, 1)
         s = [make_grid(t, nrow=int(sqrt(K)), padding=0) for t in samples]
         save_image(torch.stack(s),
-                   '{}/gen_samples_{:03d}.png'.format(run_path, epoch),
+                   '{}/gen_samples_{:03d}.png'.format(run_path, suffix),
                    nrow=int(sqrt(N)))
         return samples
 
-    def generate_special(self, mean, label, run_path, N=64):
-        samples_list = super(VAE_OSCN, self).generate_special(N, mean)
+    def generate_special(self,
+                         mean,
+                         label,
+                         run_path=None,
+                         num_data=64
+                         ):
+        samples_list = super(VAE_OSCN, self).generate_special(num_data, mean)
         for i, samples in enumerate(samples_list):
             samples = samples.data.cpu()
             # wrangle things so they come out tiled
-            samples = samples.view(N, *samples.size()[1:])
+            samples = samples.view(num_data, *samples.size()[1:])
             save_image(
                 samples,
                 # 'addition_images/gen_special_samples_oscn_' + label + '.png',
                 '{}/gen_special_samples_oscn_'.format(run_path) + label + '.png',
-                nrow=int(sqrt(N)))
+                nrow=int(sqrt(num_data)))
         return samples
 
     def latent(self, data):
         zss= super(VAE_OSCN, self).get_latent(data)
         return zss
 
-    def reconstruct(self, data, run_path, epoch, N=None):
-        if N is not None:
-            data = data[:N]
+    def reconstruct(self,
+                    data,
+                    run_path=None,
+                    suffix=None,
+                    num_data=None
+                    ):
+        if num_data is not None:
+            data = data[:num_data]
         recon = super(VAE_OSCN, self).reconstruct(data)
-        comp = torch.cat([data, recon]).data.cpu()
-        save_image(comp, '{}/recon_{:03d}.png'.format(run_path, epoch))
+        composed = torch.cat([data, recon]).data.cpu()
+        save_image(composed, '{}/composed_{:03d}.png'.format(run_path, suffix))
         return recon
 
-    def analyse(self, data, run_path, epoch):
+    def analyse(self,
+                data,
+                run_path=None,
+                suffix=None
+                ):
         zemb, zsl, kls_df = super(VAE_OSCN, self).analyse(data, K=10)
         labels = ['Prior', self.modelName.lower()]
         plot_embeddings(
             zemb, zsl, labels,
-            '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
-        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, epoch))
+            '{}/emb_umap_{:03d}.png'.format(run_path, suffix))
+        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, suffix))

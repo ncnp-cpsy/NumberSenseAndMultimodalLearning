@@ -9,9 +9,10 @@ python main.py  \
        --obj "elbo" \
        --K 30 \
        --batch-size 128 \
-       --epochs 10 \
+       --epochs 50 \
        --learn-prior \
-       --seed 4
+       --seed 4 \
+       --print-freq 50
 
 python main.py  \
        --experiment "${EXPR_DIR}/VAE_OSCN" \
@@ -20,6 +21,7 @@ python main.py  \
        --obj "elbo" \
        --K 30 \
        --batch-size 128 \
-       --epochs 10 \
+       --epochs 50 \
        --learn-prior \
-       --seed 4
+       --seed 4 \
+       --print-freq 50

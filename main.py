@@ -92,19 +92,17 @@ def main(run_type, args):
     print('Arguments (initial):\n', args)
 
     # load args from disk if pretrained model path is given
-    args.pretrained_path = ""
-    if args.pre_trained:
-        # temporary
-        args_tmp_output_dir = args.output_dir
-        args.pretrained_path = args.pre_trained
-        # load
+    args.pretrained_path = ''
+    if args.pre_trained != '':
+        args_tmp = args  # temporary due to no-updating
         args = torch.load(args.pre_trained + '/args.rar')
-        args.output_dir = args_tmp_output_dir
+        args.pretrained_path = args_tmp.pre_trained
+        args.pre_trained = args_tmp.pretrained_path
+        args.output_dir = args_tmp.output_dir
         print("args are updated using pretrained_path:\n", args)
 
-    args.cuda = not args.no_cuda and torch.cuda.is_available()
+    args.device = "cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu"
     # args.device = torch.device("cuda" if args.cuda else "cpu")
-    args.device = "cuda" if args.cuda else "cpu"
 
     # set up directories
     run_id = datetime.datetime.now().isoformat()
@@ -112,17 +110,31 @@ def main(run_type, args):
     if not args.experiment:
         args.experiment = args.model
     experiment_dir = Path('./rslt/' + args.experiment)
-    if args.pre_trained:
+    if args.pre_trained == '':
         experiment_dir.mkdir(parents=True, exist_ok=True)
         run_path = mkdtemp(prefix=run_id, dir=str(experiment_dir))
         sys.stdout = Logger('{}/run.log'.format(run_path))
         with open('{}/args.json'.format(run_path), 'w') as fp:
             json.dump(args.__dict__, fp)
         torch.save(args, '{}/args.rar'.format(run_path))
+    # args.output_dir_analyse = args.pre
+
+    # classifier. comannd line arguments were not used for classify
+    print('Parameters were loaded for classifier')
+    args_classifier_cmnist = config_classifier_cmnist
+    args_classifier_cmnist.pretrained_path = config_classifier_cmnist.pre_trained
+    args_classifier_oscn = config_classifier_oscn
+    args_classifier_oscn.pretrained_path = config_classifier_oscn.pre_trained
+    if 'Classifier_CMNIST' in args.model:
+        args_classifier = args_classifier_cmnist
+    elif 'Classifier_OSCN' in args.model:
+        args_classifier = args_classifier_oscn
+    else:
+        Exception
 
     # log
-    print('Expt:', run_path)
-    print('RunID:', run_id)
+    print('Expt:\n', run_path)
+    print('RunID:\n', run_id)
     print('Arguments (after settings):\n', args)
 
     # main
@@ -130,21 +142,13 @@ def main(run_type, args):
         run_train(args=args, run_path=run_path)
 
     elif run_type == 'classify':
-        # NOTE: comannd line arguments were not used for classify
-        print('Parameters were loaded for classifier')
-        if 'Classifier_CMNIST' in args.model:
-            args_classifier = config_classifier_cmnist
-        elif 'Classifier_OSCN' in args.model:
-            args_classifier = config_classifier_oscn
-        else:
-            Exception
         run_train(args=args_classifier, run_path=run_path)
 
     elif run_type == 'analyse':
         analyse(
             args=args,
-            args_classifier_cmnist=config_classifier_cmnist,
-            args_classifier_oscn=config_classifier_oscn,
+            args_classifier_cmnist=args_classifier_cmnist,
+            args_classifier_oscn=args_classifier_oscn,
         )
     elif run_type == 'synthesize':
         synthesize()
