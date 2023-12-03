@@ -86,12 +86,13 @@ class VAE_OSCN(VAE):
 
     def __init__(self, params):
         super(VAE_OSCN, self).__init__(
-            dist.Laplace,  # prior
-            dist.Laplace,  # likelihood
-            dist.Laplace,  # posterior
-            Enc(params.latent_dim),
-            Dec(params.latent_dim),
-            params
+            prior_dist=dist.Laplace,  # prior
+            # likelihood_dist=dist.Laplace,  # likelihood
+            likelihood_dist=dist.Normal,
+            post_dist=dist.Laplace,  # posterior
+            enc=Enc(params.latent_dim),
+            dec=Dec(params.latent_dim),
+            params=params,
         )
         grad = {'requires_grad': params.learn_prior}
         self._pz_params = nn.ParameterList([

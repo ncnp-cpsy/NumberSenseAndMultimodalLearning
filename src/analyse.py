@@ -60,6 +60,10 @@ def analyse_reconst(runner,
                     run_path=output_dir,
                     suffix=999,
                 )
+                # generation = runner.model.generate_special(
+                #     run_path=output_dir,
+                #     suffix=999,
+                # )
                 r = count_reconst(
                     recon=recon,
                     true_label=convert_label_to_int(
@@ -88,10 +92,11 @@ def count_reconst(recon,
         print('pred:', pred, '\t\ttar:', tar)
         return torch.sum(pred == tar)
     set_label = list(set(true_label.cpu().numpy()))
+    print(recon)
 
     print(recon.shape, 'set_label', set_label)
     pred_label = classifier.predict(recon)
-    pred_label = torch.argmax(pred_label, dim=1).cpu()
+    pred_label = torch.argmax(pred_label, dim=1).cpu() + 1
     true_label = true_label.cpu()
 
     # all category

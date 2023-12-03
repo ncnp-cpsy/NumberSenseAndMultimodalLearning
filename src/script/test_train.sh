@@ -2,17 +2,6 @@
 
 EXPR_DIR='test'
 
-python main.py  \
-       --experiment "${EXPR_DIR}/VAE_CMNIST" \
-       --run-type "train" \
-       --model "VAE_CMNIST" \
-       --obj "elbo" \
-       --K 30 \
-       --batch-size 128 \
-       --epochs 50 \
-       --learn-prior \
-       --seed 4 \
-       --print-freq 50
 
 python main.py  \
        --experiment "${EXPR_DIR}/VAE_OSCN" \
@@ -23,5 +12,17 @@ python main.py  \
        --batch-size 128 \
        --epochs 50 \
        --learn-prior \
+       --seed 1 \
+       --print-freq 100
+
+python main.py  \
+       --experiment "${EXPR_DIR}/VAE_CMNIST" \
+       --run-type "train" \
+       --model "VAE_CMNIST" \
+       --obj "elbo" \
+       --K 30 \
+       --batch-size 128 \
+       --epochs 50 \
+       --learn-prior \
        --seed 4 \
-       --print-freq 50
+       --print-freq 100

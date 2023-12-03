@@ -73,12 +73,12 @@ class VAE_CMNIST(VAE):
 
     def __init__(self, params):
         super(VAE_CMNIST, self).__init__(
-            dist.Normal,  # prior
-            dist.Normal,  # likelihood
-            dist.Normal,  # posterior
-            Enc(params.latent_dim, params.num_hidden_layers),
-            Dec(params.latent_dim, params.num_hidden_layers),
-            params
+            prior_dist=dist.Normal,  # prior
+            likelihood_dist=dist.Normal,  # likelihood
+            post_dist=dist.Normal,  # posterior
+            enc=Enc(params.latent_dim, params.num_hidden_layers),
+            dec=Dec(params.latent_dim, params.num_hidden_layers),
+            params=params
         )
         grad = {'requires_grad': params.learn_prior}
         self._pz_params = nn.ParameterList([
