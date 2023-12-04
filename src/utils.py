@@ -232,3 +232,10 @@ class FakeCategorical(dist.Distribution):
         # cross-entropy loss ($\sum -gt_i \log(p_i)$ with most gt_i = 0, We adopt the
         # operationally equivalence here, which is summing up the sentence dimension
         # in objective.
+
+class DotDict(dict):
+    """Dictionary which can be accessed using dot symbol
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__dict__ = self

@@ -104,10 +104,18 @@ class SVHN(VAE):
     def getDataLoaders(batch_size, shuffle=True, device='cuda'):
         kwargs = {'num_workers': 1, 'pin_memory': True} if device == 'cuda' else {}
         tx = transforms.ToTensor()
-        train = DataLoader(datasets.SVHN('../data', split='train', download=True, transform=tx),
-                           batch_size=batch_size, shuffle=shuffle, **kwargs)
-        test = DataLoader(datasets.SVHN('../data', split='test', download=True, transform=tx),
-                          batch_size=batch_size, shuffle=shuffle, **kwargs)
+        train = DataLoader(
+            datasets.SVHN('../data', split='train', download=True, transform=tx),
+            batch_size=batch_size,
+            shuffle=shuffle,
+            **kwargs
+        )
+        test = DataLoader(
+            datasets.SVHN('../data', split='test', download=True, transform=tx),
+            batch_size=batch_size,
+            shuffle=shuffle,
+            **kwargs
+        )
         return train, test
 
     def generate(self, run_path, epoch):
@@ -132,3 +140,4 @@ class SVHN(VAE):
         labels = ['Prior', self.modelName.lower()]
         plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
         plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, epoch))
+        return zemb, zsl, kls_df

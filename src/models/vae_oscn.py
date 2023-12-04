@@ -1,8 +1,8 @@
-# OSCN model specification
+"""OSCN model specification
+"""
 
 import numpy as np
 from numpy import sqrt
-
 import torch
 import torch.distributions as dist
 import torch.nn as nn
@@ -10,7 +10,6 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import transforms, datasets
 from torchvision.utils import save_image, make_grid
-from torch.utils.data import Dataset
 
 from src.datasets import DatasetOSCN
 from src.utils import Constants
@@ -86,10 +85,10 @@ class VAE_OSCN(VAE):
 
     def __init__(self, params):
         super(VAE_OSCN, self).__init__(
-            prior_dist=dist.Laplace,  # prior
-            # likelihood_dist=dist.Laplace,  # likelihood
+            prior_dist=dist.Laplace,
+            # likelihood_dist=dist.Laplace,
             likelihood_dist=dist.Normal,
-            post_dist=dist.Laplace,  # posterior
+            post_dist=dist.Laplace,
             enc=Enc(params.latent_dim),
             dec=Dec(params.latent_dim),
             params=params,
@@ -105,13 +104,13 @@ class VAE_OSCN(VAE):
 
     @property
     def pz_params(self):
-        return self._pz_params[0], F.softmax(self._pz_params[1], dim=1) * self._pz_params[1].size(-1)
+        return (
+            self._pz_params[0],
+            F.softmax(self._pz_params[1], dim=1) * self._pz_params[1].size(-1)
+        )
 
     @staticmethod
     def getDataLoaders(batch_size, shuffle=True, device='cuda'):
-        kwargs = {'num_workers': 1, 'pin_memory': True} if device == 'cuda' else {}
-        tx = transforms.ToTensor()
-
         oscn_train_dataset = DatasetOSCN(train=True)
         oscn_test_dataset = DatasetOSCN(train=False)
         train = torch.utils.data.DataLoader(
@@ -124,70 +123,85 @@ class VAE_OSCN(VAE):
             batch_size=batch_size,
             shuffle=shuffle,
             num_workers=2)
-
-        """ train = DataLoader(datasets.OSCN('../data', split='train', download=True, transform=tx),
-                           batch_size=batch_size, shuffle=shuffle, **kwargs)
-        test = DataLoader(datasets.OSCN('../data', split='test', download=True, transform=tx),
-                          batch_size=batch_size, shuffle=shuffle, **kwargs) """
+        """
+        kwargs = {'num_workers': 1, 'pin_memory': True} if device == 'cuda' else {}
+        tx = transforms.ToTensor()
+        train = DataLoader(
+            datasets.OSCN('../data', split='train', download=True, transform=tx),
+            batch_size=batch_size,
+            shuffle=shuffle,
+            **kwargs)
+        test = DataLoader(
+            datasets.OSCN('../data', split='test', download=True, transform=tx),
+            batch_size=batch_size,
+            shuffle=shuffle,
+            **kwargs)
+        """
         return train, test
 
     def generate(self,
-                 run_path=None,
-                 suffix=None
+                 num_data=64,
+                 K=9,
+                 output_dir=None,
+                 suffix='',
                  ):
-        N, K = 64, 9
-        samples = super(VAE_OSCN, self).generate(N, K).cpu()
+        samples = super().generate(num_data, K).cpu()
         # wrangle things so they come out tiled
-        samples = samples.view(K, N, *samples.size()[1:]).transpose(0, 1)
+        samples = samples.view(K, num_data, *samples.size()[1:]).transpose(0, 1)
         s = [make_grid(t, nrow=int(sqrt(K)), padding=0) for t in samples]
-        save_image(torch.stack(s),
-                   '{}/gen_samples_{:03d}.png'.format(run_path, suffix),
-                   nrow=int(sqrt(N)))
+        if output_dir is not None:
+            fname = '{}/gen_samples_{:03d}.png'.format(output_dir, suffix)
+            save_image(torch.stack(s), fname, nrow=int(sqrt(num_data)))
         return samples
 
     def generate_special(self,
                          mean,
                          label,
-                         run_path=None,
+                         output_dir=None,
                          num_data=64
                          ):
-        samples_list = super(VAE_OSCN, self).generate_special(num_data, mean)
+        samples_list = super().generate_special(
+            mean=mean,
+            num_data=num_data,
+        )
         for i, samples in enumerate(samples_list):
             samples = samples.data.cpu()
             # wrangle things so they come out tiled
             samples = samples.view(num_data, *samples.size()[1:])
-            save_image(
-                samples,
-                # 'addition_images/gen_special_samples_oscn_' + label + '.png',
-                '{}/gen_special_samples_oscn_'.format(run_path) + label + '.png',
-                nrow=int(sqrt(num_data)))
+            if output_dir is not None:
+                fname = '{}/gen_special_samples_oscn_'.format(output_dir) + label + '.png'
+                save_image(samples, fname, nrow=int(sqrt(num_data)))
         return samples
-
-    def latent(self, data):
-        zss= super(VAE_OSCN, self).get_latent(data)
-        return zss
 
     def reconstruct(self,
                     data,
-                    run_path=None,
-                    suffix=None,
-                    num_data=None
+                    num_data=None,
+                    output_dir=None,
+                    suffix='',
                     ):
         if num_data is not None:
             data = data[:num_data]
-        recon = super(VAE_OSCN, self).reconstruct(data)
-        composed = torch.cat([data, recon]).data.cpu()
-        save_image(composed, '{}/composed_{:03d}.png'.format(run_path, suffix))
+        recon = super().reconstruct(data=data)
+        if output_dir is not None:
+            composed = torch.cat([data, recon]).data.cpu()
+            fname = '{}/recon_{:03d}.png'.format(output_dir, suffix)
+            save_image(composed, fname)
         return recon
+
+    def latent(self, data):
+        zss= super().get_latent(data)
+        return zss
 
     def analyse(self,
                 data,
-                run_path=None,
-                suffix=None
+                output_dir=None,
+                suffix='',
                 ):
-        zemb, zsl, kls_df = super(VAE_OSCN, self).analyse(data, K=10)
-        labels = ['Prior', self.modelName.lower()]
-        plot_embeddings(
-            zemb, zsl, labels,
-            '{}/emb_umap_{:03d}.png'.format(run_path, suffix))
-        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, suffix))
+        zemb, zsl, kls_df = super().analyse(data, K=10)
+        if output_dir is not None:
+            labels = ['Prior', self.modelName.lower()]
+            fname = '{}/emb_umap_{:03d}.png'.format(output_dir, suffix)
+            plot_embeddings(zemb, zsl, labels, fname)
+            fname = '{}/kl_distance_{:03d}.png'.format(output_dir, suffix)
+            plot_kls_df(kls_df, fname)
+        return zemb, zsl, kls_df

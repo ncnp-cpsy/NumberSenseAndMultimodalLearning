@@ -1,4 +1,5 @@
-# Base VAE class definition
+"""Base VAE class definition
+"""
 
 import torch
 import torch.nn as nn
@@ -58,16 +59,20 @@ class VAE(nn.Module):
         #return  [zs]
         return  [self._qz_x_params[0]]
 
-    def generate(self, N, K):
+    def generate(self,
+                 num_data,
+                 K):
         self.eval()
         with torch.no_grad():
             pz = self.pz(*self.pz_params)
-            latents = pz.rsample(torch.Size([N]))
+            latents = pz.rsample(torch.Size([num_data]))
             px_z = self.px_z(*self.dec(latents))
             data = px_z.sample(torch.Size([K]))
         return data.view(-1, *data.size()[3:])
 
-    def generate_special(self, N, mean):
+    def generate_special(self,
+                         mean,
+                         num_data=64):
         self.eval()
         with torch.no_grad():
             data = []
@@ -77,12 +82,16 @@ class VAE(nn.Module):
             mean = mean.to(device)
             pz = self.pz(mean, hoge[1])
             #pz = self.pz(mean, torch.zeros(1, 20).to(device) + 0.5 )
-            latents = pz.rsample(torch.Size([N]))
+            latents = pz.rsample(torch.Size([num_data]))
             px_z = self.px_z(*self.dec(latents))
             data.append(px_z.mean.view(-1, *px_z.mean.size()[2:]))
         return data  # list of generations---one for each modality
 
-    def reconstruct(self, data):
+    def reconstruct(self,
+                    data,
+                    output_dir=None,
+                    suffix='',
+                    ):
         self.eval()
         with torch.no_grad():
             qz_x = self.qz_x(*self.enc(data))

@@ -8,7 +8,6 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from torchvision.utils import save_image, make_grid
-from torch.utils.data import Dataset
 
 from src.utils import Constants
 from src.vis import plot_embeddings, plot_kls_df
@@ -72,7 +71,7 @@ class VAE_CMNIST(VAE):
     """ Derive a specific sub-class of a VAE for CMNIST. """
 
     def __init__(self, params):
-        super(VAE_CMNIST, self).__init__(
+        super().__init__(
             prior_dist=dist.Normal,  # prior
             likelihood_dist=dist.Normal,  # likelihood
             post_dist=dist.Normal,  # posterior
@@ -122,62 +121,73 @@ class VAE_CMNIST(VAE):
             batch_size=batch_size,
             shuffle=shuffle,
             num_workers=2)
-
         return train, test
 
     def generate(self,
-                 run_path,
-                 suffix):
-        N, K = 64, 9
-        samples = super(VAE_CMNIST, self).generate(N, K).cpu()
+                 num_data=64,
+                 K=9,
+                 output_dir=None,
+                 suffix='',
+                 ):
+        samples = super().generate(
+            num_data=num_data,
+            K=K).cpu()
         # wrangle things so they come out tiled
-        samples = samples.view(K, N, *samples.size()[1:]).transpose(0, 1)  # N x K x 1 x 28 x 28
+        # num_data x K x 1 x 28 x 28
+        samples = samples.view(K, num_data, *samples.size()[1:]).transpose(0, 1)
         s = [make_grid(t, nrow=int(sqrt(K)), padding=0) for t in samples]
-        save_image(torch.stack(s),
-                   '{}/gen_samples_{:03d}.png'.format(run_path, suffix),
-                   nrow=int(sqrt(N)))
+        if output_dir is not None:
+            fname = '{}/gen_samples_{:03d}.png'.format(output_dir, suffix)
+            save_image(torch.stack(s), fname, nrow=int(sqrt(num_data)))
         return samples
 
     def generate_special(self,
                          mean,
-                         run_path,
+                         num_data=64,
+                         output_dir=None,
                          label='',
-                         N=64):
-        samples_list = super(VAE_CMNIST, self).generate_special(N, mean)
+                         ):
+        samples_list = super().generate_special(
+            mean=mean,
+            num_data=num_data,
+        )
         for i, samples in enumerate(samples_list):
             samples = samples.data.cpu()
             # wrangle things so they come out tiled
-            samples = samples.view(N, *samples.size()[1:])
-            save_image(
-                samples,
-                # 'addition_images/gen_special_samples_cmnist_{}'.format(i) + "_" + label + '.png',
-                '{}/gen_special_samples_cmnist_{}'.format(run_path, i) + "_" + label + '.png',
-                nrow=int(sqrt(N)))
+            samples = samples.view(num_data, *samples.size()[1:])
+            if output_dir is not None:
+                fname = '{}/gen_special_samples_cmnist_{}'.format(
+                    output_dir, i) + "_" + label + '.png'
+                save_image(samples, fname, nrow=int(sqrt(num_data)))
         return samples
 
     def latent(self, data):
-        zss= super(VAE_CMNIST, self).get_latent(data)
+        zss= super().get_latent(data)
         return zss
 
     def reconstruct(self,
                     data,
-                    run_path=None,
-                    suffix=None,
+                    output_dir=None,
+                    suffix='',
                     num_data=None
                     ):
         if num_data is not None:
             data = data[:num_data]
-        recon = super(VAE_CMNIST, self).reconstruct(data)
+        recon = super().reconstruct(data)
         comp = torch.cat([data, recon]).data.cpu()
-        save_image(comp, '{}/recon_{:03d}.png'.format(run_path, suffix))
+        save_image(comp, '{}/recon_{:03d}.png'.format(output_dir, suffix))
         return recon
 
     def analyse(self,
                 data,
-                run_path=None,
-                suffix=None
+                output_dir=None,
+                suffix='',
                 ):
-        zemb, zsl, kls_df = super(VAE_CMNIST, self).analyse(data, K=10)
+        zemb, zsl, kls_df = super().analyse(data, K=10)
         labels = ['Prior', self.modelName.lower()]
-        plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, suffix))
-        plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, suffix))
+        if output_dir is not None:
+            fname = '{}/emb_umap_{:03d}.png'.format(output_dir, suffix)
+            plot_embeddings(zemb, zsl, labels, fname)
+            fname = '{}/kl_distance_{:03d}.png'.format(output_dir, suffix)
+            plot_kls_df(kls_df, fname)
+        return zemb, zsl, kls_df

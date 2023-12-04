@@ -14,9 +14,9 @@ from src.utils import Logger, Timer, save_model, save_vars, unpack_data
 
 
 class Runner():
-    def __init__(self, args, run_path='./'):
+    def __init__(self, args, run_dir='./'):
         self.args = args
-        self.run_path = run_path
+        self.run_dir = run_dir
         self.model_name = args.model
 
         # load model
@@ -93,7 +93,7 @@ class Runner():
                 device=self.args.device)
             loss = -1 * loss
             """
-            with open(str(self.run_path) + '/ratio.log', 'a') as f:
+            with open(str(self.run_dir) + '/ratio.log', 'a') as f:
                 print(ratio[0], ratio[1], file=f)
             """
             loss.backward()
@@ -122,7 +122,11 @@ class Runner():
                 data, label = unpack_data(
                     dataT, device=self.args.device, require_label=True)
 
-                self.model.reconstruct(data, self.run_path, epoch)
+                self.model.reconstruct(
+                    data=data,
+                    output_dir=self.run_dir,
+                    suffix=epoch,
+                )
                 # if i == 0:
                 #     break
                 if 'Classifier' in self.model_name:
@@ -138,9 +142,13 @@ class Runner():
                     loss = -self.t_objective(self.model, data, K=self.args.K)
                 b_loss += loss.item()
                 # if i == 0:
-                #     self.model.reconstruct(data, self.run_path, epoch)
+                #     self.model.reconstruct(
+                #         data,
+                #         output_dir=self.run_dir,
+                #         suffix=epoch,
+                #     )
                 #     if not self.args.no_analytics:
-                #         self.model.analyse(data, self.run_path, epoch)
+                #         self.model.analyse(data, self.run_dir, epoch)
                 #     break
 
         agg['test_loss'].append(b_loss / len(self.test_loader.dataset))
@@ -159,8 +167,12 @@ class Runner():
         pil_image = Image.fromarray(data)
         pil_image.save(name)
 
-    def predict(self, data):
-        pred = self.model.reconstruct(data, run_path=None, epoch=None)
+    def predict(self, data, output_dir=None, suffix=''):
+        pred = self.model.reconstruct(
+            data,
+            output_dir=output_dir,
+            suffix=suffix,
+        )
         return pred
 
     def estimate_log_marginal(self, K):
@@ -177,18 +189,17 @@ class Runner():
             K, marginal_loglik))
 
 
-def run_train(args, run_path):
+def run_train(args, run_dir):
     with Timer('MM-VAE') as t:
         agg = defaultdict(list)
-        runner = Runner(args=args, run_path=run_path)
+        runner = Runner(args=args, run_dir=args.output_dir)
 
         for epoch in range(1, args.epochs + 1):
             _ = runner.train(epoch, agg)
-            save_model(runner.model, run_path + '/model.rar')
-            save_vars(agg, run_path + '/losses.rar')
-            runner.model.generate(run_path, epoch)
+            save_model(runner.model, run_dir + '/model.rar')
+            save_vars(agg, run_dir + '/losses.rar')
+            runner.model.generate(num_data=32, output_dir=run_dir, suffix=epoch)
             _ = runner.test(epoch, agg)
-
         if args.logp:
             # compute as tight a marginal likelihood as possible
             runner.estimate_log_marginal(5000)
@@ -197,5 +208,5 @@ if __name__ == '__main__':
     args = {
         'run_type': 'train',
     }
-    run_path = './rslt/test'
-    run_train(args=args, run_path=run_path)
+    run_dir = './rslt/test'
+    run_train(args=args, run_dir=run_dir)

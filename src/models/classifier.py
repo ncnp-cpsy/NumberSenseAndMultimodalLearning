@@ -18,12 +18,12 @@ class Classifier(nn.Module):
     def forward(self):
         raise NotImplementedError()
 
-    def generate(self, run_path, epoch):
+    def generate(self, num_data, K=None, output_dir=None, suffix=''):
         """Predictions of class labels
         """
         pass
 
-    def reconstruct(self, data, run_path=None, epoch=None):
+    def reconstruct(self, data, output_dir=None, suffix=''):
         """Predictions of class labels
         """
         self.eval()

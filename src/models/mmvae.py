@@ -45,7 +45,6 @@ class MMVAE(nn.Module):
             for d, vae in enumerate(self.vaes):
                 if e != d:  # fill-in off-diagonal
                     px_zs[e][d] = vae.px_z(*vae.dec(zs))
-        
 
         if 'use_conditional' in vars(self.params):
             if self.params.use_conditional:
@@ -62,8 +61,6 @@ class MMVAE(nn.Module):
         else:
             return qz_xs, px_zs, zss
 
-
-
     def get_latent(self, x, K=1):
         zss = []
         # initialise cross-modal matrix
@@ -73,7 +70,6 @@ class MMVAE(nn.Module):
             zss.append(qz_x.mean)
             #zss.append(zs)
         return  zss
-
 
     def generate(self, N):
         self.eval()

@@ -1,3 +1,4 @@
+import csv
 from pathlib import Path
 
 import numpy as np
@@ -21,7 +22,6 @@ from src.datasets import convert_label_to_int
 
 matplotlib.use('Agg')
 
-
 color_dict = {
     0: "gold",
     1: "blue",
@@ -35,7 +35,6 @@ color_dict = {
     9: "darkviolet"
 }
 
-
 def analyse_reconst(runner,
                     classifier,
                     output_dir='./',
@@ -48,23 +47,22 @@ def analyse_reconst(runner,
                 device=runner.args.device,
                 require_label=True,
             )
-            print(data.shape, len(label))
             # loss = - runner.t_objective(runner.model, data, K=runner.args.K)
             if i == 0:
                 recon = runner.model.reconstruct(
                     data=data,
-                    run_path=output_dir,
+                    output_dir=output_dir,
                     suffix=999,
                 )
                 generation = runner.model.generate(
-                    run_path=output_dir,
+                    output_dir=output_dir,
                     suffix=999,
                 )
                 # generation = runner.model.generate_special(
-                #     run_path=output_dir,
+                #     output_dir=output_dir,
                 #     suffix=999,
                 # )
-                r = count_reconst(
+                acc, confusion = count_reconst(
                     recon=recon,
                     true_label=convert_label_to_int(
                         label=label,
@@ -75,36 +73,33 @@ def analyse_reconst(runner,
                     classifier=classifier,
                     output_dir=output_dir
                 )
-                print('Plot reconstruction of index:', i)
                 break
 
     return {
-        'reconst_avg': None,
+        'reconst_avg': acc,
         'reconst_all': None,
     }
 
 def count_reconst(recon,
                   true_label,
                   classifier,
-                  output_dir,
+                  output_dir='./',
                   ):
     def accuracy(pred, tar):
         print('pred:', pred, '\t\ttar:', tar)
-        return torch.sum(pred == tar)
-    set_label = list(set(true_label.cpu().numpy()))
-    print(recon)
-
-    print(recon.shape, 'set_label', set_label)
+        acc = torch.sum(pred == tar)
+        return acc, acc / len(pred)
     pred_label = classifier.predict(recon)
     pred_label = torch.argmax(pred_label, dim=1).cpu() + 1
     true_label = true_label.cpu()
+    set_label = list(set(true_label.numpy()))
 
     # all category
-    acc_all = accuracy(
+    acc_all, acc_ratio = accuracy(
         pred=pred_label,
         tar=true_label,
     )
-    print('Accuracy:', acc_all)
+    print('Accuracy (count):', acc_all, '\nAccuracy (ratio)', acc_ratio)
 
     # each cateogry
     conf_mat = confusion_matrix(
@@ -112,17 +107,27 @@ def count_reconst(recon,
         y_pred=pred_label,
         labels=set_label,
     )
-    print('Accuracy:', conf_mat)
-
-    # Plot matrix
     disp = ConfusionMatrixDisplay(
         confusion_matrix=conf_mat,
         display_labels=set_label,
     )
-    # disp.plot()
-    # plt.show()
+    fname = output_dir + '/confusion.svg'
+    disp.plot()
+    plt.savefig(fname, format='svg')
+    print('Accuracy:', conf_mat)
 
-    return acc_all, conf_mat
+    # normalized
+    conf_mat_nrm = conf_mat.astype('float') / conf_mat.sum(axis=1)[:, np.newaxis]
+    disp = ConfusionMatrixDisplay(
+        confusion_matrix=conf_mat_nrm,
+        display_labels=set_label,
+    )
+    fname = output_dir + '/confusion_normalized.svg'
+    disp.plot()
+    plt.savefig(fname, format='svg')
+    print('Accuracy:', conf_mat_nrm)
+
+    return acc_ratio.item(), conf_mat_nrm
 
 def analyse_cross(runner,
                   classifier,
@@ -371,35 +376,35 @@ def analyse_mathematics(runner,
             runner.model.generate_special(
                 mean=mean_all[1] + mean_all[9] - mean_all[8],
                 target_modality=target_modality,
-                run_path=output_dir,
+                output_dir=output_dir,
                 label="1+9-8",
             )
             runner.model.generate_special(
                 mean=mean_all[2] + mean_all[7] - mean_all[1],
                 target_modality = target_modality,
-                run_path=output_dir,
+                output_dir=output_dir,
                 label="2+7-1",
             )
             runner.model.generate_special(
                 mean=mean_all[3] + mean_all[5] - mean_all[2],
                 target_modality = target_modality,
-                run_path=output_dir,
+                output_dir=output_dir,
                 label="3+5-2",
             )
         else:
             runner.model.generate_special(
                 mean=mean_all[1] + mean_all[9] - mean_all[8],
-                run_path=output_dir,
+                output_dir=output_dir,
                 label="1+9-8",
             )
             runner.model.generate_special(
                 mean=mean_all[2] + mean_all[7] - mean_all[1],
-                run_path=output_dir,
+                output_dir=output_dir,
                 label="2+7-1",
             )
             runner.model.generate_special(
                 mean=mean_all[3] + mean_all[5] - mean_all[2],
-                run_path=output_dir,
+                output_dir=output_dir,
                 label="3+5-2",
             )
         """
@@ -550,22 +555,13 @@ def analyse_model(runner,
                   output_dir='./'):
 
     # What analysis are performed?
-    if runner.model_name == 'MMVAE_CMNIST_OSCN':
-        require_reconst = True
-        require_cross = True
-    else:
-        require_reconst = True
-        require_cross = False
+    require_reconst = True if target_property == 1 else False
+    require_cross = True if runner.model_name == 'MMVAE_CMNIST_OSCN' else False
     require_magnitude = True
     require_2d = True
     require_3d = False  # if true, error happened.
     require_cluster = True
-    if target_property == 1:
-        require_mathematics = True
-    elif target_property == 0 or target_property == 2:
-        require_mathematics = False
-    else:
-        raise Exception
+    require_mathematics = True if target_property == 1 else False
     withzero = False
 
     # Settings for the number of cateogry
@@ -685,9 +681,16 @@ def analyse_model(runner,
             end_ind=end_ind,
             output_dir=output_dir,
         ))
-
+    # save
+    avgs = {'id': runner.args.run_id}
+    avgs.update(dict(filter(lambda item: 'avg' in item[0], rslt.items())))
+    print('results (all):', rslt)
+    print('results (only averages):', avgs)
+    with open(output_dir + '/analyse_result.csv', 'w') as f:
+        w = csv.DictWriter(f, avgs.keys())
+        w.writeheader()
+        w.writerow(avgs)
     return rslt
-
 
 def analyse(args,
             args_classifier_cmnist,
@@ -702,8 +705,6 @@ def analyse(args,
     target_property
         Whether information are analysed, color(0), number(1), shape(2)?
     """
-    print('Args:', args)
-    # model setting
     runner = Runner(args=args)
 
     if runner.model_name == 'MMVAE_CMNIST_OSCN':
@@ -736,9 +737,8 @@ def analyse(args,
                   '==============\n',
                   'START ANALYSIS\n',
                   '==============\n')
-            output_dir = args.output_dir + '_' + \
+            output_dir = args.output_dir + '/' + \
                 str(target_modality) + '_' + str(target_property)
-            print('AAA:', args, output_dir, args.output_dir)
             Path(output_dir).mkdir(parents=True, exist_ok=True)
             rslt = analyse_model(
                 runner=runner,
@@ -747,7 +747,6 @@ def analyse(args,
                 target_property=target_property,
                 output_dir=output_dir,
             )
-            print(rslt)
     return
 
 
