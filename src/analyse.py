@@ -77,7 +77,7 @@ def analyse_reconst(runner,
 
     return {
         'reconst_avg': acc,
-        'reconst_all': None,
+        'reconst_all': np.nan,
     }
 
 def count_reconst(recon,
@@ -114,7 +114,7 @@ def count_reconst(recon,
     fname = output_dir + '/confusion.svg'
     disp.plot()
     plt.savefig(fname, format='svg')
-    print('Accuracy:', conf_mat)
+    print('Accuracy:\n', conf_mat)
 
     # normalized
     conf_mat_nrm = conf_mat.astype('float') / conf_mat.sum(axis=1)[:, np.newaxis]
@@ -125,17 +125,25 @@ def count_reconst(recon,
     fname = output_dir + '/confusion_normalized.svg'
     disp.plot()
     plt.savefig(fname, format='svg')
-    print('Accuracy:', conf_mat_nrm)
+    print('Accuracy:\n', np.round(conf_mat_nrm, decimals=3))
 
     return acc_ratio.item(), conf_mat_nrm
+
+def analyse_classifier(classifier,
+                       output_dir='./',
+                       ):
+    return {
+        'classifier_avg': np.nan,
+        'classifier_all': np.nan,
+    }
 
 def analyse_cross(runner,
                   classifier,
                   output_dir='./',
                   ):
     return {
-        'cross_avg': None,
-        'cross_all': None,
+        'cross_avg': np.nan,
+        'cross_all': np.nan,
     }
 
 def analyse_cluster(latent_all,
@@ -308,8 +316,8 @@ def analyse_tsne_2d(label_all,
     plt.clf()
 
     return {
-        'tsne-2d_avg': None,
-        'tsne-2d_all': None,
+        'tsne-2d_avg': np.nan,
+        'tsne-2d_all': np.nan,
     }
 
 
@@ -342,8 +350,8 @@ def analyse_tsne_3d(label_all,
 
     plt.savefig(output_dir + '/3d_latent_' + str(target_modality) + '_' + str(target_property) + '.svg', format='svg')
     return {
-        'tsne-3d_avg': None,
-        'tsne-3d_all': None,
+        'tsne-3d_avg': np.nan,
+        'tsne-3d_all': np.nan,
     }
 
 def analyse_mathematics(runner,
@@ -435,8 +443,8 @@ def analyse_mathematics(runner,
         check_additive(1, 8, 4, mean_all=mean_all)
 
     return {
-        'mathematics_avg': None,
-        'mathematics_all': None,
+        'mathematics_avg': np.nan,
+        'mathematics_all': np.nan,
     }
 
 
@@ -682,7 +690,12 @@ def analyse_model(runner,
             output_dir=output_dir,
         ))
     # save
-    avgs = {'id': runner.args.run_id}
+    avgs = {
+        'id': runner.args.run_id,
+        'model_name': runner.model_name,
+        'target_modality': target_modality,
+        'target_property': target_property,
+    }
     avgs.update(dict(filter(lambda item: 'avg' in item[0], rslt.items())))
     print('results (all):', rslt)
     print('results (only averages):', avgs)

@@ -1,6 +1,7 @@
 import os
 import sys
 import datetime
+from collections import defaultdict
 from pathlib import Path
 import json
 import warnings
@@ -13,6 +14,7 @@ from src.utils import Logger, Timer, save_model, save_vars, unpack_data
 import src.models as models
 from src.runner import run_train
 from src.analyse import analyse
+from src.synthesize import synthesize
 from src.config import (
     config_trainer_vae_cmnist,
     config_trainer_vae_oscn,
@@ -20,6 +22,7 @@ from src.config import (
     config_analyzer_vae_oscn,
     config_classifier_cmnist,
     config_classifier_oscn,
+    config_synthesizer,
 )
 
 warnings.filterwarnings("ignore", category=NumbaPerformanceWarning)
@@ -30,8 +33,10 @@ torch.backends.cudnn.benchmark = True
 
 def main(args):
     print('Arguments (initial):\n', args)
-    torch.manual_seed(args.seed)
-    np.random.seed(args.seed)
+
+    if 'seed' in dir(args):
+        torch.manual_seed(args.seed)
+        np.random.seed(args.seed)
 
     # load args from disk if pretrained model path is given
     if 'pretrained_path' in dir(args) and args.pretrained_path != '':
@@ -101,7 +106,9 @@ def main(args):
             args_classifier_oscn=args_classifier_oscn,
         )
     elif args.run_type == 'synthesize':
-        synthesize()
+        synthesize(
+            args=args
+        )
     else:
         Exception
     return
@@ -111,25 +118,75 @@ def test_train():
     main(args=config_trainer_vae_oscn)
 
 def test_train_classifier():
+    # Train of classifier
     args = config_classifier_cmnist
     args.pretrained_path = ''
     main(args=args)
-    args = config_classifier_cmnist
+    args = config_classifier_oscn
     args.pretrained_path = ''
     main(args=args)
+    return
 
 def test_analyse():
     main(args=config_analyzer_vae_cmnist)
     main(args=config_analyzer_vae_oscn)
+    return
+
+def test_train_loop():
+    run_ids_dict = defaultdict(list)
+    execute_train = False
+    for seed in range(3, 5):
+        args = config_trainer_vae_cmnist
+        args.seed = seed
+        args.run_id = 'vae_cmnist_seed_' + str(seed)
+        run_ids_dict['VAE_CMNIST'].append(args.run_id)
+        if execute_train:
+            main(args=args)
+
+        args = config_trainer_vae_oscn
+        args.seed = seed
+        args.run_id = 'vae_oscn_seed_' + str(seed)
+        run_ids_dict['VAE_OSCN'].append(args.run_id)
+        if execute_train:
+            main(args=args)
+    return run_ids_dict
+
+def test_analyse_loop(run_ids_dict):
+    experiment_name = config_trainer_vae_cmnist.experiment
+    for model_name in run_ids_dict.keys():
+        for run_id in run_ids_dict[model_name]:
+            args = config_analyzer_vae_cmnist
+            args.run_id = run_id
+            args.pretrained_path = os.path.join(
+                './rslt', experiment_name, model_name, run_id)
+            main(args=args)
+
+            args = config_analyzer_vae_oscn
+            args.run_id = run_id
+            args.pretrained_path = os.path.join(
+                './rslt', experiment_name, model_name, run_id)
+            main(args=args)
+
+def test_synthesize():
+    args = config_synthesizer
+    synthesize(args=args)
+    # main(args=args)
 
 def test_pipeline():
-    main(args=config_trainer_vae_cmnist)
-    main(args=config_trainer_vae_oscn)
-    main(args=config_classifier_cmnist)
-    main(args=config_classifier_oscn)
-    main(args=config_analyzer_vae_cmnist)
-    main(args=config_analyzer_vae_oscn)
+    # test_train_classifier()
+    run_ids_dict = test_train_loop()
+    # test_analyse_loop(run_ids_dict=run_ids_dict)
+    synthesize(args=config_synthesizer, run_ids_dict=run_ids_dict)
+
+def test():
+    test_train_classifier()
+    test_train()
+    test_analyse()
+    test_pipeline()
 
 if __name__ == '__main__':
+    # test_train_classifier()
     # test_train()
-    test_analyse()
+    # test_analyse()
+    test_pipeline()
+    # test_synthesize()

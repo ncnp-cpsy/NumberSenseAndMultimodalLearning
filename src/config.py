@@ -62,13 +62,16 @@ args = parser.parse_args()
 """
 from src.utils import DotDict
 
+experiment_name = 'test-pipeline-loop-2'
 id_vae_cmnist = '2023-12-04T12:35:32.971112'
 id_vae_oscn = '2023-12-04T12:37:09.612504'
-id_classifier_oscn = '2023-12-01T23:16:41.595779y56i2qp2'
-id_classifier_cmnist = '2023-12-01T23:18:21.255314zhkqwh4b'
+# id_classifier_cmnist = '2023-12-01T23:18:21.255314zhkqwh4b'
+# id_classifier_oscn = '2023-12-01T23:16:41.595779y56i2qp2'
+id_classifier_cmnist = 'test_classifier-cmnist'
+id_classifier_oscn = 'test-classifier-oscn'
 
 config_trainer_vae_cmnist = DotDict({
-    'experiment': 'test',
+    'experiment': experiment_name,
     'model': 'VAE_CMNIST',
     'run_type': 'train',
     'seed': 4,
@@ -92,7 +95,7 @@ config_trainer_vae_cmnist = DotDict({
 })
 
 config_trainer_vae_oscn = DotDict({
-    'experiment': 'test',
+    'experiment': experiment_name,
     'model': 'VAE_OSCN',
     'run_type': 'train',
     'seed': 4,
@@ -119,17 +122,17 @@ config_trainer_vae_oscn = DotDict({
 config_analyzer_vae_cmnist = DotDict({
     'run_type': 'analyse',
     'seed': 4,
-    'pretrained_path': './rslt/test/VAE_CMNIST/' + id_vae_cmnist,
+    'pretrained_path': './rslt/' + experiment_name + '/VAE_CMNIST/' + id_vae_cmnist,
     'run_id': id_vae_cmnist,
-    'cuda': True,
+    'no_cuda': False,
 })
 
 config_analyzer_vae_oscn = DotDict({
     'run_type': 'analyse',
     'seed': 4,
-    'pretrained_path': './rslt/test/VAE_OSCN/' + id_vae_oscn,
+    'pretrained_path': './rslt/' + experiment_name + '/VAE_OSCN/' + id_vae_oscn,
     'run_id': id_vae_oscn,
-    'cuda': True,
+    'no_cuda': False,
 })
 
 config_classifier_cmnist = DotDict({
@@ -137,8 +140,8 @@ config_classifier_cmnist = DotDict({
     'batch_size': 128,
     'cuda': True,
     'device': 'cuda',
-    'epochs': 30,
-    'experiment': './test/Classifier_CMNIST',
+    'epochs': 10,
+    'experiment': experiment_name,
     'latent_dim': 20,
     'learn_prior': False,
     'llik_scaling': 0.0,
@@ -149,7 +152,8 @@ config_classifier_cmnist = DotDict({
     'no_cuda': False,
     'num_hidden_layers': 1,
     'obj': 'cross',
-    'pretrained_path': './rslt/test/Classifier_CMNIST/' + id_classifier_cmnist,
+    'run_id': id_classifier_cmnist,
+    'pretrained_path': './rslt/' + experiment_name + '/Classifier_CMNIST/' + id_classifier_cmnist,
     'print_freq': 0,
     'run_type': 'train',
     'seed': 4,
@@ -162,8 +166,8 @@ config_classifier_oscn = DotDict({
     'batch_size': 128,
     'cuda': True,
     'device': 'cuda',
-    'epochs': 30,
-    'experiment': 'test/Classifier_OSCN',
+    'epochs': 10,
+    'experiment': experiment_name,
     'latent_dim': 20,
     'learn_prior': False,
     'llik_scaling': 0.0,
@@ -174,9 +178,17 @@ config_classifier_oscn = DotDict({
     'no_cuda': False,
     'num_hidden_layers': 1,
     'obj': 'cross',
-    'pretrained_path': './rslt/test/Classifier_OSCN/' + id_classifier_oscn,
+    'run_id': id_classifier_oscn,
+    'pretrained_path': './rslt/' + experiment_name + '/Classifier_OSCN/' + id_classifier_oscn,
     'print_freq': 0,
     'run_type': 'train',
     'seed': 4,
     'use_conditional': False,
+})
+
+config_synthesizer = DotDict({
+    'experiment': experiment_name,
+    'run_type': 'synthesize',
+    'run_id': 'dummy',
+    'pretrained_path': '',
 })

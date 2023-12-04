@@ -1,0 +1,5 @@
+,id,model_name,target_modality,target_property,reconst_avg,cluster_avg,magnitude_avg,tsne-2d_avg,mathematics_avg
+0,vae_cmnist_seed_3,VAE_CMNIST,0,1,0.8125,0.06643934,-0.039588726664776655,,
+1,vae_cmnist_seed_4,VAE_CMNIST,0,1,0.8046875,0.06177996,-0.08722749071187716,,
+2,vae_oscn_seed_3,VAE_OSCN,0,1,0.9609375,-0.094839096,0.9559313872297313,,
+3,vae_oscn_seed_4,VAE_OSCN,0,1,0.921875,-0.09584159,0.8588745308022707,,
