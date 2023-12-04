@@ -15,16 +15,21 @@ from src.utils import Logger, Timer, save_model, save_vars, unpack_data
 
 class Runner():
     def __init__(self, args, run_dir='./'):
+        args.device = "cuda" \
+            if torch.cuda.is_available() and not args.no_cuda else "cpu"
         self.args = args
         self.run_dir = run_dir
         self.model_name = args.model
 
-        # load model
+        # construct and load model
         print('\n\nModel runner was initialized.')
         model_class = getattr(models, '{}'.format(self.model_name))
         model = model_class(args).to(args.device)
-        # torchsummary.summary(
-        #     model, (model.data_size), device=args.device)
+        try:
+            torchsummary.summary(
+                model, (model.data_size), device=args.device)
+        except Exception as e:
+            print('Print of model summary was skipped because', e)
 
         if args.pretrained_path != '':
             print('Loading model {} from {}'.format(
@@ -39,6 +44,7 @@ class Runner():
             filter(lambda p: p.requires_grad, self.model.parameters()),
             lr=1e-3, amsgrad=True)
 
+        # dataset and dataloader
         if self.model_name == 'smnist':
             self.train_loader, self.test_loader, self.abtest_loader = \
                 self.model.getDataLoaders(
@@ -47,7 +53,14 @@ class Runner():
             self.train_loader, self.test_loader = \
                 self.model.getDataLoaders(
                     args.batch_size, device=args.device)
+        print(
+            '\nlength of dataset (train):',
+            len(self.train_loader.dataset),
+            '\nlength of dataset (test):',
+            len(self.test_loader.dataset),
+        )
 
+        # loss function
         objective_name = ('m_' if hasattr(self.model, 'vaes') else '') \
             + args.obj \
             + ('_looser' if (args.looser and args.obj != 'elbo') else '')
@@ -56,8 +69,8 @@ class Runner():
         self.objective = getattr(objectives, objective_name)
         self.t_objective = getattr(objectives, t_objective_name)
         print(
-            'objectives: ', self.objective.__name__,
-            '\nt_objectives: ', self.t_objective.__name__,
+            'objectives:', self.objective.__name__,
+            '\nt_objectives:', self.t_objective.__name__,
         )
 
     def train(self, epoch, agg):

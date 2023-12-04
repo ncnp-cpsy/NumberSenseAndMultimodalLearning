@@ -35,49 +35,12 @@ color_dict = {
     9: "darkviolet"
 }
 
-def analyse_reconst(runner,
-                    classifier,
-                    output_dir='./',
-                    ):
-    runner.model.eval()
-    with torch.no_grad():
-        for i, dataT in enumerate(runner.test_loader):
-            data, label = unpack_data(
-                dataT,
-                device=runner.args.device,
-                require_label=True,
-            )
-            # loss = - runner.t_objective(runner.model, data, K=runner.args.K)
-            if i == 0:
-                recon = runner.model.reconstruct(
-                    data=data,
-                    output_dir=output_dir,
-                    suffix=999,
-                )
-                generation = runner.model.generate(
-                    output_dir=output_dir,
-                    suffix=999,
-                )
-                # generation = runner.model.generate_special(
-                #     output_dir=output_dir,
-                #     suffix=999,
-                # )
-                acc, confusion = count_reconst(
-                    recon=recon,
-                    true_label=convert_label_to_int(
-                        label=label,
-                        model_name=runner.model_name,
-                        target_property=1,
-                        data=data,
-                    ),
-                    classifier=classifier,
-                    output_dir=output_dir
-                )
-                break
-
+def analyse_classifier(classifier,
+                       output_dir='./',
+                       ):
     return {
-        'reconst_avg': acc,
-        'reconst_all': np.nan,
+        'classifier_avg': np.nan,
+        'classifier_all': np.nan,
     }
 
 def count_reconst(recon,
@@ -129,21 +92,100 @@ def count_reconst(recon,
 
     return acc_ratio.item(), conf_mat_nrm
 
-def analyse_classifier(classifier,
-                       output_dir='./',
-                       ):
+def analyse_reconst(runner,
+                    classifier,
+                    target_modality=None,
+                    output_dir='./',
+                    ):
+    runner.model.eval()
+    with torch.no_grad():
+        for i, dataT in enumerate(runner.test_loader):
+            data, label = unpack_data(
+                dataT,
+                device=runner.args.device,
+                require_label=True,
+            )
+            # loss = - runner.t_objective(runner.model, data, K=runner.args.K)
+            if i == 0:
+                recon = runner.model.reconstruct(
+                    data=data,
+                    output_dir=output_dir,
+                    suffix=999,
+                )
+                if 'MMVAE' in runner.model_name:
+                    print('size of extracted recon in MMVAE:', type(recon))
+                    recon = recon[target_modality][target_modality]
+                    print('size of extracted recon in MMVAE:', recon.shape)
+                    recon = recon[0]
+                    print('size of extracted recon in MMVAE:', recon.shape)
+                generation = runner.model.generate(
+                    output_dir=output_dir,
+                    suffix=999,
+                )
+                acc, confusion = count_reconst(
+                    recon=recon,
+                    true_label=convert_label_to_int(
+                        label=label,
+                        model_name=runner.model_name,
+                        target_property=1,
+                        target_modality=target_modality,
+                        data=data,
+                    ),
+                    classifier=classifier,
+                    output_dir=output_dir
+                )
+                break
+
+    suffix = str(target_modality) + 'x' + str(target_modality)
     return {
-        'classifier_avg': np.nan,
-        'classifier_all': np.nan,
+        'reconst_' + suffix + 'avg': acc,
+        'reconst_' + suffix + 'all': np.nan,
     }
 
 def analyse_cross(runner,
                   classifier,
+                  target_modality_from=0,
+                  target_modality_to=1,
                   output_dir='./',
                   ):
+    runner.model.eval()
+    with torch.no_grad():
+        for i, dataT in enumerate(runner.test_loader):
+            data, label = unpack_data(
+                dataT,
+                device=runner.args.device,
+                require_label=True,
+            )
+            if i == 0:
+                recon = runner.model.reconstruct(
+                    data=data,
+                    output_dir=output_dir,
+                    suffix=999,
+                )
+                if 'MMVAE' in runner.model_name:
+                    print('size of extracted recon in MMVAE:', type(recon))
+                    recon = recon[target_modality_from][target_modality_to]
+                    print('size of extracted recon in MMVAE:', recon.shape)
+                    recon = recon[0]
+                    print('size of extracted recon in MMVAE:', recon.shape)
+                acc, confusion = count_reconst(
+                    recon=recon,
+                    true_label=convert_label_to_int(
+                        label=label,  # Not label[target_modality_to]
+                        model_name=runner.model_name,
+                        target_property=1,
+                        target_modality=target_modality_to,
+                        data=data,
+                    ),
+                    classifier=classifier,
+                    output_dir=output_dir
+                )
+                break
+
+    suffix = str(target_modality_from) + 'x' + str(target_modality_to)
     return {
-        'cross_avg': np.nan,
-        'cross_all': np.nan,
+        'cross_' + suffix + '_avg': np.nan,
+        'cross_' + suffix + '_all': np.nan,
     }
 
 def analyse_cluster(latent_all,
@@ -385,35 +427,35 @@ def analyse_mathematics(runner,
                 mean=mean_all[1] + mean_all[9] - mean_all[8],
                 target_modality=target_modality,
                 output_dir=output_dir,
-                label="1+9-8",
+                suffix="1+9-8",
             )
             runner.model.generate_special(
                 mean=mean_all[2] + mean_all[7] - mean_all[1],
                 target_modality = target_modality,
                 output_dir=output_dir,
-                label="2+7-1",
+                suffix="2+7-1",
             )
             runner.model.generate_special(
                 mean=mean_all[3] + mean_all[5] - mean_all[2],
                 target_modality = target_modality,
                 output_dir=output_dir,
-                label="3+5-2",
+                suffix="3+5-2",
             )
         else:
             runner.model.generate_special(
                 mean=mean_all[1] + mean_all[9] - mean_all[8],
                 output_dir=output_dir,
-                label="1+9-8",
+                suffix="1+9-8",
             )
             runner.model.generate_special(
                 mean=mean_all[2] + mean_all[7] - mean_all[1],
                 output_dir=output_dir,
-                label="2+7-1",
+                suffix="2+7-1",
             )
             runner.model.generate_special(
                 mean=mean_all[3] + mean_all[5] - mean_all[2],
                 output_dir=output_dir,
-                label="3+5-2",
+                suffix="3+5-2",
             )
         """
         points = TSNE(n_components=3, random_state=0).fit_transform(mean_all)
@@ -504,6 +546,7 @@ def get_latent_space(
             label=label,
             model_name=runner.model_name,
             target_property=target_property,
+            target_modality=target_modality,
             data=data,
         )
 
@@ -564,7 +607,12 @@ def analyse_model(runner,
 
     # What analysis are performed?
     require_reconst = True if target_property == 1 else False
-    require_cross = True if runner.model_name == 'MMVAE_CMNIST_OSCN' else False
+    require_cross = True \
+        if runner.model_name == 'MMVAE_CMNIST_OSCN' and \
+           target_property == 1 else False
+    require_classifier = False
+    # require_classifier = False \ # TODO
+    #     if runner.model_name == 'MMVAE_CMNIST_OSCN' else False
     require_magnitude = True
     require_2d = True
     require_3d = False  # if true, error happened.
@@ -624,12 +672,21 @@ def analyse_model(runner,
         rslt.update(analyse_reconst(
             runner=runner,
             classifier=classifier,
+            target_modality=target_modality,
             output_dir=output_dir,
         ))
     if require_cross:
         print('---')
         rslt.update(analyse_cross(
             runner=runner,
+            classifier=classifier,  # classifier for target_modality_to
+            target_modality_from=1 - target_modality,
+            target_modality_to=target_modality,
+            output_dir=output_dir,
+        ))
+    if require_classifier:
+        print('---')
+        rslt.update(analyse_classifier(
             classifier=classifier,
             output_dir=output_dir,
         ))

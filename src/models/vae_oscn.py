@@ -156,9 +156,9 @@ class VAE_OSCN(VAE):
 
     def generate_special(self,
                          mean,
-                         label,
+                         num_data=64,
                          output_dir=None,
-                         num_data=64
+                         suffix='',
                          ):
         samples_list = super().generate_special(
             mean=mean,
@@ -169,7 +169,7 @@ class VAE_OSCN(VAE):
             # wrangle things so they come out tiled
             samples = samples.view(num_data, *samples.size()[1:])
             if output_dir is not None:
-                fname = '{}/gen_special_samples_oscn_'.format(output_dir) + label + '.png'
+                fname = '{}/gen_special_samples_oscn_'.format(output_dir) + suffix + '.png'
                 save_image(samples, fname, nrow=int(sqrt(num_data)))
         return samples
 

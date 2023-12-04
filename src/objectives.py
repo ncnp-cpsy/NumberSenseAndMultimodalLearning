@@ -305,12 +305,20 @@ def cross(model,
     > loss = F.nll_loss(F.log_softmax(x, dim=1), labels)
     """
     do_print = False
+    if 'CMNIST' in model.__class__.__name__ :
+        target_modality = 0
+    elif 'OSCN' in model.__class__.__name__ :
+        target_modality = 1
+    else:
+        Exception
 
     pred = model(x)
     labels = convert_label_to_int(
         label=labels,
         model_name=model.__class__.__name__,
         target_property=1,
+        target_modality=target_modality,
+        data=x,
     )
     labels = labels.to(device) - 1
     # num_class = 9

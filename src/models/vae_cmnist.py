@@ -145,7 +145,7 @@ class VAE_CMNIST(VAE):
                          mean,
                          num_data=64,
                          output_dir=None,
-                         label='',
+                         suffix='',
                          ):
         samples_list = super().generate_special(
             mean=mean,
@@ -157,7 +157,7 @@ class VAE_CMNIST(VAE):
             samples = samples.view(num_data, *samples.size()[1:])
             if output_dir is not None:
                 fname = '{}/gen_special_samples_cmnist_{}'.format(
-                    output_dir, i) + "_" + label + '.png'
+                    output_dir, i) + "_" + suffix + '.png'
                 save_image(samples, fname, nrow=int(sqrt(num_data)))
         return samples
 

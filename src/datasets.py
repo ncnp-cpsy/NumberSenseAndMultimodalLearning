@@ -288,8 +288,13 @@ class CUBImageFt(Dataset):
         self._load_ft_mat()
 
 
-def convert_label_to_int(label, model_name, target_property, data=None):
-    do_print = False
+def convert_label_to_int(label,
+                         model_name,
+                         target_property=0,
+                         target_modality=0,
+                         data=None,
+                         do_print=True,
+                         ):
     zukei_to_int = {
         'j': 0,
         's': 1,
@@ -307,6 +312,7 @@ def convert_label_to_int(label, model_name, target_property, data=None):
             '\n===\nlabel info before conversion...',
             '\nmodel name:', model_name,
             '\ntarget_property:', target_property,
+            '\ntarget_modality:', target_modality,
             '\ntype(label):', type(label),
             '\nlabel:', label,
             '\nlabel[0]:', label[0],
@@ -315,18 +321,20 @@ def convert_label_to_int(label, model_name, target_property, data=None):
 
     if model_name == 'MMVAE_CMNIST_OSCN':
         if target_property == 1:
-            print('AAAAAAAAAAAAA')
+            # In the case of MMVAE_CMNIST_OSCN with OSCN datasets, using labels of CMNIST datasets, instead of extracting labels of OSCN.
             label = label[0]
         else:
             label = label[1]  # 全部の情報が必要
+    if do_print:
+        print('label after extraction:', label)
 
     # Pattern of label -> [0,1,3,,,] (CMNIST and CLEVR)
     if (model_name == 'Classifier_CMNIST') or \
        (model_name == 'VAE_CMNIST') or \
        (model_name == 'VAE_CLEVR') or \
-       (model_name == 'MMVAE_CMNIST_OSCN' and target_modality == 0) or \
+       (model_name == 'MMVAE_CMNIST_OSCN' and target_property == 1) or \
        (model_name == 'MMVAE_MNIST_CLEVR'):
-        # (model_name == 'MMVAE_CMNIST_OSCN' and target_property == 1) or \
+       # (model_name == 'MMVAE_CMNIST_OSCN' and target_modality == 0) or \
         if target_property == 0:
             label = []
             if model_name == 'MMVAE_CMNIST_OSCN' :
@@ -364,8 +372,7 @@ def convert_label_to_int(label, model_name, target_property, data=None):
     # Pattern of label -> (g3j, w3t) (OSCN)
     elif (model_name == 'Classifier_OSCN') or \
          (model_name == 'VAE_OSCN') or \
-         (model_name == 'MMVAE_CMNIST_OSCN' and target_modelity == 1):
-         # (model_name == 'MMVAE_CMNIST_OSCN' and target_property != 1):
+         (model_name == 'MMVAE_CMNIST_OSCN' and target_property != 1):
         label = list(label)
         if target_property == 0:
             label = [color_to_int[s[0]] for s in label]

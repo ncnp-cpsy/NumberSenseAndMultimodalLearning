@@ -18,27 +18,33 @@ from src.models.vae_oscn import VAE_OSCN
 
 class MMVAE_CMNIST_OSCN(MMVAE):
     def __init__(self, params):
-        super(MMVAE_CMNIST_OSCN, self).__init__(
-            dist.Laplace, params, CMNIST, OSCN)
+        super().__init__(
+            dist.Laplace,  # prior_dist
+            params,  # params
+            VAE_CMNIST,
+            VAE_OSCN,
+        )
         grad = {'requires_grad': params.learn_prior}
         self._pz_params = nn.ParameterList([
             nn.Parameter(torch.zeros(1, params.latent_dim), requires_grad=False),  # mu
             nn.Parameter(torch.zeros(1, params.latent_dim), **grad)  # logvar
         ])
-        self.vaes[0].llik_scaling = prod(self.vaes[1].data_size) / prod(self.vaes[0].data_size) \
+        self.vaes[0].llik_scaling = prod(
+            self.vaes[1].data_size) / prod(self.vaes[0].data_size) \
             if params.llik_scaling == 0 else params.llik_scaling
         self.modelName = 'cmnist-oscn'
 
     @property
     def pz_params(self):
-        return self._pz_params[0], F.softmax(self._pz_params[1], dim=1) * self._pz_params[1].size(-1)
+        return self._pz_params[0], \
+            F.softmax(self._pz_params[1], dim=1) * self._pz_params[1].size(-1)
 
     def getDataLoaders(self, batch_size, shuffle=True, device='cuda'):
         # get transformed indices
-        t_cmnist = torch.load('../data/train-ms-cmnist-idx.pt')
-        t_oscn = torch.load('../data/train-ms-oscn-idx.pt')
-        s_cmnist = torch.load('../data/test-ms-cmnist-idx.pt')
-        s_oscn = torch.load('../data/test-ms-oscn-idx.pt') 
+        t_cmnist = torch.load('./data/train-ms-cmnist-idx.pt')
+        t_oscn = torch.load('./data/train-ms-oscn-idx.pt')
+        s_cmnist = torch.load('./data/test-ms-cmnist-idx.pt')
+        s_oscn = torch.load('./data/test-ms-oscn-idx.pt')
 
         # load base datasets
         t1, s1 = self.vaes[0].getDataLoaders(batch_size, shuffle, device)
@@ -51,63 +57,100 @@ class MMVAE_CMNIST_OSCN(MMVAE):
         test_cmnist_oscn = TensorDataset([
             ResampleDataset(s1.dataset, lambda d, i: s_cmnist[i], size=len(s_cmnist)),
             ResampleDataset(s2.dataset, lambda d, i: s_oscn[i], size=len(s_oscn))
-        ]) 
+        ])
 
-        
-        """ train_cmnist_oscn = TensorDataset([t1.dataset, t2.dataset])
-        test_cmnist_oscn = TensorDataset([s1.dataset, s2.dataset]) """
-        print(len(train_cmnist_oscn), len(test_cmnist_oscn) )
-
-        kwargs = {'num_workers': 2, 'pin_memory': True} if device == 'cuda' else {}
-        train = DataLoader(train_cmnist_oscn, batch_size=batch_size, shuffle=shuffle, **kwargs)
-        test = DataLoader(test_cmnist_oscn, batch_size=batch_size, shuffle=shuffle, **kwargs)
+        """
+        train_cmnist_oscn = TensorDataset([t1.dataset, t2.dataset])
+        test_cmnist_oscn = TensorDataset([s1.dataset, s2.dataset])
+        """
+        print(
+            '\nlength of cmnist and oscn dataset (train):',
+            len(train_cmnist_oscn),
+            '\nlength of cmnist and oscn dataset (test):',
+            len(test_cmnist_oscn)
+        )
+        kwargs = {
+            'num_workers': 2,
+            'pin_memory': True,
+        } if device == 'cuda' else {}
+        train = DataLoader(
+            train_cmnist_oscn,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            **kwargs)
+        test = DataLoader(
+            test_cmnist_oscn,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            **kwargs)
         return train, test
 
-    def generate(self, run_path, epoch):
-        N = 64
-        samples_list = super(MMVAE_CMNIST_OSCN, self).generate(N)
+    def generate(self,
+                 num_data=64,
+                 output_dir=None,
+                 suffix=''):
+        samples_list = super().generate(num_data)
         for i, samples in enumerate(samples_list):
             samples = samples.data.cpu()
             # wrangle things so they come out tiled
-            samples = samples.view(N, *samples.size()[1:])
-            save_image(samples,
-                       '{}/gen_samples_{}_{:03d}.png'.format(run_path, i, epoch),
-                       nrow=int(sqrt(N)))
+            samples = samples.view(num_data, *samples.size()[1:])
+            if output_dir is not None:
+                fname = '{}/gen_samples_{}_{:03d}.png'.format(output_dir, i, suffix)
+                save_image(samples, fname, nrow=int(sqrt(num_data)))
+        return samples
 
-    def generate_special(self, mean, target_modality, label, run_path):
-        N = 64
-        samples_list = super(MMVAE_CMNIST_OSCN, self).generate_special(N, mean)
+    def generate_special(self,
+                         mean,
+                         num_data=64,
+                         target_modality=1,
+                         output_dir=None,
+                         suffix='',
+                         ):
+        samples_list = super().generate_special(
+            mean=mean,
+            num_data=num_data,
+        )
         for i, samples in enumerate(samples_list):
             samples = samples.data.cpu()
             # wrangle things so they come out tiled
-            samples = samples.view(N, *samples.size()[1:])
-            if i == target_modality:
-                save_image(
-                    samples,
-                    '{}/gen_special_samples_cmnist-oscn_{}'.format(run_path, i) + "_" + label + '.png',
-                        nrow=int(sqrt(N)))
+            samples = samples.view(num_data, *samples.size()[1:])
+            if i == target_modality and output_dir is not None:
+                fname = '{}/gen_special_samples_cmnist-oscn_{}'.format(
+                    output_dir, i) + "_" + suffix + '.png'
+                save_image(samples, fname, nrow=int(sqrt(num_data)))
+        return samples
 
-    def reconstruct(self, data, run_path, epoch, n = 8):
-        recons_mat = super(MMVAE_CMNIST_OSCN, self).reconstruct([d[:n] for d in data])
+    def reconstruct(self,
+                    data,
+                    output_dir=None,
+                    suffix='',
+                    num_data=None):
+        recons_mat = super().reconstruct([d[:num_data] for d in data])
         for r, recons_list in enumerate(recons_mat):
             for o, recon in enumerate(recons_list):
-                _data = data[r][:n].cpu()
+                _data = data[r][:num_data].cpu()
                 recon = recon.squeeze(0).cpu()
                 # resize Cmnist to 32 and colour. 0 => Cmnist, 1 => OSCN
                 _data = _data if r == 1 else resize_img(_data, self.vaes[1].data_size)
                 recon = recon if o == 1 else resize_img(recon, self.vaes[1].data_size)
                 comp = torch.cat([_data, recon])
-                save_image(comp, '{}/recon_{}x{}_{:03d}.png'.format(run_path, r, o, epoch))
+                if output_dir is not None:
+                    fname = '{}/recon_{}x{}_{:03d}.png'.format(output_dir, r, o, suffix)
+                    save_image(comp, fname)
+        return recons_mat
 
-    def analyse(self, data, run_path, epoch):
-        #zemb, zsl, kls_df = super(MMVAE_CMNIST_OSCN, self).analyse(data, K=10)
+    def analyse(self,
+                data,
+                output_dir,
+                suffix):
+        #zemb, zsl, kls_df = super().analyse(data, K=10)
         labels = ['Prior', *[vae.modelName.lower() for vae in self.vaes]]
         print(labels)
-        #plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(run_path, epoch))
-        #plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(run_path, epoch))
+        #plot_embeddings(zemb, zsl, labels, '{}/emb_umap_{:03d}.png'.format(output_dir, suffix))
+        #plot_kls_df(kls_df, '{}/kl_distance_{:03d}.png'.format(output_dir, suffix))
 
     def latent(self, data):
-        zss= super(MMVAE_CMNIST_OSCN, self).get_latent(data)
+        zss= super().get_latent(data)
         return zss
 
 def resize_img(img, refsize):

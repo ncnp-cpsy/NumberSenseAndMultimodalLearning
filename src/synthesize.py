@@ -8,12 +8,21 @@ import seaborn as sns
 def make_run_ids_dict(experiment_dir):
     print('run_ids_dict was automatically constructed.')
     run_ids_dict = {}
-    model_dirs = glob.glob(experiment_dir + '/*')
-    for model_dir in model_dirs:
-        model_name = os.path.split(model_dir)[1]
+    # model_names = [
+    #     os.path.split(model_dir)[1] \
+    #     for model_dir in glob.glob(experiment_dir + '/*')
+    # ]
+    model_names = [
+        'VAE_CMNIST',
+        'VAE_OSCN',
+        'MMVAE_OSCN',
+    ]
+    for model_name in model_names:
+        model_dir = os.path.join(experiment_dir, model_name)
         run_ids = [
             os.path.split(run_id_dir)[1] \
-            for run_id_dir in glob.glob(model_dir + '/*')]
+            for run_id_dir in glob.glob(model_dir + '/*')
+        ]
         run_ids_dict.update({model_name: run_ids})
     return run_ids_dict
 
@@ -43,10 +52,17 @@ def synthesize(args,
     experiment_dir = os.path.join('./rslt/' + args.experiment)
 
     if type(run_ids_dict) is type(None):
-        run_ids_dict = make_run_ids_dict(
-            experiment_dir=experiment_dir,
-        )
-    print('run_ids_dict for synthesized:', run_ids_dict)
+        if 'run_ids_dict' in dir(args):
+            run_ids_dict = args.run_ids_dict
+        else:
+            run_ids_dict = make_run_ids_dict(
+                experiment_dir=experiment_dir,
+            )
+            print('run_ids_dict for synthesized:', run_ids_dict)
+    try:
+        pprint.pprint(run_ids_dict)
+    except Exception as e:
+        print(run_ids_dict)
 
     # convert to pandas dataframe
     results = make_synthesized_data(
@@ -54,8 +70,7 @@ def synthesize(args,
         run_ids_dict=run_ids_dict,
     )
     print(results)
-    # results.to_csv(args.output_dir + 'synthesized.csv')
-    results.to_csv('synthesized.csv')
+    results.to_csv(args.output_dir + '/synthesized.csv')
 
     # Plot
     columns_selected = [
@@ -67,7 +82,7 @@ def synthesize(args,
     sns.pairplot(
         results[columns_selected],
         hue='model_name',
-    ).savefig('pairplot.png')
+    ).savefig(args.output_dir + '/pairplot.png')
     return
 
 if __name__ == '__main__':

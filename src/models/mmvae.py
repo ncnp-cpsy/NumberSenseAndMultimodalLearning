@@ -13,7 +13,7 @@ from src.vis import embed_umap, tensors_to_df
 
 class MMVAE(nn.Module):
     def __init__(self, prior_dist, params, *vaes):
-        super(MMVAE, self).__init__()
+        super().__init__()
         self.pz = prior_dist
         self.vaes = nn.ModuleList([vae(params) for vae in vaes])
         self.modelName = None  # filled-in per sub-class
@@ -71,18 +71,22 @@ class MMVAE(nn.Module):
             #zss.append(zs)
         return  zss
 
-    def generate(self, N):
+    def generate(self,
+                 num_data):
         self.eval()
         with torch.no_grad():
             data = []
             pz = self.pz(*self.pz_params)
-            latents = pz.rsample(torch.Size([N]))
+            latents = pz.rsample(torch.Size([num_data]))
             for d, vae in enumerate(self.vaes):
                 px_z = vae.px_z(*vae.dec(latents))
                 data.append(px_z.mean.view(-1, *px_z.mean.size()[2:]))
         return data  # list of generations---one for each modality
 
-    def generate_special(self, N, mean):
+    def generate_special(self,
+                         mean,
+                         num_data=64,
+                         ):
         self.eval()
         with torch.no_grad():
             data = []
@@ -92,13 +96,17 @@ class MMVAE(nn.Module):
             mean = mean.to(device)
             pz = self.pz(mean, hoge[1])
             #pz = self.pz(mean, torch.zeros(1, 20).to(device) + 0.5 )
-            latents = pz.rsample(torch.Size([N]))
+            latents = pz.rsample(torch.Size([num_data]))
             for d, vae in enumerate(self.vaes):
                 px_z = vae.px_z(*vae.dec(latents))
                 data.append(px_z.mean.view(-1, *px_z.mean.size()[2:]))
         return data  # list of generations---one for each modality
 
-    def reconstruct(self, data):
+    def reconstruct(self,
+                    data,
+                    output_dir=None,
+                    suffix=''
+                    ):
         self.eval()
         with torch.no_grad():
             if 'use_conditional' in vars(self.params):
