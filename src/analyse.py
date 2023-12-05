@@ -301,7 +301,7 @@ def analyse_magnitude(runner,
     plt.clf()
 
     return {
-        'magnitude_avg': correlation,
+        'magnitude_avg': np.abs(correlation),
         'magnitude_all': correlation,
     }
 

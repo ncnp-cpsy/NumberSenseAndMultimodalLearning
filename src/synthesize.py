@@ -4,6 +4,11 @@ import glob
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import scipy.stats as stats
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+import matplotlib.pyplot as plt
+
 
 def make_run_ids_dict(experiment_dir):
     print('run_ids_dict was automatically constructed.')
@@ -50,6 +55,106 @@ def make_synthesized_data(experiment_dir,
                     print(fname, 'was loaded.')
     results = pd.DataFrame(results)
     return results
+
+def plot_box(df_wide,
+             target_column,
+             fname,
+             ):
+    df = df_wide
+    vals, xs = [], []
+    palette = ['r', 'g', 'b', 'y']
+    names = df.columns
+    # names = ['Multi-modal', 'Single-modal']
+
+    # boxplot
+    for i, col in enumerate(df.columns):
+        vals.append(df[col].values)
+        # adds jitter to the data points - can be adjusted
+        xs.append(
+            np.random.normal(i + 1, 0.02, df[col].values.shape[0]))
+    plt.boxplot(
+        vals,
+        labels=names,
+        widths=(0.6, 0.6),
+    )
+
+    # scatter
+    for x, val, c in zip(xs, vals, palette):
+        plt.scatter(x, val, alpha=0.9, color=c)
+    plt.tick_params(labelsize=15)
+    plt.savefig(fname, format='svg')
+
+    # pandas
+    # df.plot.box(grid=True)
+    # plt.savefig(fname, format='svg')
+
+    plt.close()
+    return
+
+def perform_anova(df,
+                  target_modality,
+                  target_column,
+                  output_dir='./',
+                  ):
+    print(
+        'Start ANOVA.',
+        '\ntarget_modality:', target_modality,
+        '\ntarget_column:', target_column,
+    )
+    mmvae_name = 'MMVAE_CMNIST_OSCN'
+    if target_modality == 0:
+        vae_name = 'VAE_CMNIST'
+    elif target_modality == 1:
+        vae_name = 'VAE_OSCN'
+    else:
+        Exception
+
+    # Extract
+    query_1 = '(model_name in [@mmvae_name])'
+    query_2 = '(target_modality == @target_modality)'
+    query_3 = '(model_name in [@vae_name])'
+    query = '(' + query_1 + ' and ' + query_2 + ') or ' + query_3
+    print(query)
+    df = df.query(query)[['id', 'model_name', target_column]]
+    df['id'] = df['id'].str.replace(
+        'mmvae_cmnist_oscn_', ''
+    ).str.replace(
+        'vae_oscn_', ''
+    ).str.replace(
+        'vae_cmnist_', ''
+    )
+    print(df)
+
+    df_wide = pd.pivot(
+        data=df,
+        index='id',
+        columns='model_name',
+        values=target_column,
+    )
+    print(df_wide)
+
+    # Plot
+    fname = output_dir + '/anova_' + str(target_modality) + '_' + target_column + '.svg'
+    plot_box(
+        df_wide=df_wide,
+        target_column=target_column,
+        fname=fname
+    )
+
+    # ANOVA using stats
+    fvalue, pvalue = stats.f_oneway(df_wide[mmvae_name], df_wide[vae_name])
+    print(
+        'F-value:', fvalue,
+        '\np-value:', pvalue,
+    )
+
+    # ANOVA using ols and anova_lm
+    script = target_column + '~C(model_name)'
+    model = ols(script, data=df).fit()
+    anova_table = sm.stats.anova_lm(model, typ=2)
+    print(anova_table)
+
+    return
 
 def synthesize(args,
                run_ids_dict=None):
@@ -107,6 +212,8 @@ def analyse_synthesized_data(
     print('analyzed data (all):')
     print(synthesized)
     synthesized.to_csv(output_dir + '/synthesized.csv')
+
+    print('---')
     print('analyzed data (selected):')
     if target_modality is None:
         synthesized = synthesized[columns]
@@ -117,12 +224,27 @@ def analyse_synthesized_data(
     print(synthesized)
 
     print('---')
+    cols = [
+        'magnitude_avg',
+        'cluster_avg',
+        'mathematics_avg',
+    ]
+    for col in cols:
+        perform_anova(
+            df=synthesized,
+            target_modality=target_modality,
+            target_column=col,
+            output_dir=output_dir,
+        )
+
+    print('---')
     print('pairplot')
     fname = output_dir + '/pairplot' + suffix + '.png'
     sns.pairplot(
         synthesized,
         hue='model_name',
-    ).savefig(fname)
+    ).savefig(fname, format='png')
+    plt.close()
 
     return rslt
 
