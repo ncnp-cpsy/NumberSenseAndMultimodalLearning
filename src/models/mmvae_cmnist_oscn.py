@@ -111,14 +111,14 @@ class MMVAE_CMNIST_OSCN(MMVAE):
             num_data=num_data,
         )
         for i, samples in enumerate(samples_list):
-            samples = samples.data.cpu()
+            samples_save = samples.data.cpu()
             # wrangle things so they come out tiled
-            samples = samples.view(num_data, *samples.size()[1:])
+            samples_save = samples_save.view(num_data, *samples_save.size()[1:])
             if i == target_modality and output_dir is not None:
                 fname = '{}/gen_special_samples_cmnist-oscn_{}'.format(
                     output_dir, i) + "_" + suffix + '.png'
-                save_image(samples, fname, nrow=int(sqrt(num_data)))
-        return samples
+                save_image(samples_save, fname, nrow=int(sqrt(num_data)))
+        return samples_list
 
     def reconstruct(self,
                     data,

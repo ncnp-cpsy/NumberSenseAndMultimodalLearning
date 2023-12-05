@@ -148,9 +148,10 @@ def main(args):
     return
 
 def run_all():
-    seed_initial, seed_end = 0, 3
+    seed_initial, seed_end = 0, 5
     run_ids_dict = defaultdict(list)
     execute_train = True
+    execute_analyse = True
     experiment_name = config_trainer_vae_cmnist.experiment
 
     # Train of classifier
@@ -201,7 +202,8 @@ def run_all():
             args.run_id = run_id
             args.pretrained_path = os.path.join(
                 './rslt', experiment_name, model_name, run_id)
-            main(args=args)
+            if execute_analyse:
+                main(args=args)
 
     # Synthesize
     args = config_synthesizer
@@ -238,22 +240,22 @@ def test_train():
 def test_analyse():
     experiment_name = config_trainer_vae_oscn.experiment
 
-    # # CMNIST
-    # args = config_analyzer_vae_cmnist
-    # model_name = 'VAE_CMNIST'
-    # args.run_id = 'test_vae_cmnist'
-    # args.pretrained_path = os.path.join(
-    #     './rslt', experiment_name, model_name, args.run_id)
-    # main(args=args)
+    # CMNIST
+    args = config_analyzer_vae_cmnist
+    model_name = 'VAE_CMNIST'
+    args.run_id = 'test_vae_cmnist'
+    args.pretrained_path = os.path.join(
+        './rslt', experiment_name, model_name, args.run_id)
+    main(args=args)
 
-    # # OSCN
-    # args = config_analyzer_vae_oscn
-    # model_name = 'VAE_OSCN'
-    # args.run_id = 'test_vae_oscn'
-    # args.pretrained_path = os.path.join(
-    #     './rslt', experiment_name, model_name, args.run_id)
-    # main(args=args)
-    # args = config_analyzer_vae_oscn
+    # OSCN
+    args = config_analyzer_vae_oscn
+    model_name = 'VAE_OSCN'
+    args.run_id = 'test_vae_oscn'
+    args.pretrained_path = os.path.join(
+        './rslt', experiment_name, model_name, args.run_id)
+    main(args=args)
+    args = config_analyzer_vae_oscn
 
     # MMVAE
     args = config_analyzer_mmvae_cmnist_oscn

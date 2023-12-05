@@ -87,6 +87,8 @@ class MMVAE(nn.Module):
                          mean,
                          num_data=64,
                          ):
+        """Generate outputs using `mean` arguments
+        """
         self.eval()
         with torch.no_grad():
             data = []
@@ -95,7 +97,7 @@ class MMVAE(nn.Module):
             device = torch.device("cuda")
             mean = mean.to(device)
             pz = self.pz(mean, hoge[1])
-            #pz = self.pz(mean, torch.zeros(1, 20).to(device) + 0.5 )
+            # pz = self.pz(mean, torch.zeros(1, 20).to(device) + 0.5 )
             latents = pz.rsample(torch.Size([num_data]))
             for d, vae in enumerate(self.vaes):
                 px_z = vae.px_z(*vae.dec(latents))

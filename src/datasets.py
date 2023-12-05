@@ -293,7 +293,8 @@ def convert_label_to_int(label,
                          target_property=0,
                          target_modality=0,
                          data=None,
-                         do_print=True,
+                         do_print=False,
+                         do_print_simple=False,
                          ):
     zukei_to_int = {
         'j': 0,
@@ -307,14 +308,17 @@ def convert_label_to_int(label,
         'w': 0,
     }
 
-    if do_print:
+    if do_print or do_print_simple:
         print(
             '\n===\nlabel info before conversion...',
             '\nmodel name:', model_name,
             '\ntarget_property:', target_property,
             '\ntarget_modality:', target_modality,
+            '\nlabel:\n', label,
+            )
+    if do_print:
+        print(
             '\ntype(label):', type(label),
-            '\nlabel:', label,
             '\nlabel[0]:', label[0],
             '\nlabel[1]:', label[1],
         )
@@ -390,11 +394,14 @@ def convert_label_to_int(label,
         label = torch.Tensor(label)
     label = label.to(torch.int64)
 
-    if do_print:
+    if do_print or do_print_simple:
         print(
             '\n===\nlabel info after conversion...',
+            '\nlabel:\n', label,
+        )
+    if do_print:
+        print(
             '\ntype(label):', type(label),
-            '\nlabel:', label,
             '\nlabel[0]:', label[0],
             '\nlabel[1]:', label[1],
         )

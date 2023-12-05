@@ -73,6 +73,8 @@ class VAE(nn.Module):
     def generate_special(self,
                          mean,
                          num_data=64):
+        """Generate outputs using `mean` arguments
+        """
         self.eval()
         with torch.no_grad():
             data = []

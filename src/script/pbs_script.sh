@@ -12,7 +12,9 @@ date +"%Y/%m/%d %p %I:%M:%S"
 start_time=`date +%s`
 cd $PBS_O_WORKDIR
 
-./run_replication_all.sh
+shopt -s expand_aliases
+alias my-python='/home/taka/.pyenv/shims/python'
+my-python ./main.py
 
 date +"%Y/%m/%d %p %I:%M:%S"
 end_time=`date +%s`
