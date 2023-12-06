@@ -1,6 +1,7 @@
 from collections import defaultdict
 import time
 from PIL import Image
+import pprint
 
 import numpy as np
 import torch
@@ -22,7 +23,8 @@ class Runner():
         self.model_name = args.model
 
         # construct and load model
-        print('\n\nModel runner was initialized.')
+        print('\n\nModel runner was constructed.')
+        pprint.pprint(self.args)
         model_class = getattr(models, '{}'.format(self.model_name))
         model = model_class(args).to(args.device)
         try:
@@ -37,6 +39,8 @@ class Runner():
             model.load_state_dict(
                 torch.load(args.pretrained_path + '/model.rar'))
             # model._pz_params = model._pz_params  # DEBUG
+        else:
+            print('Model is initialized without loading.')
         self.model = model
 
         # preparation for training

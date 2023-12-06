@@ -5,9 +5,9 @@ Additionally, refer to the source code of MMVAE in the original paper.
 """
 from src.utils import DotDict
 
-epochs = 50
+epochs = 30
 # experiment_name = 'test-pipeline-loop-7'
-experiment_name = 'test-pbs-2'
+experiment_name = 'test-pbs-1'
 id_vae_cmnist = '2023-12-04T12:35:32.971112'
 id_vae_oscn = '2023-12-04T12:37:09.612504'
 id_mmvae_cmnist_oscn = '2023-12-04T12:37:09.612504'

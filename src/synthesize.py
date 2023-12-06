@@ -56,6 +56,24 @@ def make_synthesized_data(experiment_dir,
     results = pd.DataFrame(results)
     return results
 
+def plot_scatter(df,
+                 fname,
+                 model_name=None,
+                 target_modality=None,
+                 col_x='',
+                 col_y='',
+                 ):
+    if model_name is not None:
+        df = df.loc[df['model_name'] == model_name]
+    if target_modality is not None:
+        df = df.loc[df['target_modality'] == target_modality]
+    plt.scatter(df[col_x], df[col_y])
+    plt.xlabel(col_x)
+    plt.ylabel(col_y)
+    plt.savefig(fname, format='svg')
+    plt.close()
+    return
+
 def plot_box(df_wide,
              target_column,
              fname,
@@ -69,9 +87,9 @@ def plot_box(df_wide,
     # boxplot
     for i, col in enumerate(df.columns):
         vals.append(df[col].values)
-        # adds jitter to the data points - can be adjusted
-        xs.append(
-            np.random.normal(i + 1, 0.02, df[col].values.shape[0]))
+        # x = np.random.normal(i + 1, 0.02, df[col].values.shape[0])  # with jitter
+        x = [i + 1 for n in range(df[col].values.shape[0])]  # without jitter
+        xs.append(x)
     plt.boxplot(
         vals,
         labels=names,
@@ -144,7 +162,8 @@ def perform_anova(df,
     # ANOVA using stats
     fvalue, pvalue = stats.f_oneway(df_wide[mmvae_name], df_wide[vae_name])
     print(
-        'F-value:', fvalue,
+        '\n---',
+        '\nF-value:', fvalue,
         '\np-value:', pvalue,
     )
 
@@ -179,6 +198,15 @@ def synthesize(args,
         run_ids_dict=run_ids_dict,
     )
 
+    # convert `reconst_0x0_avg` value to `1x1` in VAE_OSCN.
+    cols = ['id', 'model_name', 'reconst_0x0_avg', 'reconst_1x1_avg']
+    print('Before converting:\n', results[cols])
+    reconst_1x1_avg = results.loc[results['model_name'] == 'VAE_OSCN', 'reconst_1x1_avg']
+    results.loc[results['model_name'] == 'VAE_OSCN', 'reconst_1x1_avg'] = \
+        results.loc[results['model_name'] == 'VAE_OSCN']['reconst_0x0_avg']
+    results.loc[results['model_name'] == 'VAE_OSCN', 'reconst_0x0_avg'] = reconst_1x1_avg
+    print('After converting:\n', results[cols])
+
     # Statistical test and plot
     for target_modality in [0, 1]:
         columns_selected = [
@@ -208,28 +236,30 @@ def analyse_synthesized_data(
 ):
     rslt = {}
 
-    print('---')
+    print('===')
     print('analyzed data (all):')
     print(synthesized)
     synthesized.to_csv(output_dir + '/synthesized.csv')
 
-    print('---')
-    print('analyzed data (selected):')
-    if target_modality is None:
-        synthesized = synthesized[columns]
-    else:
-        query = '(target_modality == @target_modality and model_name in ["MMVAE_CMNIST_OSCN"]) or (not model_name in ["MMVAE_CMNIST_OSCN"])'
-        print(query)
-        synthesized = synthesized.query(query)[columns]
-    print(synthesized)
+    # print('===')
+    # print('analyzed data (selected):')
+    # if target_modality is None:
+    #     synthesized = synthesized[columns]
+    # else:
+    #     query = '(target_modality == @target_modality and model_name in ["MMVAE_CMNIST_OSCN"]) or (not model_name in ["MMVAE_CMNIST_OSCN"])'
+    #     print(query)
+    #     synthesized = synthesized.query(query)[columns]
+    # print(synthesized)
 
-    print('---')
+    print('===')
     cols = [
         'magnitude_avg',
         'cluster_avg',
         'mathematics_avg',
+        'reconst_' + str(target_modality) + 'x' + str(target_modality) + '_avg'
     ]
     for col in cols:
+        print('---')
         perform_anova(
             df=synthesized,
             target_modality=target_modality,
@@ -237,7 +267,19 @@ def analyse_synthesized_data(
             output_dir=output_dir,
         )
 
-    print('---')
+    print('===')
+    print('scatter bettween cluster and magnitude')
+    fname = output_dir + '/scatter_' + str(target_modality) + '.svg'
+    plot_scatter(
+        df=synthesized,
+        fname=fname,
+        model_name='MMVAE_CMNIST_OSCN',
+        target_modality=target_modality,
+        col_x='magnitude_avg',
+        col_y='cluster_avg',
+    )
+
+    print('===')
     print('pairplot')
     fname = output_dir + '/pairplot' + suffix + '.png'
     sns.pairplot(

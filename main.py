@@ -6,6 +6,8 @@ from pathlib import Path
 import json
 import warnings
 import pprint
+import copy
+
 import numpy as np
 from numba.core.errors import NumbaPerformanceWarning
 import torch
@@ -150,38 +152,38 @@ def main(args):
 def run_all():
     seed_initial, seed_end = 0, 5
     run_ids_dict = defaultdict(list)
-    execute_train = True
+    execute_train = False
     execute_analyse = True
     experiment_name = config_trainer_vae_cmnist.experiment
 
     # Train of classifier
-    args = config_classifier_cmnist
+    args = copy.copy(config_classifier_cmnist)
     args.pretrained_path = ''
     if execute_train:
         main(args=args)
 
-    args = config_classifier_oscn
+    args = copy.copy(config_classifier_oscn)
     args.pretrained_path = ''
     if execute_train:
         main(args=args)
 
     # Train of VAE and MMVAE
     for seed in range(seed_initial, seed_end):
-        args = config_trainer_vae_cmnist
+        args = copy.copy(config_trainer_vae_cmnist)
         args.seed = seed
         args.run_id = 'vae_cmnist_seed_' + str(seed)
         run_ids_dict['VAE_CMNIST'].append(args.run_id)
         if execute_train:
             main(args=args)
 
-        args = config_trainer_vae_oscn
+        args = copy.copy(config_trainer_vae_oscn)
         args.seed = seed
         args.run_id = 'vae_oscn_seed_' + str(seed)
         run_ids_dict['VAE_OSCN'].append(args.run_id)
         if execute_train:
             main(args=args)
 
-        args = config_trainer_mmvae_cmnist_oscn
+        args = copy.copy(config_trainer_mmvae_cmnist_oscn)
         args.seed = seed
         args.run_id = 'mmvae_cmnist_oscn_seed_' + str(seed)
         run_ids_dict['MMVAE_CMNIST_OSCN'].append(args.run_id)
@@ -192,11 +194,11 @@ def run_all():
     for model_name in run_ids_dict.keys():
         for run_id in run_ids_dict[model_name]:
             if model_name == 'VAE_OSCN':
-                args = config_analyzer_vae_oscn
+                args = copy.copy(config_analyzer_vae_oscn)
             elif model_name == 'VAE_CMNIST':
-                args = config_analyzer_vae_cmnist
+                args = copy.copy(config_analyzer_vae_cmnist)
             elif model_name == 'MMVAE_CMNIST_OSCN':
-                args = config_analyzer_mmvae_cmnist_oscn
+                args = copy.copy(config_analyzer_mmvae_cmnist_oscn)
             else:
                 Exception
             args.run_id = run_id
@@ -206,7 +208,7 @@ def run_all():
                 main(args=args)
 
     # Synthesize
-    args = config_synthesizer
+    args = copy.copy(config_synthesizer)
     args.pretrained_path = os.path.join(
         './rslt', experiment_name, model_name, run_id) # dummy path
     main(args=args)
@@ -270,14 +272,14 @@ def test_train_loop():
     run_ids_dict = defaultdict(list)
     execute_train = True
     for seed in range(3, 5):
-        args = config_trainer_vae_cmnist
+        args = copy.copy(config_trainer_vae_cmnist)
         args.seed = seed
         args.run_id = 'vae_cmnist_seed_' + str(seed)
         run_ids_dict['VAE_CMNIST'].append(args.run_id)
         if execute_train:
             main(args=args)
 
-        args = config_trainer_vae_oscn
+        args = copy.copy(config_trainer_vae_oscn)
         args.seed = seed
         args.run_id = 'vae_oscn_seed_' + str(seed)
         run_ids_dict['VAE_OSCN'].append(args.run_id)
@@ -285,7 +287,7 @@ def test_train_loop():
             main(args=args)
 
         # MMVAE
-        args = config_trainer_mmvae_cmnist_oscn
+        args = copy.copy(config_trainer_mmvae_cmnist_oscn)
         args.seed = seed
         args.run_id = 'mmvae_cmnist_oscn_seed_' + str(seed)
         run_ids_dict['MMVAE_CMNIST_OSCN'].append(args.run_id)
@@ -298,11 +300,11 @@ def test_analyse_loop(run_ids_dict):
     for model_name in run_ids_dict.keys():
         for run_id in run_ids_dict[model_name]:
             if model_name == 'VAE_OSCN':
-                args = config_analyzer_vae_oscn
+                args = copy.copy(config_analyzer_vae_oscn)
             elif model_name == 'VAE_CMNIST':
-                args = config_analyzer_vae_cmnist
+                args = copy.copy(config_analyzer_vae_cmnist)
             elif model_name == 'MMVAE_CMNIST_OSCN':
-                args = config_analyzer_mmvae_cmnist_oscn
+                args = copy.copy(config_analyzer_mmvae_cmnist_oscn)
             else:
                 Exception
             args.run_id = run_id
@@ -311,7 +313,7 @@ def test_analyse_loop(run_ids_dict):
             main(args=args)
 
 def test_synthesize():
-    args = config_synthesizer
+    args = copy.copy(config_synthesizer)
     experiment_name = config_trainer_vae_cmnist.experiment
     model_name = 'VAE_OSCN'
     run_id = 'test_vae_oscn'
@@ -330,14 +332,14 @@ def test_run_all():
     run_all()
 
 def test():
-    # test_train_classifier()
-    # test_train()
-    # test_analyse()
-    # test_synthesize()
-    # test_pipeline()
+    test_train_classifier()
+    test_train()
+    test_analyse()
+    test_synthesize()
+    test_pipeline()
     test_run_all()
 
 if __name__ == '__main__':
-    test()
+    run_all()
+    # test()
     # main(args=config_trainer_vae_oscn)
-    # run_all()

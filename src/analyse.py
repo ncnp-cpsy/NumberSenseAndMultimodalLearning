@@ -1,7 +1,8 @@
-import csv
-from pathlib import Path
+import sys
 import itertools
+import csv
 import pprint
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -18,7 +19,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-from src.utils import unpack_data
+from src.utils import unpack_data, Logger
 from src.runner import Runner
 from src.datasets import convert_label_to_int
 
@@ -50,6 +51,7 @@ def count_reconst(recon,
                   classifier,
                   output_dir='./',
                   suffix='',
+                  set_label=None
                   ):
     def accuracy(pred, tar):
         print('pred:', pred, '\ntar:', tar)
@@ -58,7 +60,8 @@ def count_reconst(recon,
     pred_label = classifier.predict(recon)
     pred_label = torch.argmax(pred_label, dim=1).cpu() + 1
     true_label = true_label.cpu()
-    set_label = list(set(true_label.numpy()))
+    if set_label is None:
+        set_label = list(set(true_label.numpy()))
 
     # all category
     acc_all, acc_ratio = accuracy(
@@ -80,6 +83,7 @@ def count_reconst(recon,
     fname = output_dir + '/confusion' + suffix + '.svg'
     disp.plot()
     plt.savefig(fname, format='svg')
+    plt.clf()
     print('Accuracy:\n', conf_mat)
 
     # normalized
@@ -91,6 +95,7 @@ def count_reconst(recon,
     fname = output_dir + '/confusion_normalized' + suffix + '.svg'
     disp.plot()
     plt.savefig(fname, format='svg')
+    plt.clf()
     print('Accuracy:\n', np.round(conf_mat_nrm, decimals=3))
 
     return acc_ratio.item(), conf_mat_nrm
@@ -229,7 +234,8 @@ def analyse_cluster(latent_all,
     plt.yticks(yticks, cluster_labels + 1)
     plt.ylabel('Cluster')
     plt.xlabel('silhouette coefficient')
-    plt.savefig(output_dir + '/silhouette_' + '_' + str(target_modality) + '_' + str(target_property) + '.svg', format='svg')
+    fname = output_dir + '/silhouette_' + str(target_modality) + '_' + str(target_property) + '.svg'
+    plt.savefig(fname, format='svg')
     plt.clf()
 
     return {
@@ -246,6 +252,7 @@ def analyse_magnitude(runner,
                       start_ind,
                       end_ind,
                       withzero,
+                      trans_log=False,
                       output_dir='./',
                       ):
     mean_all = [None for i in range(category_num)]
@@ -253,9 +260,14 @@ def analyse_magnitude(runner,
 
     for i in range(start_ind, end_ind):
         target_latents = latent_all[np.where(label_all == i)]
+        mean = np.mean(target_latents, axis = 0)
+        if trans_log:
+            print('Perform log transformation')
+            print('Before:\n', mean)
+            mean = np.exp(mean)
+            print('After:\n', mean)
+        mean_all[i - start_ind] = mean
         # print(target_latents.shape)
-
-        mean_all[i - start_ind] = np.mean(target_latents, axis = 0)
         # print(mean_all[i-1].shape)
         # print(np.mean(target_latents, axis = 1))
 
@@ -395,7 +407,9 @@ def analyse_tsne_3d(label_all,
         ax.scatter(result[:,0], result[:,1], result[:, 2],
                    s = 0.5, c = color_dict[i - start_ind])
 
-    plt.savefig(output_dir + '/3d_latent_' + str(target_modality) + '_' + str(target_property) + '.svg', format='svg')
+    fname = output_dir + '/3d_latent_' + str(target_modality) + '_' + str(target_property) + '.svg'
+    plt.savefig(fname, format='svg')
+    plt.clf()
     return {
         'tsne-3d_avg': np.nan,
         'tsne-3d_all': np.nan,
@@ -413,12 +427,37 @@ def analyse_mathematics(runner,
                         output_dir='./',
                         ):
 
-    mean_all = [None for i in range(category_num)]
-    generations = []
-    l = range(1, 10)
-
+    """
+    Note
+    ----
+    `mean_all` is average of latent embedding corresponding to the label.
+    The indices of `mean_all` are correspond to the number label.
+    """
     def check_satisfied_equation(base, add, sub):
-        return 1 <= base + add - sub and base + add - sub <= 9
+        over_one = 1 <= base + add - sub
+        under_nine = base + add - sub <= 9
+        no_repeat_base = base != sub
+        return over_one and under_nine and no_repeat_base
+
+    mean_all = [None for i in range(category_num)]
+    rslt = {}
+    generations = []
+    target_calcs = [
+        # base, add, sub
+        [1, 1, 1],
+        [1, 9, 8],
+        [1, 8, 4],
+        [2, 7, 1],
+        [2, 7, 2],
+        [3, 3, 3],
+        [3, 5, 2],
+        [3, 6, 3],
+        [5, 3, 5],
+        [9, 7, 8],
+        # [0, 3, 2],  # error
+    ]
+
+    l = range(1, 10)
 
     # make combinations of calculation equation
     elements = [(base, add, sub) \
@@ -433,12 +472,29 @@ def analyse_mathematics(runner,
 
     # latent embedding for each number
     for i in range(start_ind, end_ind):
+        print('i:', str(i))
         target_latents = latent_all[np.where(label_all == i)]
         mean_all[i] = np.mean(target_latents, axis = 0)
         # print(np.mean(target_latents, axis = 1))
-        # print('shape', mean_all[i].shape)
+        print('shape', mean_all[i].shape)
+    print('mean_all:', mean_all)
+
+    # analyse for selected calculation
+    for target_calc in target_calcs:
+        print('---')
+        rslt.update(check_selected_calculation(
+            runner=runner,
+            classifier=classifier,
+            mean_all=mean_all,
+            base=target_calc[0],
+            add=target_calc[1],
+            sub=target_calc[2],
+            target_modality=target_modality,
+            output_dir=output_dir,
+        ))
 
     # latent embedding for each calculation
+    print('---')
     for base, add, sub in elements:
         _, generation, _ = calculate_simple(
             runner=runner,
@@ -447,7 +503,8 @@ def analyse_mathematics(runner,
             add=add,
             sub=sub,
             target_modality=target_modality,
-            # output_dir=output_dir,
+            num_data=1,
+            output_dir=None,
         )
         generations.append(generation)
     # print(torch.stack(generations).shape)
@@ -460,94 +517,43 @@ def analyse_mathematics(runner,
         output_dir=output_dir,
         suffix='_mathe',
     )
-    return {
+    rslt.update({
         'mathematics_avg': acc,
         'mathematics_all': np.nan,
-      }
+      })
+    return rslt
 
 def calculate_simple(runner,
                      mean_all,
                      base,
                      add,
                      sub,
+                     num_data=64,
                      target_modality=1,
                      output_dir=None,
                      ):
     true_label = base + add - sub
     mean = mean_all[base] + mean_all[add] - mean_all[sub]
+    suffix = str(base) + '+' + str(add) + '-' + str(sub)
     if 'MMVAE' in runner.model_name:
         generation = runner.model.generate_special(
             mean=mean,
+            num_data=num_data,
             target_modality=target_modality,
             output_dir=output_dir,
-            suffix=str(base) + '+' + str(add) + '-' + str(sub),
-            num_data=1,
+            suffix=suffix,
         )
         generation = generation[target_modality]
     else:
         generation = runner.model.generate_special(
             mean=mean,
+            num_data=num_data,
             output_dir=output_dir,
-            suffix=str(base) + '+' + str(add) + '-' + str(sub),
-            num_data=1,
+            suffix=suffix,
         )
     return mean, generation, true_label
 
-def analyse_mathematics_selected(runner,
-                                 classifier,
-                                 latent_all,
-                                 label_all,
-                                 target_modality,
-                                 category_num,
-                                 start_ind,
-                                 end_ind,
-                                 output_dir='./',
-                                 ):
-    """
-    Note
-    ----
-    `mean_all` is average of latent embedding corresponding to the label.
-    The indices of `mean_all` are correspond to the number label.
-    """
-    target_calcs = [
-        # base, add, sub
-        [1, 9, 8],
-        [1, 8, 4],
-        [2, 7, 1],
-        [3, 5, 2],
-        # [0, 3, 2],  # error
-    ]
-    mean_all = [None for i in range(category_num)]
-    for i in range(start_ind, end_ind):
-        target_latents = latent_all[np.where(label_all == i)]
-        mean_all[i] = np.mean(target_latents, axis = 0)
-        # print(np.mean(target_latents, axis = 1))
-        print('shape', mean_all[i].shape)
-
-    # mean_all_for_calc = np.array(mean_all[start_ind:])
-    # model.generate_special(mean_all[0])
-    # base = mean_all_for_calc.mean(axis = 0)
-    # base[8] = (mean_all[1] + mean_all[8]  - mean_all[4])[8]
-    # base[8] = (mean_all[0] + mean_all[7] - mean_all[4])[8]
-    # model.generate_special(base)
-
-    results = {}
-    for target_calc in target_calcs:
-        rslt = check_additive(
-            runner=runner,
-            classifier=classifier,
-            mean_all=mean_all,
-            base=target_calc[0],
-            add=target_calc[1],
-            sub=target_calc[2],
-            target_modality=target_modality,
-            output_dir=output_dir,
-        )
-        results.update(rslt)
-
-    return results
-
-def check_additive(runner,
+def check_selected_calculation(runner,
                    classifier,
                    mean_all,
                    base,
@@ -560,29 +566,32 @@ def check_additive(runner,
     suffix = str(base) + '+' + str(add) + '-' + str(sub)
     mean = mean_all[base] + mean_all[add] - mean_all[sub]
     labels = [base + add - sub for idx in range(num_data)]
+    print('Target calculation:', suffix)
 
-    if 'MMVAE' in runner.model_name:
-        generation = runner.model.generate_special(
-            mean=mean,
-            num_data=num_data,
-            target_modality=target_modality,
-            output_dir=output_dir,
-            suffix=suffix,
-        )
-        generation = generation[target_modality]
-    else:
-        generation = runner.model.generate_special(
-            mean=mean,
-            num_data=num_data,
-            output_dir=output_dir,
-            suffix=suffix,
-        )
+    # mean_all_for_calc = np.array(mean_all[start_ind:])
+    # model.generate_special(mean_all[0])
+    # base = mean_all_for_calc.mean(axis = 0)
+    # base[8] = (mean_all[1] + mean_all[8]  - mean_all[4])[8]
+    # base[8] = (mean_all[0] + mean_all[7] - mean_all[4])[8]
+    # model.generate_special(base)
+
+    _, generation, _ = calculate_simple(
+        runner=runner,
+        mean_all=mean_all,
+        base=base,
+        add=add,
+        sub=sub,
+        target_modality=target_modality,
+        num_data=64,
+        output_dir=output_dir,
+    )
     acc, confusion = count_reconst(
         recon=generation.to(runner.args.device),
         true_label=torch.tensor(labels).to(runner.args.device),
         classifier=classifier,
         output_dir=output_dir,
         suffix='_' + suffix,
+        set_label=list(range(1, 10)),
     )
     """
     points = TSNE(n_components=3, random_state=0).fit_transform(mean_all)
@@ -601,7 +610,9 @@ def check_additive(runner,
                 print('{:.1f}'.format(v), end = " ")
         print("")
         # print(mean_all.mean(axis = 0))
+
     plt.savefig(output_dir + '/special_latent.svg', format='svg')
+    plt.clf()
 
     check_distance(
         mean_all=mean_all,
@@ -643,11 +654,10 @@ def check_distance(mean_all,
     return
 
 
-def get_latent_space(
-        runner,
-        target_modality,
-        target_property,
-        category_num):
+def get_latent_space(runner,
+                     target_modality,
+                     target_property,
+                     category_num):
 
     label_all = []
     latent_all = []
@@ -667,10 +677,10 @@ def get_latent_space(
                 '\n===\nData and label info...',
                 '\ntype(label):', type(label),
                 '\nlabel:', label,
-                '\nlabel[0]:', label[0],
-                '\nlabel[1]:', label[1],
+                # '\nlabel[0]:', label[0],
+                # '\nlabel[1]:', label[1],
                 '\ntype(data):', type(data),
-                '\ndata[0]:', data[0],
+                # '\ndata[0]:', data[0],
                 '\ndata[0].shape:', data[0].shape
             )
 
@@ -879,18 +889,6 @@ def analyse_model(runner,
             end_ind=end_ind,
             output_dir=output_dir,
         ))
-        print('---')
-        rslt.update(analyse_mathematics_selected(
-            runner=runner,
-            classifier=classifier,
-            latent_all=latent_all,
-            label_all=label_all,
-            target_modality=target_modality,
-            category_num=category_num,
-            start_ind=start_ind,
-            end_ind=end_ind,
-            output_dir=output_dir,
-        ))
     # save
     avgs = {
         'id': runner.args.run_id,
@@ -948,13 +946,16 @@ def analyse(args,
             Exception
 
         for target_property in property_list:
-            print('\n\n',
-                  '==============\n',
-                  'START ANALYSIS\n',
-                  '==============\n')
             output_dir = args.output_dir + '/' + \
                 str(target_modality) + '_' + str(target_property)
             Path(output_dir).mkdir(parents=True, exist_ok=True)
+            sys.stdout = Logger('{}/analyse.log'.format(output_dir))
+            print(
+                '\n\n',
+                '==============\n',
+                'START ANALYSIS\n',
+                '==============\n',
+            )
             rslt = analyse_model(
                 runner=runner,
                 classifier=classifier,
