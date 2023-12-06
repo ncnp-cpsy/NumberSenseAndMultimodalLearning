@@ -1,9 +1,10 @@
 #!/bin/bash
-#PBS -l select=1:ncpus=2:mem=15G:ngpus=1:host=s65
 #PBS -N MMVAE
+#PBS -l select=1:ncpus=2:mem=15G:ngpus=1:host=s65
 #PBS -j oe
 
 ## #PBS -l select=1:ncpus=2:mem=15G:ngpus=1:host=cpsy-t5820
+## #PBS -l select=1:ncpus=2:mem=15G:ngpus=1:host=s65
 
 echo "working directory: " $PBS_O_WORKDIR
 echo "omp thread num: " $OMP_NUM_THREADS

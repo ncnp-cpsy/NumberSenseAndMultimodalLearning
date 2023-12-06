@@ -160,19 +160,24 @@ def perform_anova(df,
     )
 
     # ANOVA using stats
-    fvalue, pvalue = stats.f_oneway(df_wide[mmvae_name], df_wide[vae_name])
-    print(
-        '\n---',
-        '\nF-value:', fvalue,
-        '\np-value:', pvalue,
-    )
+    try:
+        fvalue, pvalue = stats.f_oneway(df_wide[mmvae_name], df_wide[vae_name])
+        print(
+            '\n---',
+            '\nF-value:', fvalue,
+            '\np-value:', pvalue,
+        )
+    except Exception as e:
+        print('ANOVA was skipped because', e)
 
     # ANOVA using ols and anova_lm
-    script = target_column + '~C(model_name)'
-    model = ols(script, data=df).fit()
-    anova_table = sm.stats.anova_lm(model, typ=2)
-    print(anova_table)
-
+    try:
+        script = target_column + '~C(model_name)'
+        model = ols(script, data=df).fit()
+        anova_table = sm.stats.anova_lm(model, typ=2)
+        print(anova_table)
+    except Exception as e:
+        print('ANOVA was skipped because', e)
     return
 
 def synthesize(args,

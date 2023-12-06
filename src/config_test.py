@@ -5,13 +5,13 @@ Additionally, refer to the source code of MMVAE in the original paper.
 """
 from src.utils import DotDict
 
-epochs = 30
-experiment_name = 'parameter-search-1'
-id_vae_cmnist = '2023-12-04T12:35:32.971112'
-id_vae_oscn = '2023-12-04T12:37:09.612504'
-id_mmvae_cmnist_oscn = '2023-12-04T12:37:09.612504'
-id_classifier_cmnist = 'classifier-cmnist'
-id_classifier_oscn = 'classifier-oscn'
+epochs = 3
+experiment_name = 'test_loop_1'
+id_vae_cmnist = 'test_vae_cmnist'
+id_vae_oscn = 'test_vae_oscn'
+id_mmvae_cmnist_oscn = 'test_mmvae_cmnist_oscn'
+id_classifier_cmnist = 'test_classifier_cmnist'
+id_classifier_oscn = 'test_classifier_oscn'
 
 config_trainer_vae_cmnist = DotDict({
     'experiment': experiment_name,
@@ -75,7 +75,7 @@ config_trainer_mmvae_cmnist_oscn = DotDict({
     'batch_size': 128,
     'epochs': epochs,
     'K': 20,
-    'learn_prior': True,  # true in noda-san experiment
+    'learn_prior': False,  # true in noda-san experiment
     'llik_scaling': 0.0,
     'logp': False,
     'looser': False,
