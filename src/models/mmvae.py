@@ -34,6 +34,7 @@ class MMVAE(nn.Module):
 
     def forward(self, x, K=1):
         qz_xs, zss = [], []
+
         # initialise cross-modal matrix
         px_zs = [[None for _ in range(len(self.vaes))] for _ in range(len(self.vaes))]
         for m, vae in enumerate(self.vaes):
@@ -50,9 +51,11 @@ class MMVAE(nn.Module):
             if self.params.use_conditional:
                 z0 = qz_xs[0].rsample()
                 z1 = qz_xs[1].rsample()
-                conds_number = F.log_softmax(F.relu(self.sub_net_number(0.5 * (z0 + z1))), dim = -1) 
-                conds_color = F.log_softmax(F.relu(self.sub_net_color(0.5 * (z0 + z1))), dim = -1) 
-        
+                conds_number = F.log_softmax(F.relu(
+                    self.sub_net_number(0.5 * (z0 + z1))), dim = -1)
+                conds_color = F.log_softmax(F.relu(
+                    self.sub_net_color(0.5 * (z0 + z1))), dim = -1)
+
         if 'use_conditional' in vars(self.params):
             if self.params.use_conditional:
                 return qz_xs, px_zs, zss, conds_number, conds_color

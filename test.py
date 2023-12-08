@@ -2,7 +2,7 @@ import os
 import copy
 from collections import defaultdict
 
-from main import main
+from main import main, run_all
 from src.config_test import (
     config_trainer_vae_cmnist,
     config_trainer_vae_oscn,
@@ -125,19 +125,21 @@ def test_pipeline():
     test_train_classifier()
     run_ids_dict = test_train_loop()
     test_analyse_loop(run_ids_dict=run_ids_dict)
+
+    args = copy.copy(config_synthesizer)
     args.run_ids_dict = run_ids_dict
-    main(args=config_synthesizer)
+    main(args=args)
 
 def test_run_all():
     run_all()
 
 def test():
     # test_train_classifier()
-    # test_train()
-    # test_analyse()
+    test_train()
+    test_analyse()
     test_synthesize()
-    test_pipeline()
-    test_run_all()
+    # test_pipeline()
+    # test_run_all()
 
 if __name__ == '__main__':
     test()

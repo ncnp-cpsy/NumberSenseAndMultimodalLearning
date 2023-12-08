@@ -151,9 +151,9 @@ def main(args):
 
 def run_all():
     seed_initial, seed_end = 0, 5
-    run_ids_dict = defaultdict(list)
     execute_train = True
     execute_analyse = True
+    run_ids_dict = defaultdict(list)
     experiment_name = config_trainer_vae_cmnist.experiment
 
     # Train of classifier

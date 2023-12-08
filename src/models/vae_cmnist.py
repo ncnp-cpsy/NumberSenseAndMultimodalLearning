@@ -1,5 +1,5 @@
-# CMNIST model specification
-
+"""CMNIST model specification
+"""
 from numpy import prod, sqrt
 import torch
 import torch.distributions as dist
@@ -13,73 +13,53 @@ from src.utils import Constants
 from src.vis import plot_embeddings, plot_kls_df
 from src.datasets import DatasetCMNIST
 from src.models.vae import VAE
-
-
-# Constants
-data_size = torch.Size([3, 28, 28])
-img_chans = data_size[0]
-f_base = 32
-
-data_dim = int(prod(data_size))
-hidden_dim = 400
-
-def extra_hidden_layer():
-    return nn.Sequential(nn.Linear(hidden_dim, hidden_dim), nn.ReLU(True))
-
-# Classes
-class Enc(nn.Module):
-    """ Generate latent parameters for MNIST image data. """
-
-    def __init__(self, latent_dim, num_hidden_layers=1):
-        super(Enc, self).__init__()
-
-        modules = []
-        modules.append(nn.Sequential(
-            nn.Linear(data_dim, hidden_dim),
-            nn.ReLU(True)))
-        modules.extend([
-            extra_hidden_layer() for _ in range(num_hidden_layers - 1)])
-        self.enc = nn.Sequential(*modules)
-        self.fc21 = nn.Linear(hidden_dim, latent_dim)
-        self.fc22 = nn.Linear(hidden_dim, latent_dim)
-
-    def forward(self, x):
-        e = self.enc(x.view(*x.size()[:-3], -1) )  # flatten data
-        lv = self.fc22(e)
-        return self.fc21(e), F.softmax(lv, dim=-1) * lv.size(-1) + Constants.eta
-
-class Dec(nn.Module):
-    """ Generate an MNIST image given a sample from the latent space. """
-
-    def __init__(self, latent_dim, num_hidden_layers=1):
-        super(Dec, self).__init__()
-        modules = []
-        modules.append(nn.Sequential(nn.Linear(latent_dim, hidden_dim), nn.ReLU(True)))
-        modules.extend([extra_hidden_layer() for _ in range(num_hidden_layers - 1)])
-        self.dec = nn.Sequential(*modules)
-        self.fc3 = nn.Linear(hidden_dim, data_dim)
-
-    def forward(self, z):
-        p = self.fc3(self.dec(z))
-        d = torch.sigmoid(p.view(*z.size()[:-1], *data_size))  # reshape data
-        d = d.clamp(Constants.eta, 1 - Constants.eta)
-
-        return d, torch.tensor(0.75).to(z.device)  # mean, length scale
+from src.models.components import EncMLP, DecMLP, EncCNN, DecCNN
 
 
 class VAE_CMNIST(VAE):
     """ Derive a specific sub-class of a VAE for CMNIST. """
-
     def __init__(self, params):
+        use_cnn = False
+        data_size = torch.Size([3, 28, 28])
+        img_chans = data_size[0]
+        f_base = 28
+        stride = 1
+
+        if use_cnn:
+            enc = EncCNN(
+                latent_dim=params.latent_dim,
+                img_chans=img_chans,
+                f_base=f_base,
+                stride=stride,
+            )
+            dec = DecCNN(
+                latent_dim=params.latent_dim,
+                img_chans=img_chans,
+                f_base=f_base,
+                stride=stride,
+            )
+        else:
+            # In noda-san implementation, use MLP.
+            enc = EncMLP(
+                latent_dim=params.latent_dim,
+                num_hidden_layers=params.num_hidden_layers,
+                data_size=data_size
+            )
+            dec = DecMLP(
+                latent_dim=params.latent_dim,
+                num_hidden_layers=params.num_hidden_layers,
+                data_size=data_size,
+            )
         super().__init__(
-            prior_dist=dist.Normal,  # prior
-            likelihood_dist=dist.Normal,  # likelihood
-            post_dist=dist.Normal,  # posterior
-            enc=Enc(params.latent_dim, params.num_hidden_layers),
-            dec=Dec(params.latent_dim, params.num_hidden_layers),
+            prior_dist=dist.Normal,
+            likelihood_dist=dist.Normal,
+            post_dist=dist.Normal,
+            enc=enc,
+            dec=dec,
             params=params
         )
         grad = {'requires_grad': params.learn_prior}
+
         self._pz_params = nn.ParameterList([
             nn.Parameter(torch.zeros(1, params.latent_dim), requires_grad=False),  # mu
             nn.Parameter(torch.zeros(1, params.latent_dim), **grad)  # logvar
@@ -90,7 +70,8 @@ class VAE_CMNIST(VAE):
 
     @property
     def pz_params(self):
-        return self._pz_params[0], F.softmax(self._pz_params[1], dim=1) * self._pz_params[1].size(-1)
+        return self._pz_params[0], \
+            F.softmax(self._pz_params[1], dim=1) * self._pz_params[1].size(-1)
 
     @staticmethod
     def getDataLoaders(batch_size, shuffle=True, device="cuda"):

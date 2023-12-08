@@ -19,7 +19,7 @@ config_trainer_vae_cmnist = DotDict({
     'run_type': 'train',
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 1,
+    'num_hidden_layers': 2,
     'use_conditional': False,
     'latent_dim': 20,
     # Training and Loss
@@ -43,7 +43,7 @@ config_trainer_vae_oscn = DotDict({
     'run_type': 'train',
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 1,
+    'num_hidden_layers': 2,
     'use_conditional': False,
     'latent_dim': 20,
     # Training and Loss
@@ -67,7 +67,7 @@ config_trainer_mmvae_cmnist_oscn = DotDict({
     'run_type': 'train',
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 1,
+    'num_hidden_layers': 2,
     'use_conditional': False,
     'latent_dim': 20,
     # Training and Loss
@@ -111,7 +111,7 @@ config_classifier_cmnist = DotDict({
     'pretrained_path': './rslt/' + experiment_name + '/Classifier_CMNIST/' + id_classifier_cmnist,
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 1,
+    'num_hidden_layers': 2,
     'latent_dim': 20,
     'use_conditional': False,
     # Training and Loss
@@ -138,7 +138,7 @@ config_classifier_oscn = DotDict({
     'pretrained_path': './rslt/' + experiment_name + '/Classifier_OSCN/' + id_classifier_oscn,
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 1,
+    'num_hidden_layers': 2,
     'latent_dim': 20,
     'use_conditional': False,
     # Training and Loss

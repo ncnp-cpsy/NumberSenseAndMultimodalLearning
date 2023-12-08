@@ -15,82 +15,51 @@ from src.datasets import DatasetOSCN
 from src.utils import Constants
 from src.vis import plot_embeddings, plot_kls_df
 from src.models.vae import VAE
-
-
-# Constants
-data_size = torch.Size([3, 32, 32])
-img_chans = data_size[0]
-f_base = 32  # base size of filter channels
-
-
-# Classes
-class Enc(nn.Module):
-    """ Generate latent parameters for OSCN image data. """
-
-    def __init__(self, latent_dim):
-        super(Enc, self).__init__()
-        self.enc = nn.Sequential(
-            # input size: 3 x 32 x 32
-            nn.Conv2d(img_chans, f_base, 4, 2, 1, bias=True),
-            nn.ReLU(True),
-            # size: (f_base) x 16 x 16
-            nn.Conv2d(f_base, f_base * 2, 4, 2, 1, bias=True),
-            nn.ReLU(True),
-            # size: (f_base * 2) x 8 x 8
-            nn.Conv2d(f_base * 2, f_base * 4, 4, 2, 1, bias=True),
-            nn.ReLU(True),
-            # size: (f_base * 4) x 4 x 4
-        )
-        self.c1 = nn.Conv2d(f_base * 4, latent_dim, 4, 1, 0, bias=True)
-        self.c2 = nn.Conv2d(f_base * 4, latent_dim, 4, 1, 0, bias=True)
-        # c1, c2 size: latent_dim x 1 x 1
-
-    def forward(self, x):
-        e = self.enc(x)
-        lv = self.c2(e).squeeze()
-        return self.c1(e).squeeze(), F.softmax(lv, dim=-1) * lv.size(-1) + Constants.eta
-
-
-class Dec(nn.Module):
-    """ Generate a OSCN image given a sample from the latent space. """
-
-    def __init__(self, latent_dim):
-        super(Dec, self).__init__()
-        self.dec = nn.Sequential(
-            nn.ConvTranspose2d(latent_dim, f_base * 4, 4, 1, 0, bias=True),
-            nn.ReLU(True),
-            # size: (f_base * 4) x 4 x 4
-            nn.ConvTranspose2d(f_base * 4, f_base * 2, 4, 2, 1, bias=True),
-            nn.ReLU(True),
-            # size: (f_base * 2) x 8 x 8
-            nn.ConvTranspose2d(f_base * 2, f_base, 4, 2, 1, bias=True),
-            nn.ReLU(True),
-            # size: (f_base) x 16 x 16
-            nn.ConvTranspose2d(f_base, img_chans, 4, 2, 1, bias=True),
-            nn.Sigmoid()
-            # Output size: 3 x 32 x 32
-        )
-
-    def forward(self, z):
-        z = z.unsqueeze(-1).unsqueeze(-1)  # fit deconv layers
-        out = self.dec(z.view(-1, *z.size()[-3:]))
-        out = out.view(*z.size()[:-3], *out.size()[1:])
-        # consider also predicting the length scale
-        return out, torch.tensor(0.75).to(z.device)  # mean, length scale
-
+from src.models.components import EncMLP, DecMLP, EncCNN, DecCNN
 
 
 class VAE_OSCN(VAE):
     """ Derive a specific sub-class of a VAE for OSCN """
-
     def __init__(self, params):
+        use_cnn = False
+        data_size = torch.Size([3, 32, 32])
+        img_chans = data_size[0]
+        f_base = 32  # base size of filter channels
+
+        if use_cnn:
+            # In noda-san implementation, use CNN.
+            enc = EncCNN(
+                latent_dim=params.latent_dim,
+                img_chans=img_chans,
+                f_base=f_base,
+            )
+            dec = DecCNN(
+                latent_dim=params.latent_dim,
+                img_chans=img_chans,
+                f_base=f_base,
+            )
+        else:
+            enc = EncMLP(
+                latent_dim=params.latent_dim,
+                num_hidden_layers=params.num_hidden_layers,
+                data_size=data_size
+            )
+            dec = DecMLP(
+                latent_dim=params.latent_dim,
+                num_hidden_layers=params.num_hidden_layers,
+                data_size=data_size,
+            )
+
         super(VAE_OSCN, self).__init__(
-            prior_dist=dist.Laplace,
+            # in original and noda-san code, use Laprace
+            # prior_dist=dist.Laplace,
             # likelihood_dist=dist.Laplace,
+            # post_dist=dist.Laplace,
+            prior_dist=dist.Normal,
             likelihood_dist=dist.Normal,
-            post_dist=dist.Laplace,
-            enc=Enc(params.latent_dim),
-            dec=Dec(params.latent_dim),
+            post_dist=dist.Normal,
+            enc=enc,
+            dec=dec,
             params=params,
         )
         grad = {'requires_grad': params.learn_prior}
