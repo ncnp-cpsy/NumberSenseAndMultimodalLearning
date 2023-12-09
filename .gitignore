@@ -1,12 +1,11 @@
+.git/*
 memo/*
 data/*
-data_prepare/*
-.git/*
+data_prepare/datasets/*
 rslt/*
 rslt/experiments/ignore/*
 rslt/experiments/test/*
 rslt/experiments/loop-test/*
 rslt/rslt_latent_images/*
 rslt/analysis/*
-
-log/MMVAE.o*
+log/*

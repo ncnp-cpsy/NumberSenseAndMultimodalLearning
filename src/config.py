@@ -6,10 +6,10 @@ Additionally, refer to the source code of MMVAE in the original paper.
 from src.utils import DotDict
 
 epochs = 50
-experiment_name = 'parameter-search-8'
-id_vae_cmnist = '2023-12-04T12:35:32.971112'
-id_vae_oscn = '2023-12-04T12:37:09.612504'
-id_mmvae_cmnist_oscn = '2023-12-04T12:37:09.612504'
+experiment_name = 'parameter-search-12'
+id_vae_cmnist = 'vae_cmnist'
+id_vae_oscn = 'vae_oscn'
+id_mmvae_cmnist_oscn = 'mmvae_cmnist_oscn'
 id_classifier_cmnist = 'classifier-cmnist'
 id_classifier_oscn = 'classifier-oscn'
 
@@ -19,8 +19,9 @@ config_trainer_vae_cmnist = DotDict({
     'run_type': 'train',
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 1,
+    'num_hidden_layers': 3,
     'use_conditional': False,
+    'use_cnn': True,
     'latent_dim': 20,
     # Training and Loss
     'obj': 'elbo',
@@ -43,8 +44,9 @@ config_trainer_vae_oscn = DotDict({
     'run_type': 'train',
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 1,
+    'num_hidden_layers': 3,
     'use_conditional': False,
+    'use_cnn': True,
     'latent_dim': 20,
     # Training and Loss
     'obj': 'elbo',
@@ -67,15 +69,16 @@ config_trainer_mmvae_cmnist_oscn = DotDict({
     'run_type': 'train',
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 1,
+    'num_hidden_layers': 3,
     'use_conditional': False,
+    'use_cnn': True,
     'latent_dim': 20,
     # Training and Loss
-    'obj': 'dreg',
+    'obj': 'elbo',
     'batch_size': 128,
     'epochs': epochs,
     'K': 20,
-    'learn_prior': True,  # true in noda-san experiment
+    'learn_prior': False,  # true in noda-san experiment
     'llik_scaling': 0.0,
     'logp': False,
     'looser': False,
@@ -111,9 +114,10 @@ config_classifier_cmnist = DotDict({
     'pretrained_path': './rslt/' + experiment_name + '/Classifier_CMNIST/' + id_classifier_cmnist,
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 1,
+    'num_hidden_layers': 3,
     'latent_dim': 20,
     'use_conditional': False,
+    'use_cnn': True,
     # Training and Loss
     'obj': 'cross',
     'batch_size': 128,
@@ -124,7 +128,7 @@ config_classifier_cmnist = DotDict({
     'logp': False,
     'looser': False,
     # others
-    'print_freq': 0,
+    'print_freq': 100,
     'no_analytics': False,
     'no_cuda': False,
 })
@@ -138,9 +142,10 @@ config_classifier_oscn = DotDict({
     'pretrained_path': './rslt/' + experiment_name + '/Classifier_OSCN/' + id_classifier_oscn,
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 1,
+    'num_hidden_layers': 3,
     'latent_dim': 20,
     'use_conditional': False,
+    'use_cnn': True,
     # Training and Loss
     'obj': 'cross',
     'batch_size': 128,
@@ -151,7 +156,7 @@ config_classifier_oscn = DotDict({
     'logp': False,
     'looser': False,
     # others
-    'print_freq': 0,
+    'print_freq': 100,
     'no_analytics': False,
     'no_cuda': False,
     'device': 'cuda',
@@ -170,7 +175,7 @@ config_synthesizer = DotDict({
 """ Arguments parser and help documents in original code.
 parser = argparse.ArgumentParser(description='Multi-Modal VAEs')
 
-# Experiment Model settings
+# Experiment
 parser.add_argument('--experiment', type=str, default='', metavar='E',
                     help='experiment name')
 parser.add_argument('--run-type', type=str, default='train', metavar='R',
@@ -179,19 +184,21 @@ parser.add_argument('--run-type', type=str, default='train', metavar='R',
 parser.add_argument('--model', type=str, default='VAE_OSCN', metavar='M',
                     choices=[s.__name__ for s in models.__all__],
                     help='model name (default: mnist_svhn)')
-parser.add_argument('--obj', type=str, default='elbo', metavar='O',
-                    choices=['elbo', 'iwae', 'dreg', 'cross'],
-                    help='objective to use (default: elbo)')
+parser.add_argument('--pre-trained', type=str, default="",
+                    help='path to pre-trained model (train from scratch if empty)')
+
+# Model settings
 parser.add_argument('--latent-dim', type=int, default=20, metavar='L',
                     help='latent dimensionality (default: 20)')
 parser.add_argument('--num-hidden-layers', type=int, default=1, metavar='H',
                     help='number of hidden layers in enc and dec (default: 1)')
-parser.add_argument('--pre-trained', type=str, default="",
-                    help='path to pre-trained model (train from scratch if empty)')
 parser.add_argument('--learn-prior', action='store_true', default=False,
                     help='learn model prior parameters')
 
 # Loss
+parser.add_argument('--obj', type=str, default='elbo', metavar='O',
+                    choices=['elbo', 'iwae', 'dreg', 'cross'],
+                    help='objective to use (default: elbo)')
 parser.add_argument('--K', type=int, default=20, metavar='K',
                     help='number of particles to use for iwae/dreg (default: 10)')
 parser.add_argument('--looser', action='store_true', default=False,

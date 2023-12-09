@@ -13,30 +13,27 @@ from src.utils import Constants
 from src.vis import plot_embeddings, plot_kls_df
 from src.datasets import DatasetCMNIST
 from src.models.vae import VAE
-from src.models.components import EncMLP, DecMLP, EncCNN, DecCNN
+from src.models.components import EncMLP, DecMLP, EncCNN_CMNIST, DecCNN_CMNIST
 
 
 class VAE_CMNIST(VAE):
     """ Derive a specific sub-class of a VAE for CMNIST. """
     def __init__(self, params):
-        use_cnn = False
+        use_cnn = params.use_cnn
         data_size = torch.Size([3, 28, 28])
         img_chans = data_size[0]
-        f_base = 28
-        stride = 1
+        f_base = 32
 
         if use_cnn:
-            enc = EncCNN(
+            enc = EncCNN_CMNIST(
                 latent_dim=params.latent_dim,
                 img_chans=img_chans,
                 f_base=f_base,
-                stride=stride,
             )
-            dec = DecCNN(
+            dec = DecCNN_CMNIST(
                 latent_dim=params.latent_dim,
                 img_chans=img_chans,
                 f_base=f_base,
-                stride=stride,
             )
         else:
             # In noda-san implementation, use MLP.

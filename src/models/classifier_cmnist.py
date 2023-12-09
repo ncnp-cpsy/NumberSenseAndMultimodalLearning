@@ -4,40 +4,37 @@ from torch import nn
 
 from src.datasets import DatasetCMNIST, DatasetOSCN
 from src.models.classifier import Classifier
+from src.models.components import EncMLP, EncCNN_CMNIST
 
 class Classifier_CMNIST(Classifier):
     """Classifier for CMNIST
     """
     def __init__(self, params):
         super().__init__(params)
+        use_cnn = params.use_cnn
+        data_size = torch.Size([3, 28, 28])
+        img_chans = data_size[0]
+        f_base = 32
 
-        self.params = params
-        hidden_dim = 400
-        latent_dim = 8
-        num_hidden_layers=1
-
-        self.data_size = torch.Size([3, 28, 28])
-        self.img_ch = self.data_size[0]
-        self.f_base = 32  # base size of filter channels
-
-        def extra_hidden_layer():
-            return nn.Sequential(nn.Linear(
-                hidden_dim, hidden_dim), nn.ReLU(True))
-
-        modules = []
-        modules.append(nn.Sequential(
-            nn.Linear(int(prod(self.data_size)), hidden_dim),
-            nn.ReLU(True)))
-        modules.extend([
-            extra_hidden_layer() for _ in range(num_hidden_layers - 1)])
-        self.enc = nn.Sequential(*modules)
-        self.fc1 = nn.Linear(hidden_dim, latent_dim)
-        self.fc2 = nn.Linear(latent_dim, 9)
+        if use_cnn:
+            enc = EncCNN_CMNIST(
+                latent_dim=params.latent_dim,
+                img_chans=img_chans,
+                f_base=f_base,
+            )
+        else:
+            enc = EncMLP(
+                latent_dim=params.latent_dim,
+                num_hidden_layers=params.num_hidden_layers,
+                data_size=data_size
+            )
+        self.data_size = data_size
+        self.enc = enc
+        self.fc = nn.Linear(params.latent_dim, 9)
 
     def forward(self, x):
-        x = self.enc(x.view(*x.size()[:-3], -1) )  # flatten data
-        x = self.fc1(x)
-        x = self.fc2(x)
+        x, _ = self.enc(x)
+        x = self.fc(x)
         return x
 
     @staticmethod

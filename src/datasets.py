@@ -407,3 +407,107 @@ def convert_label_to_int(label,
         )
 
     return label
+
+
+def test_datasets():
+    # CMNIST
+    print('\n\n---\ncheck the CMNIST dataset...')
+    cmnist_train_dataset = DatasetCMNIST(train=True)
+    cmnist_test_dataset = DatasetCMNIST(train=False)
+    print(
+        '\nshape of train images:', cmnist_train_dataset.images.shape,
+        '\nshape of test images:', cmnist_test_dataset.images.shape,
+        '\nshape of train labels:', cmnist_train_dataset.labels.shape,
+        '\nshape of test labels:', cmnist_test_dataset.labels.shape,
+        '\ntrain labels[0]:', cmnist_train_dataset.labels[0],
+        '\ntrain labels[1]:', cmnist_train_dataset.labels[1],
+    )
+    for target_property in [0, 1, 2]:
+        print('target_property is', target_property)
+        print('train')
+        labels = convert_label_to_int(
+            label=cmnist_train_dataset.labels,
+            model_name='VAE_CMNIST',
+            target_property=target_property,
+            target_modality=0,
+            data=cmnist_train_dataset.images,
+        )
+        print(np.stack(np.unique(labels.cpu().numpy(), return_counts=True)))
+        print('test')
+        labels = convert_label_to_int(
+            label=cmnist_test_dataset.labels,
+            model_name='VAE_CMNIST',
+            target_property=target_property,
+            target_modality=0,
+            data=cmnist_test_dataset.images,
+        )
+        print(np.stack(np.unique(labels.cpu().numpy(), return_counts=True)))
+
+
+    # OSCN
+    print('\n\n---\ncheck the OSCN dataset...')
+    oscn_train_dataset = DatasetOSCN(train=True)
+    oscn_test_dataset = DatasetOSCN(train=False)
+    print(
+        '\nshape of train images:', oscn_train_dataset.images.shape,
+        '\nshape of test images:', oscn_test_dataset.images.shape,
+        '\nshape of train labels:', oscn_train_dataset.labels.shape,
+        '\nshape of test labels:', oscn_test_dataset.labels.shape,
+        '\ntrain labels[0]:', oscn_train_dataset.labels[0],
+        '\ntrain labels[1]:', oscn_train_dataset.labels[1],
+    )
+    for target_property in [0, 1, 2]:
+        print('target_property is', target_property)
+        print('train')
+        labels = convert_label_to_int(
+            label=oscn_train_dataset.labels,
+            model_name='VAE_OSCN',
+            target_property=target_property,
+            target_modality=0,
+        )
+        print(np.stack(np.unique(labels.cpu().numpy(), return_counts=True)))
+        print('test')
+        labels = convert_label_to_int(
+            label=oscn_test_dataset.labels,
+            model_name='VAE_OSCN',
+            target_property=target_property,
+            target_modality=0,
+        )
+        print(np.stack(np.unique(labels.cpu().numpy(), return_counts=True)))
+
+    # MNIST
+    do_mnist = True
+    if do_mnist:
+        print('\n\n---\ncheck the MNIST dataset...')
+        tx = transforms.ToTensor()
+        mnist_train_dataset = datasets.MNIST(
+            './data/', train=True, download=True, transform=tx)
+        mnist_test_dataset = datasets.MNIST(
+            './data/', train=False, download=True, transform=tx)
+        print(
+            '\nshape of train images:', mnist_train_dataset.data.shape,
+            '\nshape of test images:', mnist_test_dataset.data.shape,
+            '\nshape of train labels:', mnist_train_dataset.targets.shape,
+            '\nshape of test labels:', mnist_test_dataset.targets.shape,
+            '\ntrain labels[0]:', mnist_train_dataset.targets[0],
+            '\ntrain labels[1]:', mnist_train_dataset.targets[1],
+        )
+        print('train')
+        labels = mnist_train_dataset.targets
+        print(np.stack(np.unique(labels.cpu().numpy(), return_counts=True)))
+        print('test')
+        labels = mnist_test_dataset.targets
+        print(np.stack(np.unique(labels.cpu().numpy(), return_counts=True)))
+
+
+    # CMNIST-OSCN
+    print('\n\n---\ncheck the OSCN dataset...')
+
+    print('test dataset done...')
+    return
+
+def test_convert_label_to_int():
+    print('check `convert_label_to_int()` function ...')
+
+    print('test label converter done....')
+    return

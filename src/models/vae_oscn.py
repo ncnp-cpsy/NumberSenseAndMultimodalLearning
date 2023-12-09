@@ -15,25 +15,25 @@ from src.datasets import DatasetOSCN
 from src.utils import Constants
 from src.vis import plot_embeddings, plot_kls_df
 from src.models.vae import VAE
-from src.models.components import EncMLP, DecMLP, EncCNN, DecCNN
+from src.models.components import EncMLP, DecMLP, EncCNN_OSCN, DecCNN_OSCN
 
 
 class VAE_OSCN(VAE):
     """ Derive a specific sub-class of a VAE for OSCN """
     def __init__(self, params):
-        use_cnn = False
+        use_cnn = params.use_cnn
         data_size = torch.Size([3, 32, 32])
         img_chans = data_size[0]
         f_base = 32  # base size of filter channels
 
         if use_cnn:
             # In noda-san implementation, use CNN.
-            enc = EncCNN(
+            enc = EncCNN_OSCN(
                 latent_dim=params.latent_dim,
                 img_chans=img_chans,
                 f_base=f_base,
             )
-            dec = DecCNN(
+            dec = DecCNN_OSCN(
                 latent_dim=params.latent_dim,
                 img_chans=img_chans,
                 f_base=f_base,

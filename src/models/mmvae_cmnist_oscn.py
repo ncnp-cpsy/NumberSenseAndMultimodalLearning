@@ -67,7 +67,7 @@ class MMVAE_CMNIST_OSCN(MMVAE):
             '\nlength of cmnist and oscn dataset (train):',
             len(train_cmnist_oscn),
             '\nlength of cmnist and oscn dataset (test):',
-            len(test_cmnist_oscn)
+            len(test_cmnist_oscn),
         )
         kwargs = {
             'num_workers': 2,

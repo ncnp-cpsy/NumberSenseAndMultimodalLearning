@@ -93,7 +93,10 @@ def update_args(args):
     return args
 
 
-def main(args):
+def main(args,
+         args_classifier_cmnist=None,
+         args_classifier_oscn=None,
+         ):
     print('Arguments (initial):')
     try:
         pprint.pprint(args)
@@ -106,10 +109,12 @@ def main(args):
 
     args = update_args(args)
 
-    # classifier. comannd line arguments were not used for classify
+    # classifier.
     print('Parameters were loaded for classifier')
-    args_classifier_cmnist = config_classifier_cmnist
-    args_classifier_oscn = config_classifier_oscn
+    if args_classifier_cmnist is None:
+        args_classifier_cmnist = config_classifier_cmnist
+    if args_classifier_oscn is None:
+        args_classifier_oscn = config_classifier_oscn
     if 'Classifier_CMNIST' in args.model:
         args_classifier = args_classifier_cmnist
     elif 'Classifier_OSCN' in args.model:
@@ -150,7 +155,7 @@ def main(args):
     return
 
 def run_all():
-    seed_initial, seed_end = 0, 5
+    seed_initial, seed_end = 0, 10
     execute_train = True
     execute_analyse = True
     run_ids_dict = defaultdict(list)
