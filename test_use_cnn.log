@@ -1,0 +1,4 @@
+/new_nas/taka/MMVAE/NumberSenseAndMultimodalLearning/src/analyse.py:90: RuntimeWarning: invalid value encountered in true_divide
+  conf_mat_nrm = conf_mat.astype('float') / conf_mat.sum(axis=1)[:, np.newaxis]
+/home/taka/.pyenv/versions/3.6.9/lib/python3.6/site-packages/sklearn/metrics/_plot/confusion_matrix.py:81: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`).
+  fig, ax = plt.subplots()

@@ -155,11 +155,11 @@ def test_run_all():
 def test():
     test_datasets()
     test_convert_label_to_int()
-    # test_train_classifier()
-    # test_train()
+    test_train_classifier()
+    test_train()
     test_analyse()
     test_synthesize()
-    # test_pipeline()
+    test_pipeline()
     # test_run_all()
 
 if __name__ == '__main__':

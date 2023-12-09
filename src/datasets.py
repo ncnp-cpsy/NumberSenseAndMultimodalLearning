@@ -481,9 +481,9 @@ def test_datasets():
         print('\n\n---\ncheck the MNIST dataset...')
         tx = transforms.ToTensor()
         mnist_train_dataset = datasets.MNIST(
-            './data/', train=True, download=True, transform=tx)
+            './data_prepare/datasets/mnist/', train=True, download=True, transform=tx)
         mnist_test_dataset = datasets.MNIST(
-            './data/', train=False, download=True, transform=tx)
+            './data_prepare/datasets/mnist/', train=False, download=True, transform=tx)
         print(
             '\nshape of train images:', mnist_train_dataset.data.shape,
             '\nshape of test images:', mnist_test_dataset.data.shape,
