@@ -255,7 +255,10 @@ def analyse_magnitude(runner,
                       trans_log=False,
                       output_dir='./',
                       ):
+
+    # latent embeddings for each number (dim: 9)
     mean_all = [None for i in range(category_num)]
+    # distance between numbers (dim: 9 x 9)
     dist_all = [[0.0 for i in range(category_num)] for i in range(category_num)]
 
     for i in range(start_ind, end_ind):
@@ -276,17 +279,20 @@ def analyse_magnitude(runner,
             dist_all[i - start_ind][j - start_ind] = \
                 np.linalg.norm(mean_all[i - start_ind] - mean_all[j - start_ind])
 
-    if target_property == 1:
+    print('\nDistance matrix between labels.')
+    if target_property == 0:
+        print('  0   1   2   3')
+    elif target_property == 1:
         if runner.model_name == 'MMVAE_MNIST_CLEVR' or runner.model_name == 'VAE_CLEVR':
             print('  3   4   5   6   7   8   9   10')
         elif withzero:
             print('  0   1   2   3   4   5   6   7   8   9')
         else:
             print('  1   2   3   4   5   6   7   8   9')
-    elif target_property == 0:
-        print('  0   1   2   3')
     elif target_property == 2:
         print('  0   1   2')
+    else:
+        Exception
 
     for i in range(start_ind, end_ind):
         print(i , end = ' ')
@@ -294,23 +300,34 @@ def analyse_magnitude(runner,
             print( '{:.1f}'.format(dist_all[i - start_ind][j - start_ind]),  end=' ')
         print('')
 
+    # Make matrix representing distances of class and latent embedding
     dist_flat = []
     dist_cor1, dist_cor2 = [], []
-    for i in range(start_ind , end_ind):
-        for j in range(i , end_ind ):
+    for i in range(start_ind, end_ind):
+        for j in range(i, end_ind):
             dist_flat.append([abs(i-j), dist_all[i - start_ind][j - start_ind]])
             if i != j:
+                # distance of number (label)
                 dist_cor1.append(abs(i-j))
+                # distance of latent embedding
                 dist_cor2.append(dist_all[i - start_ind][j - start_ind])
     dist_flat = np.array(dist_flat)
-
-    coef = np.corrcoef([dist_cor1, dist_cor2])
-    correlation = coef[0, 1]
-    print('correlation', coef)
-
+    print(
+        '\nDistance of number label and latent embedding',
+        '\nNumber:', dist_cor1,
+        '\nLatent embbeding:', dist_cor2,
+        '\nFlatten array:', dist_flat,
+    )
     plt.scatter(dist_cor1, dist_cor2)
     plt.savefig(output_dir + '/dist_relations.svg', format='svg')
+    plt.xlabel('Class distance')
+    plt.ylabel('Distance of latent embeddings')
     plt.clf()
+
+    # Correlation
+    coef = np.corrcoef([dist_cor1, dist_cor2])
+    correlation = coef[0, 1]
+    print('Correlation:', coef)
 
     return {
         'magnitude_avg': np.abs(correlation),

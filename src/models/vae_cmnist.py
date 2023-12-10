@@ -19,7 +19,10 @@ from src.models.components import EncMLP, DecMLP, EncCNN_CMNIST, DecCNN_CMNIST
 class VAE_CMNIST(VAE):
     """ Derive a specific sub-class of a VAE for CMNIST. """
     def __init__(self, params):
-        use_cnn = params.use_cnn
+        if 'use_cnn' in dir(params):
+            use_cnn = params.use_cnn
+        else:
+            use_cnn = False
         data_size = torch.Size([3, 28, 28])
         img_chans = data_size[0]
         f_base = 32

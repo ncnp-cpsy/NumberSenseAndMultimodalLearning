@@ -10,27 +10,40 @@ class Classifier_OSCN(Classifier):
     """
     def __init__(self, params):
         super().__init__(params)
-        use_cnn = params.use_cnn
+        if 'use_cnn' in dir(params):
+            use_cnn = params.use_cnn
+        else:
+            use_cnn = True
+
         data_size = torch.Size([3, 32, 32])
         img_chans = data_size[0]
         f_base = 32  # base size of filter channels
 
+        # align with VAE
+        latent_dim = params.latent_dim
+        num_hidden_layers = params.num_hidden_layers
+
+        # original model
+        # use_cnn = True
+        # latent_dim = 20
+        # num_hidden_layers = 1
+
         if use_cnn:
             enc = EncCNN_OSCN(
-                latent_dim=params.latent_dim,
+                latent_dim=latent_dim,
                 img_chans=img_chans,
                 f_base=f_base,
             )
         else:
             enc = EncMLP(
-                latent_dim=params.latent_dim,
-                num_hidden_layers=params.num_hidden_layers,
+                latent_dim=latent_dim,
+                num_hidden_layers=num_hidden_layers,
                 data_size=data_size
             )
         self.data_size = data_size
         self.use_cnn = use_cnn
         self.enc = enc
-        self.fc = nn.Linear(params.latent_dim, 9)
+        self.fc = nn.Linear(latent_dim, 9)
 
     def forward(self, x):
         x, _ = self.enc(x)

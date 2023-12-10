@@ -6,7 +6,7 @@ Additionally, refer to the source code of MMVAE in the original paper.
 from src.utils import DotDict
 
 epochs = 50
-experiment_name = 'parameter-search-12'
+experiment_name = 'parameter-search-17'
 id_vae_cmnist = 'vae_cmnist'
 id_vae_oscn = 'vae_oscn'
 id_mmvae_cmnist_oscn = 'mmvae_cmnist_oscn'
@@ -21,14 +21,14 @@ config_trainer_vae_cmnist = DotDict({
     # Architecture
     'num_hidden_layers': 3,
     'use_conditional': False,
-    'use_cnn': True,
+    'use_cnn': False,
     'latent_dim': 20,
     # Training and Loss
-    'obj': 'elbo',
+    'obj': 'dreg',
     'batch_size': 128,
     'epochs': epochs,
     'K': 20,
-    'learn_prior': False,
+    'learn_prior': True,
     'llik_scaling': 0.0,
     'logp': False,
     'looser': False,
@@ -46,14 +46,14 @@ config_trainer_vae_oscn = DotDict({
     # Architecture
     'num_hidden_layers': 3,
     'use_conditional': False,
-    'use_cnn': True,
+    'use_cnn': False,
     'latent_dim': 20,
     # Training and Loss
-    'obj': 'elbo',
+    'obj': 'dreg',
     'batch_size': 128,
     'epochs': epochs,
     'K': 20,
-    'learn_prior': False,
+    'learn_prior': True,
     'llik_scaling': 0.0,
     'logp': False,
     'looser': False,
@@ -71,14 +71,14 @@ config_trainer_mmvae_cmnist_oscn = DotDict({
     # Architecture
     'num_hidden_layers': 3,
     'use_conditional': False,
-    'use_cnn': True,
+    'use_cnn': False,
     'latent_dim': 20,
     # Training and Loss
-    'obj': 'elbo',
+    'obj': 'dreg',
     'batch_size': 128,
     'epochs': epochs,
     'K': 20,
-    'learn_prior': False,  # true in noda-san experiment
+    'learn_prior': True,  # true in noda-san experiment
     'llik_scaling': 0.0,
     'logp': False,
     'looser': False,
@@ -117,13 +117,13 @@ config_classifier_cmnist = DotDict({
     'num_hidden_layers': 3,
     'latent_dim': 20,
     'use_conditional': False,
-    'use_cnn': True,
+    'use_cnn': False,
     # Training and Loss
     'obj': 'cross',
     'batch_size': 128,
     'epochs': epochs,
     'K': 20,
-    'learn_prior': False,
+    'learn_prior': True,
     'llik_scaling': 0.0,
     'logp': False,
     'looser': False,
@@ -145,13 +145,13 @@ config_classifier_oscn = DotDict({
     'num_hidden_layers': 3,
     'latent_dim': 20,
     'use_conditional': False,
-    'use_cnn': True,
+    'use_cnn': False,
     # Training and Loss
     'obj': 'cross',
     'batch_size': 128,
     'epochs': epochs,
     'K': 20,
-    'learn_prior': False,
+    'learn_prior': True,
     'llik_scaling': 0.0,
     'logp': False,
     'looser': False,

@@ -21,7 +21,10 @@ from src.models.components import EncMLP, DecMLP, EncCNN_OSCN, DecCNN_OSCN
 class VAE_OSCN(VAE):
     """ Derive a specific sub-class of a VAE for OSCN """
     def __init__(self, params):
-        use_cnn = params.use_cnn
+        if 'use_cnn' in dir(params):
+            use_cnn = params.use_cnn
+        else:
+            use_cnn = True
         data_size = torch.Size([3, 32, 32])
         img_chans = data_size[0]
         f_base = 32  # base size of filter channels
