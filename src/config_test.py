@@ -18,7 +18,7 @@ config_test_trainer_vae_cmnist = DotDict({
     # Architecture
     'num_hidden_layers': 2,
     'use_conditional': False,
-    'use_cnn': False,
+    'use_cnn': 'cnn-add',
     'latent_dim': 20,
     # Training and Loss
     'obj': 'elbo',
@@ -43,7 +43,7 @@ config_test_trainer_vae_oscn = DotDict({
     # Architecture
     'num_hidden_layers': 2,
     'use_conditional': False,
-    'use_cnn': False,
+    'use_cnn': 'cnn-add',
     'latent_dim': 20,
     # Training and Loss
     'obj': 'elbo',
@@ -68,7 +68,7 @@ config_test_trainer_mmvae_cmnist_oscn = DotDict({
     # Architecture
     'num_hidden_layers': 2,
     'use_conditional': False,
-    'use_cnn': False,
+    'use_cnn': 'cnn-add',
     'latent_dim': 20,
     # Training and Loss
     'obj': 'dreg',
@@ -114,7 +114,7 @@ config_test_classifier_cmnist = DotDict({
     'num_hidden_layers': 2,
     'latent_dim': 20,
     'use_conditional': False,
-    'use_cnn': False,
+    'use_cnn': 'cnn-add',
     # Training and Loss
     'obj': 'cross',
     'batch_size': 128,
@@ -142,7 +142,7 @@ config_test_classifier_oscn = DotDict({
     'num_hidden_layers': 2,
     'latent_dim': 20,
     'use_conditional': False,
-    'use_cnn': False,
+    'use_cnn': 'cnn-add',
     # Training and Loss
     'obj': 'cross',
     'batch_size': 128,

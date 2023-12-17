@@ -15,7 +15,16 @@ from src.datasets import DatasetOSCN
 from src.utils import Constants
 from src.vis import plot_embeddings, plot_kls_df
 from src.models.vae import VAE
-from src.models.components import EncMLP, DecMLP, EncCNN_OSCN, DecCNN_OSCN
+from src.models.components import (
+    EncMLP,
+    DecMLP,
+    EncMLPSimple,
+    DecMLPSimple,
+    EncCNN_OSCN,
+    DecCNN_OSCN,
+    EncCNNAdd_OSCN,
+    DecCNNAdd_OSCN,
+)
 
 
 class VAE_OSCN(VAE):
@@ -25,11 +34,13 @@ class VAE_OSCN(VAE):
             use_cnn = params.use_cnn
         else:
             use_cnn = True
+
+        # use_cnn = True
         data_size = torch.Size([3, 32, 32])
         img_chans = data_size[0]
         f_base = 32  # base size of filter channels
 
-        if use_cnn:
+        if use_cnn is True or use_cnn == 'cnn':
             # In noda-san implementation, use CNN.
             enc = EncCNN_OSCN(
                 latent_dim=params.latent_dim,
@@ -41,7 +52,18 @@ class VAE_OSCN(VAE):
                 img_chans=img_chans,
                 f_base=f_base,
             )
-        else:
+        elif use_cnn == 'cnn-add':
+            enc = EncCNNAdd_OSCN(
+                latent_dim=params.latent_dim,
+                img_chans=img_chans,
+                f_base=f_base,
+            )
+            dec = DecCNNAdd_OSCN(
+                latent_dim=params.latent_dim,
+                img_chans=img_chans,
+                f_base=f_base,
+            )
+        elif use_cnn is False or use_cnn == 'mlp':
             enc = EncMLP(
                 latent_dim=params.latent_dim,
                 num_hidden_layers=params.num_hidden_layers,
@@ -52,6 +74,19 @@ class VAE_OSCN(VAE):
                 num_hidden_layers=params.num_hidden_layers,
                 data_size=data_size,
             )
+        elif use_cnn == 'mlp-simple':
+            enc = EncMLPSimple(
+                latent_dim=params.latent_dim,
+                num_hidden_layers=params.num_hidden_layers,
+                data_size=data_size
+            )
+            dec = DecMLPSimple(
+                latent_dim=params.latent_dim,
+                num_hidden_layers=params.num_hidden_layers,
+                data_size=data_size,
+            )
+        else:
+            Exception
 
         super(VAE_OSCN, self).__init__(
             # in original and noda-san code, use Laprace

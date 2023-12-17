@@ -13,7 +13,16 @@ from src.utils import Constants
 from src.vis import plot_embeddings, plot_kls_df
 from src.datasets import DatasetCMNIST
 from src.models.vae import VAE
-from src.models.components import EncMLP, DecMLP, EncCNN_CMNIST, DecCNN_CMNIST
+from src.models.components import (
+    EncMLP,
+    DecMLP,
+    EncMLPSimple,
+    DecMLPSimple,
+    EncCNN_CMNIST,
+    DecCNN_CMNIST,
+    EncCNNAdd_CMNIST,
+    DecCNNAdd_CMNIST,
+)
 
 
 class VAE_CMNIST(VAE):
@@ -23,11 +32,13 @@ class VAE_CMNIST(VAE):
             use_cnn = params.use_cnn
         else:
             use_cnn = False
+
+        # use_cnn = False
         data_size = torch.Size([3, 28, 28])
         img_chans = data_size[0]
         f_base = 32
 
-        if use_cnn:
+        if use_cnn is True or use_cnn == 'cnn':
             enc = EncCNN_CMNIST(
                 latent_dim=params.latent_dim,
                 img_chans=img_chans,
@@ -38,7 +49,18 @@ class VAE_CMNIST(VAE):
                 img_chans=img_chans,
                 f_base=f_base,
             )
-        else:
+        elif use_cnn == 'cnn-add':
+            enc = EncCNNAdd_CMNIST(
+                latent_dim=params.latent_dim,
+                img_chans=img_chans,
+                f_base=f_base,
+            )
+            dec = DecCNNAdd_CMNIST(
+                latent_dim=params.latent_dim,
+                img_chans=img_chans,
+                f_base=f_base,
+            )
+        elif use_cnn is False or use_cnn == 'mlp':
             # In noda-san implementation, use MLP.
             enc = EncMLP(
                 latent_dim=params.latent_dim,
@@ -50,6 +72,20 @@ class VAE_CMNIST(VAE):
                 num_hidden_layers=params.num_hidden_layers,
                 data_size=data_size,
             )
+        elif use_cnn == 'mlp-simple':
+            enc = EncMLPSimple(
+                latent_dim=params.latent_dim,
+                num_hidden_layers=params.num_hidden_layers,
+                data_size=data_size
+            )
+            dec = DecMLPSimple(
+                latent_dim=params.latent_dim,
+                num_hidden_layers=params.num_hidden_layers,
+                data_size=data_size,
+            )
+        else:
+            Exception
+
         super().__init__(
             prior_dist=dist.Normal,
             likelihood_dist=dist.Normal,

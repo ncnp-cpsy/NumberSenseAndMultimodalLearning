@@ -3,7 +3,12 @@ from torch import nn
 
 from src.datasets import DatasetCMNIST, DatasetOSCN
 from src.models.classifier import Classifier
-from src.models.components import EncMLP, EncCNN_OSCN
+from src.models.components import (
+    EncMLP,
+    EncMLPSimple,
+    EncCNN_OSCN,
+    EncCNNAdd_OSCN,
+)
 
 class Classifier_OSCN(Classifier):
     """Classifier for OSCN
@@ -28,20 +33,34 @@ class Classifier_OSCN(Classifier):
         # latent_dim = 20
         # num_hidden_layers = 1
 
-        if use_cnn:
+        if use_cnn is True or use_cnn == 'cnn':
             enc = EncCNN_OSCN(
                 latent_dim=latent_dim,
                 img_chans=img_chans,
                 f_base=f_base,
             )
-        else:
+        elif use_cnn == 'cnn-add':
+            enc = EncCNNAdd_OSCN(
+                latent_dim=latent_dim,
+                img_chans=img_chans,
+                f_base=f_base,
+            )
+        elif use_cnn is False or use_cnn == 'mlp':
             enc = EncMLP(
                 latent_dim=latent_dim,
                 num_hidden_layers=num_hidden_layers,
                 data_size=data_size
             )
+        elif use_cnn == 'mlp-simple':
+            enc = EncMLPSimple(
+                latent_dim=params.latent_dim,
+                num_hidden_layers=params.num_hidden_layers,
+                data_size=data_size
+            )
+        else:
+            Exception
+
         self.data_size = data_size
-        self.use_cnn = use_cnn
         self.enc = enc
         self.fc = nn.Linear(latent_dim, 9)
 

@@ -6,7 +6,8 @@ Additionally, refer to the source code of MMVAE in the original paper.
 from src.utils import DotDict
 
 epochs = 50
-experiment_name = 'parameter-search-17'
+# experiment_name = 'parameter-search-17'
+experiment_name = 'parameter-search-32'
 id_vae_cmnist = 'vae_cmnist'
 id_vae_oscn = 'vae_oscn'
 id_mmvae_cmnist_oscn = 'mmvae_cmnist_oscn'
@@ -19,9 +20,9 @@ config_trainer_vae_cmnist = DotDict({
     'run_type': 'train',
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 3,
+    'num_hidden_layers': 1,
     'use_conditional': False,
-    'use_cnn': False,
+    'use_cnn': 'mlp-simple',
     'latent_dim': 20,
     # Training and Loss
     'obj': 'dreg',
@@ -44,9 +45,9 @@ config_trainer_vae_oscn = DotDict({
     'run_type': 'train',
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 3,
+    'num_hidden_layers': 1,
     'use_conditional': False,
-    'use_cnn': False,
+    'use_cnn': 'mlp-simple',
     'latent_dim': 20,
     # Training and Loss
     'obj': 'dreg',
@@ -69,9 +70,9 @@ config_trainer_mmvae_cmnist_oscn = DotDict({
     'run_type': 'train',
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 3,
+    'num_hidden_layers': 1,
     'use_conditional': False,
-    'use_cnn': False,
+    'use_cnn': 'mlp-simple',
     'latent_dim': 20,
     # Training and Loss
     'obj': 'dreg',
@@ -114,10 +115,10 @@ config_classifier_cmnist = DotDict({
     'pretrained_path': './rslt/' + experiment_name + '/Classifier_CMNIST/' + id_classifier_cmnist,
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 3,
+    'num_hidden_layers': 1,
     'latent_dim': 20,
     'use_conditional': False,
-    'use_cnn': False,
+    'use_cnn': 'mlp-simple',
     # Training and Loss
     'obj': 'cross',
     'batch_size': 128,
@@ -142,10 +143,10 @@ config_classifier_oscn = DotDict({
     'pretrained_path': './rslt/' + experiment_name + '/Classifier_OSCN/' + id_classifier_oscn,
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 3,
+    'num_hidden_layers': 1,
     'latent_dim': 20,
     'use_conditional': False,
-    'use_cnn': False,
+    'use_cnn': 'mlp-simple',
     # Training and Loss
     'obj': 'cross',
     'batch_size': 128,

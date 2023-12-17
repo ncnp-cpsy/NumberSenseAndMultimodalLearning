@@ -252,9 +252,25 @@ def analyse_magnitude(runner,
                       start_ind,
                       end_ind,
                       withzero,
-                      trans_log=False,
+                      trans_form_mean=None,
+                      trans_form_dist=None,
                       output_dir='./',
+                      suffix='',
                       ):
+    def trans_non_linear(x, form='log', minval=None):
+        print('Before using', form, ':\n', x)
+        if form == 'log':
+            x = np.log(x)
+        elif form == 'exp':
+            x = np.exp(x)
+        elif form == 'pow':
+            x = np.power(x, 2)
+        elif form == 'logmin':
+            x = np.log(x - minval + 0.0000000000000001)
+        else:
+            Exception
+        print('After using', form, ':\n', x)
+        return x
 
     # latent embeddings for each number (dim: 9)
     mean_all = [None for i in range(category_num)]
@@ -263,21 +279,36 @@ def analyse_magnitude(runner,
 
     for i in range(start_ind, end_ind):
         target_latents = latent_all[np.where(label_all == i)]
-        mean = np.mean(target_latents, axis = 0)
-        if trans_log:
-            print('Perform log transformation')
-            print('Before:\n', mean)
-            mean = np.exp(mean)
-            print('After:\n', mean)
-        mean_all[i - start_ind] = mean
+        mean_all[i - start_ind] = np.mean(target_latents, axis=0)
         # print(target_latents.shape)
         # print(mean_all[i-1].shape)
         # print(np.mean(target_latents, axis = 1))
+
+    if trans_form_mean is not None:
+        minval_mean = np.min([m for m in mean_all if m is not None])
+        print('transform in mean:', trans_form_mean, minval_mean)
+        for i in range(start_ind, end_ind):
+            mean_all[i - start_ind] = trans_non_linear(
+                x=mean_all[i - start_ind],
+                form=trans_form_mean,
+                minval=minval_mean,
+            )
 
     for i in range(start_ind, end_ind):
         for j in range(start_ind, end_ind):
             dist_all[i - start_ind][j - start_ind] = \
                 np.linalg.norm(mean_all[i - start_ind] - mean_all[j - start_ind])
+
+    if trans_form_dist is not None:
+        minval_dist = np.min(np.array(dist_all).flatten())
+        print('transform in dist:', trans_form_dist, minval_dist)
+        for i in range(start_ind, end_ind):
+            for j in range(start_ind, end_ind):
+                dist_all[i - start_ind][j - start_ind] = trans_non_linear(
+                    x=dist_all[i - start_ind][j - start_ind],
+                    form=trans_form_dist,
+                    minval=minval_dist,
+                )
 
     print('\nDistance matrix between labels.')
     if target_property == 0:
@@ -319,7 +350,8 @@ def analyse_magnitude(runner,
         '\nFlatten array:', dist_flat,
     )
     plt.scatter(dist_cor1, dist_cor2)
-    plt.savefig(output_dir + '/dist_relations.svg', format='svg')
+    fname = output_dir + '/dist_relations' + suffix + '.svg'
+    plt.savefig(fname, format='svg')
     plt.xlabel('Class distance')
     plt.ylabel('Distance of latent embeddings')
     plt.clf()
@@ -330,8 +362,8 @@ def analyse_magnitude(runner,
     print('Correlation:', coef)
 
     return {
-        'magnitude_avg': np.abs(correlation),
-        'magnitude_all': correlation,
+        'magnitude' + suffix + '_avg': np.abs(correlation),
+        'magnitude' + suffix + '_all': correlation,
     }
 
 
@@ -871,6 +903,35 @@ def analyse_model(runner,
             withzero=withzero,
             output_dir=output_dir,
         ))
+        for trans in ['log', 'exp', 'pow', 'logmin']:
+            rslt.update(analyse_magnitude(
+                runner=runner,
+                label_all=label_all,
+                latent_all=latent_all,
+                category_num=category_num,
+                target_property=target_property,
+                start_ind=start_ind,
+                end_ind=end_ind,
+                withzero=withzero,
+                trans_form_mean=trans,
+                trans_form_dist=None,
+                suffix='_' + trans + '_mean',
+                output_dir=output_dir,
+            ))
+            rslt.update(analyse_magnitude(
+                runner=runner,
+                label_all=label_all,
+                latent_all=latent_all,
+                category_num=category_num,
+                target_property=target_property,
+                start_ind=start_ind,
+                end_ind=end_ind,
+                withzero=withzero,
+                trans_form_mean=None,
+                trans_form_dist=trans,
+                suffix='_' + trans + '_dist',
+                output_dir=output_dir,
+            ))
     if require_2d:
         print('---')
         rslt.update(analyse_tsne_2d(

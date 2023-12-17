@@ -75,17 +75,23 @@ def plot_scatter(df,
     return
 
 def plot_box(df_wide,
-             target_column,
              fname,
+             target_columns=None,
+             names=None,
+             widths=None,
              ):
     df = df_wide
     vals, xs = [], []
-    palette = ['r', 'g', 'b', 'y']
-    names = df.columns
-    # names = ['Multi-modal', 'Single-modal']
+    palette = ['r', 'g', 'b', 'y', 'orange']
+    if target_columns is None:
+        target_columns = df.columns
+    if names is None:
+        names = df.columns
+    if widths is None:
+        widths = [1.2 / len(df.columns) for num in range(len(df.columns))]
 
     # boxplot
-    for i, col in enumerate(df.columns):
+    for i, col in enumerate(target_columns):
         vals.append(df[col].values)
         # x = np.random.normal(i + 1, 0.02, df[col].values.shape[0])  # with jitter
         x = [i + 1 for n in range(df[col].values.shape[0])]  # without jitter
@@ -93,13 +99,14 @@ def plot_box(df_wide,
     plt.boxplot(
         vals,
         labels=names,
-        widths=(0.6, 0.6),
+        widths=widths,
     )
 
     # scatter
     for x, val, c in zip(xs, vals, palette):
         plt.scatter(x, val, alpha=0.9, color=c)
     plt.tick_params(labelsize=15)
+    plt.xticks(rotation=0)
     plt.savefig(fname, format='svg')
 
     # pandas
@@ -107,6 +114,8 @@ def plot_box(df_wide,
     # plt.savefig(fname, format='svg')
 
     plt.close()
+    print(fname, 'was saved.')
+
     return
 
 def perform_anova(df,
@@ -150,13 +159,14 @@ def perform_anova(df,
         values=target_column,
     )
     print(df_wide)
+    print(df_wide.describe())
 
     # Plot
     fname = output_dir + '/anova_' + str(target_modality) + '_' + target_column + '.svg'
     plot_box(
         df_wide=df_wide,
-        target_column=target_column,
-        fname=fname
+        fname=fname,
+        names=['Multi-modal', 'Single-modal'],
     )
 
     # ANOVA using stats
@@ -178,6 +188,174 @@ def perform_anova(df,
         print(anova_table)
     except Exception as e:
         print('ANOVA was skipped because', e)
+
+    # Welch's t-test
+    try:
+        print(stats.ttest_ind(
+            df_wide[mmvae_name],
+            df_wide[vae_name],
+            equal_var=False,
+            # alternative='greater', not supported due to old sicpy version
+        ))
+    except Exception as e:
+        print('t-test was skipped because', e)
+    return
+
+def perform_anova_logtrans(df,
+                           target_modality,
+                           output_dir
+                           ):
+    model_names = [
+        'MMVAE_CMNIST_OSCN',
+        'VAE_CMNIST',
+        'VAE_OSCN',
+    ]
+    cols = [
+        'magnitude_avg',
+        'magnitude_logmin_mean_avg',
+        # 'magnitude_log_mean_avg',
+        'magnitude_exp_mean_avg',
+        'magnitude_pow_mean_avg',
+        # 'magnitude_logmin_dist_avg',
+        # # 'magnitude_log_dist_avg',
+        # 'magnitude_exp_dist_avg',
+        # 'magnitude_pow_dist_avg',
+    ]
+
+    def perform_anova_logtrans_model(df_wide,
+                                     model_name,
+                                     target_modality,
+                                     output_dir):
+        # Plot
+        fname = output_dir + '/anova_logtrans_' + model_name + str(target_modality) + '.svg'
+        plot_box(
+            df_wide=df_wide,
+            fname=fname,
+            names=['original', 'log', 'exp', 'pow']
+        )
+
+        # ANOVA using stats
+        try:
+            fvalue, pvalue = stats.f_oneway(*[df_wide[col] for col in cols])
+            print(
+                '\nF-value:', fvalue,
+                '\np-value:', pvalue,
+            )
+        except Exception as e:
+            print('ANOVA was skipped because', e)
+
+        # ANOVA using ols and anova_lm
+        try:
+            script = target_column + '~C(model_name)'
+            model = ols(script, data=df).fit()
+            anova_table = sm.stats.anova_lm(model, typ=2)
+            print(anova_table)
+        except Exception as e:
+            print('ANOVA was skipped because', e)
+        return
+
+    for model_name in model_names:
+        print('\n---')
+        # Extract
+        if model_name == 'MMVAE_CMNIST_OSCN':
+            query = '(model_name in [@model_name] and target_modality == @target_modality)'
+        elif model_name in ['VAE_CMNIST', 'VAE_OSCN']:
+            query = 'model_name in [@model_name]'
+        else:
+            Exception
+        df_wide = df.query(query)[['id', 'model_name'] + cols]
+        df_wide['id'] = df_wide['id'].str.replace(
+            'mmvae_cmnist_oscn_', ''
+        ).str.replace(
+            'vae_oscn_', ''
+        ).str.replace(
+            'vae_cmnist_', ''
+        )
+        print(df_wide)
+        print(df_wide.describe())
+        perform_anova_logtrans_model(
+            df_wide=df_wide[cols],
+            model_name=model_name,
+            target_modality=target_modality,
+            output_dir=output_dir,
+        )
+
+    return
+
+def perform_one_sample(df,
+                       target_modality,
+                       output_dir):
+    def perform_one_sample_model(df_wide,
+                                 model_name,
+                                 target_column,
+                                 output_dir):
+        # Plot
+        fname = output_dir + '/anova_1sample_' + model_name + '_' + target_column + '.svg'
+        plot_box(
+            df_wide=df_wide,
+            fname=fname,
+            target_columns=[target_column],
+            names=[target_column],
+            widths=[1.0],
+        )
+
+        # t-test
+        try:
+            print(stats.ttest_1samp(
+                a=df_wide[target_column],
+                popmean=1/9,
+                # alternative='greater',
+            ))
+        except Exception as e:
+            print('One sample test was skipped because', e)
+        return
+
+    cols = [
+        'reconst_' + str(target_modality) + 'x' + str(target_modality) + '_avg',
+        'cross_' + str(1 - target_modality) + 'x' + str(target_modality) + '_avg',
+        'mathematics_avg',
+    ]
+    target_conditions = {
+        'MMVAE_CMNIST_OSCN': cols,
+    }
+    if target_modality == 0:
+        target_conditions.update({
+            'VAE_CMNIST': [
+                'reconst_' + str(target_modality) + 'x' + str(target_modality) + '_avg',
+                'mathematics_avg',
+            ]})
+    if target_modality == 1:
+        target_conditions.update({
+            'VAE_OSCN': [
+                'reconst_' + str(target_modality) + 'x' + str(target_modality) + '_avg',
+                'mathematics_avg',
+        ]})
+
+    for model_name in target_conditions.keys():
+        print('\n---')
+        if model_name == 'MMVAE_CMNIST_OSCN':
+            query = '(model_name in [@model_name] and target_modality == @target_modality)'
+        elif model_name in ['VAE_CMNIST', 'VAE_OSCN']:
+            query = 'model_name in [@model_name]'
+        else:
+            Exception
+        df_wide = df.query(query)[['id', 'model_name'] + cols]
+        df_wide['id'] = df_wide['id'].str.replace(
+            'mmvae_cmnist_oscn_', ''
+        ).str.replace(
+            'vae_oscn_', ''
+        ).str.replace(
+            'vae_cmnist_', ''
+        )
+        print(df_wide)
+        print(df_wide.describe())
+        for target_column in target_conditions[model_name]:
+            perform_one_sample_model(
+                df_wide=df_wide,
+                model_name=model_name,
+                target_column=target_column,
+                output_dir=output_dir,
+            )
     return
 
 def synthesize(args,
@@ -202,6 +380,8 @@ def synthesize(args,
         experiment_dir=experiment_dir,
         run_ids_dict=run_ids_dict,
     )
+    print(results.columns)
+    print(results.describe())
 
     # convert `reconst_0x0_avg` value to `1x1` in VAE_OSCN.
     cols = ['id', 'model_name', 'reconst_0x0_avg', 'reconst_1x1_avg']
@@ -246,19 +426,18 @@ def analyse_synthesized_data(
     print(synthesized)
     synthesized.to_csv(output_dir + '/synthesized.csv')
 
-    # print('===')
-    # print('analyzed data (selected):')
-    # if target_modality is None:
-    #     synthesized = synthesized[columns]
-    # else:
-    #     query = '(target_modality == @target_modality and model_name in ["MMVAE_CMNIST_OSCN"]) or (not model_name in ["MMVAE_CMNIST_OSCN"])'
-    #     print(query)
-    #     synthesized = synthesized.query(query)[columns]
-    # print(synthesized)
-
     print('===')
+    print('Anova between multi- and single-modal models...')
     cols = [
         'magnitude_avg',
+        'magnitude_logmin_mean_avg',
+        # 'magnitude_log_mean_avg',
+        # 'magnitude_exp_mean_avg',
+        # 'magnitude_pow_mean_avg',
+        # 'magnitude_logmin_dist_avg',
+        # 'magnitude_log_dist_avg',
+        # 'magnitude_exp_dist_avg',
+        # 'magnitude_pow_dist_avg',
         'cluster_avg',
         'mathematics_avg',
         'reconst_' + str(target_modality) + 'x' + str(target_modality) + '_avg'
@@ -273,6 +452,22 @@ def analyse_synthesized_data(
         )
 
     print('===')
+    print('Anova for log transformation...')
+    perform_anova_logtrans(
+        df=synthesized,
+        target_modality=target_modality,
+        output_dir=output_dir,
+    )
+
+    print('===')
+    print('One sample t-test...')
+    perform_one_sample(
+        df=synthesized,
+        target_modality=target_modality,
+        output_dir=output_dir,
+    )
+
+    print('===')
     print('scatter bettween cluster and magnitude')
     fname = output_dir + '/scatter_' + str(target_modality) + '.svg'
     plot_scatter(
@@ -284,14 +479,14 @@ def analyse_synthesized_data(
         col_y='cluster_avg',
     )
 
-    print('===')
-    print('pairplot')
-    fname = output_dir + '/pairplot' + suffix + '.png'
-    sns.pairplot(
-        synthesized,
-        hue='model_name',
-    ).savefig(fname, format='png')
-    plt.close()
+    # print('===')
+    # print('pairplot')
+    # fname = output_dir + '/pairplot' + suffix + '.png'
+    # sns.pairplot(
+    #     synthesized,
+    #     hue='model_name',
+    # ).savefig(fname, format='png')
+    # plt.close()
 
     return rslt
 
