@@ -104,6 +104,7 @@ def main(args,
         print(args)
 
     if 'seed' in dir(args):
+        print('set seed is ', args.seed)
         torch.manual_seed(args.seed)
         np.random.seed(args.seed)
 
@@ -155,8 +156,8 @@ def main(args,
     return
 
 def run_all():
-    seed_initial, seed_end = 0, 10
-    execute_train = True
+    seed_initial, seed_end = 0, 20
+    execute_train = False
     execute_analyse = True
     run_ids_dict = defaultdict(list)
     experiment_name = config_trainer_vae_cmnist.experiment

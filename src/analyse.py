@@ -1028,12 +1028,19 @@ def analyse(args,
                 str(target_modality) + '_' + str(target_property)
             Path(output_dir).mkdir(parents=True, exist_ok=True)
             sys.stdout = Logger('{}/analyse.log'.format(output_dir))
+
             print(
                 '\n\n',
                 '==============\n',
                 'START ANALYSIS\n',
                 '==============\n',
             )
+
+            if 'seed' in dir(args):
+                print('itinial seed is updated using', args.seed)
+                torch.manual_seed(args.seed)
+                np.random.seed(args.seed)
+
             rslt = analyse_model(
                 runner=runner,
                 classifier=classifier,

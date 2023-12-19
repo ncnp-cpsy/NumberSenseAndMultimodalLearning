@@ -89,7 +89,9 @@ class EncMLPSimple(nn.Module):
         self.data_size = data_size
 
         data_dim = int(np.prod(data_size))
-        layer_dims = [data_dim, 2048, 1024, 512, 256, 128]
+        # layer_dims = [data_dim, 2048, 1024, 512, 256, 128]
+        # layer_dims = [data_dim, 2048, 256, 64]
+        layer_dims = [data_dim, 2048, 256, 256, 256, 64]
         layer_dims_zip = zip(
             layer_dims[:(len(layer_dims) - 1)],
             layer_dims[1:(len(layer_dims))],
@@ -128,7 +130,10 @@ class DecMLPSimple(nn.Module):
         self.data_size = data_size
 
         data_dim = int(np.prod(data_size))
-        layer_dims = [data_dim, 2048, 1024, 512, 256, 128, latent_dim]
+        # layer_dims = [data_dim, 2048, 1024, 512, 256, 128]
+        # layer_dims = [data_dim, 2048, 256, 64]
+        layer_dims = [data_dim, 2048, 256, 256, 256, 64]
+        layer_dims = layer_dims + [latent_dim]
         layer_dims.reverse()
         layer_dims_zip = zip(
             layer_dims[:(len(layer_dims) - 1)],

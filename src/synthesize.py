@@ -488,6 +488,9 @@ def analyse_synthesized_data(
     # ).savefig(fname, format='png')
     # plt.close()
 
+    print('===')
+    print('all done.')
+
     return rslt
 
 if __name__ == '__main__':
