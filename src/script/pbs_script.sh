@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l select=1:ncpus=2:mem=15G:ngpus=1:host=new5820-2
+#PBS -l select=1:ncpus=2:mem=15G:ngpus=1:host=cpsy-t5820
 #PBS -N MMVAE
 #PBS -j oe
 

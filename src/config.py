@@ -5,9 +5,10 @@ Additionally, refer to the source code of MMVAE in the original paper.
 """
 from src.utils import DotDict
 
+
 epochs = 50
 # experiment_name = 'parameter-search-17'
-experiment_name = 'parameter-search-32'
+experiment_name = 'parameter-search-36'
 id_vae_cmnist = 'vae_cmnist'
 id_vae_oscn = 'vae_oscn'
 id_mmvae_cmnist_oscn = 'mmvae_cmnist_oscn'
@@ -20,9 +21,9 @@ config_trainer_vae_cmnist = DotDict({
     'run_type': 'train',
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 4,
+    'num_hidden_layers': 3,
     'use_conditional': False,
-    'use_cnn': 'mlp',
+    'use_cnn': 'mlp-simple',
     'latent_dim': 20,
     # Training and Loss
     'obj': 'dreg',
@@ -45,9 +46,9 @@ config_trainer_vae_oscn = DotDict({
     'run_type': 'train',
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 4,
+    'num_hidden_layers': 3,
     'use_conditional': False,
-    'use_cnn': 'mlp',
+    'use_cnn': 'mlp-simple',
     'latent_dim': 20,
     # Training and Loss
     'obj': 'dreg',
@@ -70,9 +71,9 @@ config_trainer_mmvae_cmnist_oscn = DotDict({
     'run_type': 'train',
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 4,
+    'num_hidden_layers': 3,
     'use_conditional': False,
-    'use_cnn': 'mlp',
+    'use_cnn': 'mlp-simple',
     'latent_dim': 20,
     # Training and Loss
     'obj': 'dreg',
@@ -95,17 +96,20 @@ config_analyzer_vae_cmnist = DotDict({
     'pretrained_path': './rslt/' + experiment_name + '/VAE_CMNIST/' + id_vae_cmnist,
 })
 
+
 config_analyzer_vae_oscn = DotDict({
     'run_type': 'analyse',
     'run_id': id_vae_oscn,
     'pretrained_path': './rslt/' + experiment_name + '/VAE_OSCN/' + id_vae_oscn,
 })
 
+
 config_analyzer_mmvae_cmnist_oscn = DotDict({
     'run_type': 'analyse',
     'run_id': id_mmvae_cmnist_oscn,
     'pretrained_path': './rslt/' + experiment_name + '/MMVAE_CMNIST_OSCN/' + id_mmvae_cmnist_oscn,
 })
+
 
 config_classifier_cmnist = DotDict({
     'experiment': experiment_name,
@@ -115,10 +119,10 @@ config_classifier_cmnist = DotDict({
     'pretrained_path': './rslt/' + experiment_name + '/Classifier_CMNIST/' + id_classifier_cmnist,
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 4,
+    'num_hidden_layers': 3,
     'latent_dim': 20,
     'use_conditional': False,
-    'use_cnn': 'mlp',
+    'use_cnn': 'mlp-simple',
     # Training and Loss
     'obj': 'cross',
     'batch_size': 128,
@@ -143,10 +147,10 @@ config_classifier_oscn = DotDict({
     'pretrained_path': './rslt/' + experiment_name + '/Classifier_OSCN/' + id_classifier_oscn,
     'seed': 4,
     # Architecture
-    'num_hidden_layers': 4,
+    'num_hidden_layers': 3,
     'latent_dim': 20,
     'use_conditional': False,
-    'use_cnn': 'mlp',
+    'use_cnn': 'mlp-simple',
     # Training and Loss
     'obj': 'cross',
     'batch_size': 128,

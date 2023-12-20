@@ -60,7 +60,9 @@ The outputs were saved in `./rslt` directory like below.
             `--- run_id3
 ```
 
-### Downloads datasets
+### Create dataset
+
+If creating the CMNIST, OSCN, and CMNIST-OSCN dataset, execute `./data_prepare/cmnist_prepare.py` and `./data_prepare/make_index_cmnist_oscn.py`.
 
 ### Pretrained network
 
