@@ -507,7 +507,38 @@ def test_datasets():
     return
 
 def test_convert_label_to_int():
-    print('check `convert_label_to_int()` function ...')
+    """Comprehensive unit test for label converter
 
+    TODO
+    ----
+    To implement.
+    """
+    print('check `convert_label_to_int()` function ...')
+    model_name_list = ['MMVAE_CMNIST_OSCN', 'VAE_CMNIST', 'VAE_OSCN']
+    target_modality_list = [-1, 0, 1, 2, 3,]
+    target_property_list = [-1, 0, 1, 2, 3,]
+
+    label = []  # TODO
+    data = [] # TODO
+
+    for model_name in model_name_list:
+        for target_modality in target_modality_list:
+            for target_property in target_property_list:
+                print(
+                    '\nLabel converter is activated...',
+                    '\tmodel_name:', model_name,
+                    '\ttarget_modality:', target_modality,
+                    '\ttarget_property:', target_property,
+                )
+                try:
+                    labels = convert_label_to_int(
+                        label=label,
+                        model_name=model_name,
+                        target_property=target_property,
+                        target_modality=target_modality,
+                        data=data,
+                    )
+                except Exception as e:
+                    print('Error happen because', e)
     print('test label converter done....')
     return

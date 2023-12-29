@@ -36,8 +36,16 @@ class Runner():
         if args.pretrained_path != '':
             print('Loading model {} from {}'.format(
                 self.model_name, args.pretrained_path))
+            print('Device:',
+                  args.device,
+                  torch.cuda.is_available(),
+                  torch.cuda.device_count())
             model.load_state_dict(
-                torch.load(args.pretrained_path + '/model.rar'))
+                torch.load(
+                    args.pretrained_path + '/model.rar',
+                    map_location=args.device,
+                ),
+            )
             # model._pz_params = model._pz_params  # DEBUG
         else:
             print('Model is initialized without loading.')

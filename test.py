@@ -154,7 +154,7 @@ def test_run_all():
 
 def test():
     test_datasets()
-    test_convert_label_to_int()
+    # test_convert_label_to_int()  # not implemented
     test_train_classifier()
     test_train()
     test_analyse()

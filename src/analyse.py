@@ -41,6 +41,15 @@ color_dict = {
 def analyse_classifier(classifier,
                        output_dir='./',
                        ):
+    """
+    Note
+    ----
+    Test accuracy is also calculated in runner.
+
+    TODO
+    ----
+    Visualize input image and predicted labels.
+    """
     return {
         'classifier_avg': np.nan,
         'classifier_all': np.nan,
@@ -57,6 +66,7 @@ def count_reconst(recon,
         print('pred:', pred, '\ntar:', tar)
         acc = torch.sum(pred == tar)
         return acc, acc / len(pred)
+
     pred_label = classifier.predict(recon)
     pred_label = torch.argmax(pred_label, dim=1).cpu() + 1
     true_label = true_label.cpu()
@@ -121,11 +131,11 @@ def analyse_reconst(runner,
                     suffix=999,
                 )
                 if 'MMVAE' in runner.model_name:
-                    print('size of extracted recon in MMVAE:', type(recon))
+                    # print('size of extracted recon in MMVAE:', type(recon))
                     recon = recon[target_modality][target_modality]
-                    print('size of extracted recon in MMVAE:', recon.shape)
+                    # print('size of extracted recon in MMVAE:', recon.shape)
                     recon = recon[0]
-                    print('size of extracted recon in MMVAE:', recon.shape)
+                    # print('size of extracted recon in MMVAE:', recon.shape)
                 generation = runner.model.generate(
                     output_dir=output_dir,
                     suffix=999,
@@ -172,11 +182,11 @@ def analyse_cross(runner,
                     suffix=999,
                 )
                 if 'MMVAE' in runner.model_name:
-                    print('size of extracted recon in MMVAE:', type(recon))
+                    # print('size of extracted recon in MMVAE:', type(recon))
                     recon = recon[target_modality_from][target_modality_to]
-                    print('size of extracted recon in MMVAE:', recon.shape)
+                    # print('size of extracted recon in MMVAE:', recon.shape)
                     recon = recon[0]
-                    print('size of extracted recon in MMVAE:', recon.shape)
+                    # print('size of extracted recon in MMVAE:', recon.shape)
                 acc, confusion = count_reconst(
                     recon=recon,
                     true_label=convert_label_to_int(
@@ -258,7 +268,7 @@ def analyse_magnitude(runner,
                       suffix='',
                       ):
     def trans_non_linear(x, form='log', minval=None):
-        print('Before using', form, ':\n', x)
+        # print('Before using', form, ':\n', x)
         if form == 'log':
             x = np.log(x)
         elif form == 'exp':
@@ -269,7 +279,7 @@ def analyse_magnitude(runner,
             x = np.log(x - minval + 0.0000000000000001)
         else:
             Exception
-        print('After using', form, ':\n', x)
+        # print('After using', form, ':\n', x)
         return x
 
     # latent embeddings for each number (dim: 9)
@@ -384,7 +394,7 @@ def analyse_tsne_2d(label_all,
     # points = TSNE(n_components=2, random_state=0).fit_transform(latent_all)
 
     xy_all = [[] for i in range(category_num)]
-    print(xy_all, label_all, points)
+    # print(xy_all, label_all, points)
 
     fig, ax = plt.subplots()
 

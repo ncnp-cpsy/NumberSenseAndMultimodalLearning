@@ -150,6 +150,7 @@ def perform_anova(df,
     ).str.replace(
         'vae_cmnist_', ''
     )
+    print('---')
     print(df)
 
     df_wide = pd.pivot(
@@ -158,7 +159,9 @@ def perform_anova(df,
         columns='model_name',
         values=target_column,
     )
+    print('---')
     print(df_wide)
+    print('---')
     print(df_wide.describe())
 
     # Plot
