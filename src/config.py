@@ -7,8 +7,7 @@ from src.utils import DotDict
 
 
 epochs = 50
-# experiment_name = 'parameter-search-36'
-experiment_name = 'final-results-using-32-3'
+experiment_name = 'final-results'
 id_vae_cmnist = 'vae_cmnist'
 id_vae_oscn = 'vae_oscn'
 id_mmvae_cmnist_oscn = 'mmvae_cmnist_oscn'

@@ -167,5 +167,3 @@ config_test_synthesizer = DotDict({
     'no_cuda': False,
     'device': 'cuda',
 })
-
-

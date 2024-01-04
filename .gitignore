@@ -1,11 +1,12 @@
 .git/*
 memo/*
+log/*
 data/*
 data_prepare/datasets/*
+src/script/*
 rslt/*
 rslt/experiments/ignore/*
 rslt/experiments/test/*
 rslt/experiments/loop-test/*
 rslt/rslt_latent_images/*
 rslt/analysis/*
-log/*
