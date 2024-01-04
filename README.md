@@ -2,7 +2,7 @@
 
 This repository contains the code for "Emergence of Number Sense through the Integration of Multimodal Information." Please, see [paper](https://osf.io/preprints/psyarxiv/4bfam) for details.
 
-The experiment code in this repository is heavily based on "Variational Mixture-of-Experts Autoencodersfor Multi-Modal Deep Generative Models." Please, see [Shi et al. (2019)](https://arxiv.org/pdf/1911.03393.pdf).
+The experiment code in this repository is based on "Variational Mixture-of-Experts Autoencodersfor Multi-Modal Deep Generative Models." Please, see [Shi et al. (2019)](https://arxiv.org/pdf/1911.03393.pdf).
 
 ## How to run
 
