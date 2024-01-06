@@ -41,6 +41,6 @@ The outputs were saved in `./rslt` directory like below.
 
 ## References
 
-Noda, K., Soda, T., & Yamashita, Y. (2022, August 2). Emergence of Number Sense in Deep Multi-modal Neural Networks. https://doi.org/10.31234/osf.io/4bfam
+Noda, K., Soda, T., & Yamashita, Y. (2024). Emergence of number sense through the integration of multimodal information: developmental learning insights from neural network models. Frontiers in Neuroscience, 18, 1330512. doi: 10.3389/fnins.2024.1330512
 
 Shi, Y., Paige, B., & Torr, P. (2019). Variational mixture-of-experts autoencoders for multi-modal deep generative models. Advances in neural information processing systems, 32.
