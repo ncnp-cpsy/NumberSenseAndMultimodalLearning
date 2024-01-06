@@ -19,6 +19,7 @@ from src.config_test import (
     config_test_synthesizer,
 )
 
+
 def test_train_classifier():
     args = config_test_classifier_cmnist
     args.pretrained_path = ''

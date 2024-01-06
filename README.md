@@ -27,6 +27,7 @@ python main.py
 The outputs were saved in `./rslt` directory like below.
 
 ```
+.
 `--- rslt
     `--- experiment_name 
         |--- synthesize
