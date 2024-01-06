@@ -22,7 +22,7 @@ Execute the following code.
 python main.py
 ```
 
-### Name of outputs directory
+### Output directory
 
 The outputs were saved in `./rslt` directory like below.
 
